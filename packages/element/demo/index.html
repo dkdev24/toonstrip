@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>toonstrip &lt;comic-strip&gt; demo</title>
+  <style>
+    body { font: 16px/1.4 system-ui, sans-serif; margin: 2rem auto; padding: 0 1rem; }
+    comic-strip { border: 1px dashed #ccc; padding: 1rem; }
+  </style>
+</head>
+<body>
+  <main>
+  <h1>toonstrip &mdash; &lt;comic-strip&gt; demo</h1>
+  <p>
+    Plain HTML, no framework. Resize the window to see the column count follow
+    <code>layoutStrip</code>'s policy (3 columns wide, 2 mid-width, 1 narrow).
+  </p>
+  <comic-strip id="strip"></comic-strip>
+  </main>
+
+  <!--
+    "ajv" here is a stopgap for this demo only: @toonstrip/schema depends on
+    ajv, which ships CJS-only (no ESM/browser build) and cannot be resolved by
+    a bare-specifier import in a plain script tag. Pointing it at a CDN ESM
+    build unblocks this no-bundler demo; a real fix (bundling schema for
+    browser consumers, or an ajv alternative with a proper ESM build) is
+    tracked in NOTES.md "M3" for later milestones. A bundler-based consumer
+    (Astro, webpack, etc.) does not hit this at all — it resolves ajv from
+    node_modules normally.
+  -->
+  <script type="importmap">
+    {
+      "imports": {
+        "@toonstrip/core": "/packages/core/dist/index.js",
+        "@toonstrip/schema": "/packages/schema/dist/index.js",
+        "ajv": "https://esm.sh/ajv@8.17.1"
+      }
+    }
+  </script>
+  <script type="module">
+    import "../dist/index.js";
+
+    const doc = {
+      version: 1,
+      panels: [
+        {
+          backdrop: "pastoral",
+          camera: "establishing",
+          bodies: [{ character: "dan", emotion: { angle: 0, intensity: 0.6 } }],
+          speakers: [{ speaker: "caption", balloon: "caption", text: "A field outside town." }],
+        },
+        {
+          backdrop: "pastoral",
+          camera: "medium",
+          bodies: [
+            { character: "dan", emotion: { angle: 0, intensity: 0.8 } },
+            { character: "tiki", emotion: { angle: 1.57, intensity: 0.6 } },
+          ],
+          speakers: [
+            { speaker: "dan", balloon: "speech", text: "Have you seen the others?" },
+            { speaker: "tiki", balloon: "thought", text: "He always asks first." },
+          ],
+        },
+        {
+          backdrop: "field",
+          camera: "wide",
+          bodies: [{ character: "tiki", emotion: { angle: 3.14, intensity: 0.9 } }],
+          speakers: [{ speaker: "tiki", balloon: "speech", text: "This way!" }],
+        },
+        {
+          backdrop: "room8bs",
+          camera: "close-up",
+          bodies: [{ character: "dan", emotion: { angle: 0, intensity: 1 } }],
+          speakers: [{ speaker: "dan", balloon: "speech", text: "Finally." }],
+        },
+      ],
+    };
+
+    const strip = document.getElementById("strip");
+    strip.packs = ["/packages/pack-comic-chat/"];
+    strip.document = doc;
+  </script>
+</body>
+</html>

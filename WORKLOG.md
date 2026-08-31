@@ -176,3 +176,70 @@ with real figures, balloons, and a backdrop. Next: M2, the default asset pack.
 M2 exit criteria met: `pack-comic-chat` validates via `toonstrip pack validate`, and
 M1's fixture renders using it — real characters and a real backdrop — instead of ad hoc
 test assets. Next: M3, the `<comic-strip>` custom element.
+
+---
+
+## v0.5.0 — M3: Custom Element (`packages/element`)
+
+**Date:** 2026-09-01
+
+### Changes
+
+- `packages/element` (`@toonstrip/element`), zero framework deps, depending on
+  `@toonstrip/core` and `@toonstrip/schema`. Ported from `grues-in-comic`'s
+  `web/src/comic-view.ts` mechanism, with the turn/session/incremental-append
+  machinery deliberately dropped (dev plan §0: no game/session/turn engine — a
+  `ComicStripDocument` is handed over whole, not streamed panel by panel):
+  - `comic-strip-element.ts` — `<comic-strip>`, a custom element with `.document`
+    (property; validated via `@toonstrip/schema` at the boundary) and `.packs`
+    (property, array of pack base URLs) plus a `src` attribute convenience. Canvas
+    pool (one `<canvas>` per panel), `ResizeObserver`-driven relayout through
+    `@toonstrip/core`'s `layoutStrip`/`columnsFor`, `devicePixelRatio`-aware backing
+    store, `IntersectionObserver` visibility gating (`root: null` — the viewport, since
+    unlike the source app there's no internal scroll pane), Shadow DOM style isolation,
+    `role="img"` + `aria-label` per panel. Pose-cycle selection is frozen once per
+    panel in document order (not per-append) so a resize repaint reproduces the same
+    figures.
+  - `describe.ts` — generic `describePanel()` alt-text generator (camera shot + room
+    title + each line's speaker/verb/text), replacing the source's role-specific
+    (`GUIDE`/`HERO`) labelling with the schema's own generic `speaker` ids.
+  - `load-pack.ts` — new work (no direct port): fetches `pack.json` + character
+    manifests + sheet/backdrop images from one or more registered pack base URLs,
+    assembling the same `Cast` shape `packages/core`'s `renderPanel` consumes either
+    way. Enforces §6's "collision = build-time error" rule for real — any id declared
+    by more than one registered pack throws.
+  - `demo/index.html` — plain-HTML, no-framework demo: a 4-panel document rendered
+    with the real `pack-comic-chat` assets, using a browser import map (`@toonstrip/core`,
+    `@toonstrip/schema` resolved to their built `dist/index.js`; `ajv` resolved to a CDN
+    ESM build as a stopgap — see `NOTES.md` "M3").
+- 10 new tests: `describe.test.ts` (pure alt-text logic), `load-pack.test.ts`
+  (mocked `fetch`/`Image`, incl. collision and missing-id cases), and
+  `comic-strip-element.test.ts` (jsdom + stubbed `ResizeObserver`/`IntersectionObserver`,
+  verifying canvas-pool/ARIA wiring and column recompute on a simulated resize).
+- `packages/element/scripts/verify-demo.mjs` — a real-browser (Playwright/Chromium)
+  verification script, run manually against the demo page served over
+  `python3 -m http.server`: confirmed live column count follows `layoutStrip`'s exact
+  3/2/1 policy at three viewport widths, real non-blank canvas output with correct
+  ARIA labels, and **0 axe-core violations** with 0 console errors. Caught and fixed a
+  real bug along the way: `#measure()` originally used the host element's raw
+  `clientWidth` (which includes the host's own CSS padding) as available width,
+  over-estimating layout space — fixed to subtract computed padding, matching
+  `comic-view.ts`'s own `measure()`.
+- `pnpm build`/`pnpm test` verified clean across the whole workspace (65 tests total,
+  up from 45).
+
+### Notes
+
+- `verify-demo.mjs` is manual-only (not part of `pnpm test`/CI — no browser-install step
+  in `ci.yml` yet); a real Chromium download was needed this session (~270 MB) and isn't
+  assumed available in CI.
+- Several design decisions are logged in `NOTES.md` under "M3": the ajv/browser-build
+  gap (real, not cosmetic — affects any no-bundler consumer of `<comic-strip>`), the
+  `.document`/`.packs` property API shape, dropping the internal-scroll model, and the
+  scope of what "port the mechanism, strip the app chrome" ended up cutting.
+
+### Status
+
+M3 exit criteria met, verified in a real browser: resizing changes column count live
+to match `layoutStrip`'s policy, and the demo page passes an axe-core a11y check with
+zero violations. Next: M4, `packages/astro` + `examples/astro-blog`.

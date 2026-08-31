@@ -103,3 +103,72 @@ resolved as items get addressed. Newest at bottom, grouped by milestone.
   test fixtures) but will need revisiting once a browser consumer (`packages/element`,
   M3) exists — a browser can't `node:fs` its way to an absolute path; it'll need URLs
   instead. Flagging now so M3 doesn't have to rediscover this.
+
+## M3
+
+- **`@toonstrip/schema`'s ajv dependency has no ESM/browser build — a real gap, not just
+  a demo inconvenience.** `packages/element/demo/index.html` needs an import map to run
+  with no bundler, and ajv (CJS-only, no `"exports"`/`"module"` field) can't be resolved
+  by a bare-specifier import in a plain `<script type="module">`. The demo works around
+  it by pointing the import map's `"ajv"` entry at a CDN ESM build
+  (`https://esm.sh/ajv@8.17.1`) — fine for this one demo page, not something to ship as
+  the real answer. §5's whole premise is that `<comic-strip>` "works identically in
+  Astro, plain HTML, and any other framework's escape hatch" with zero framework deps;
+  a plain-HTML consumer hitting an unresolvable transitive dependency undermines that for
+  anyone not using a bundler. Worth deciding before M6: pre-bundle `@toonstrip/schema`'s
+  validator for browser consumers (e.g. ship a bundled `dist/browser.js` with ajv inlined),
+  or replace ajv with a validator that has both a CJS and a real ESM/browser build.
+- **Browser pack loading (`packages/element/src/load-pack.ts`) is new work, not a port**
+  — `grues-in-comic` never had a "fetch a pack from a URL" concept; the closest reference
+  (`loadCast`/`loadRoster` in the pre-M1 `figure.ts`) was already dropped in M1. Implements
+  §6's "collision = build-time error, not silent shadowing" for real (checks every
+  registered pack for a duplicate id, not just the first match) — this is the first place
+  in the repo that rule is actually enforced; `packages/cli`'s `pack validate` (M2) only
+  checks one pack directory at a time.
+- **`<comic-strip>`'s API surface is a judgment call**: `.document` (property, matches
+  §7's Astro example) and `.packs` (array of base URLs, property) plus a `src` attribute
+  as a convenience for fetching a document from a URL. The dev plan's Astro snippet shows
+  `packs={['comic-chat']}` (pack *names*), which only makes sense once a bundler/npm can
+  resolve a name to a URL (Astro's job, presumably) — the raw element has no such
+  resolution mechanism, so it takes URLs directly. Confirm this split (name-resolution is
+  an Astro-layer concern, the element only knows URLs) is the intended design before M4.
+- **No internal scroll pane.** `comic-view.ts`'s `IntersectionObserver` used `root: strip`
+  (an internal fixed-height, scrolling container) because Comic Chat's window was exactly
+  that. `<comic-strip>` assumes the *host page* scrolls instead (no internal scrollbar),
+  so it uses `root: null` (the viewport) — a deliberate deviation, not an oversight, but
+  worth confirming it's the right default for e.g. a very long strip embedded in a short
+  iframe.
+- **The whole turn/session/incremental-append half of `comic-view.ts` was dropped**, not
+  just trimmed — `appendTurn`/`flush`/scroll-pinning/`frozen`-on-append are how a live game
+  streamed panels in one at a time. `<comic-strip>` renders a complete `ComicStripDocument`
+  handed over once (dev plan §0's non-goal: "no game/session/turn engine"), so pose-cycle
+  freezing happens once, up front, for the whole document in panel order, rather than
+  per-append. This is the correct read of the non-goal, but it's a bigger structural cut
+  than "port the mechanism, strip the app chrome" might suggest — flagging so it's a
+  deliberate read, not an accidental omission, on your radar.
+- **`#measure()`'s padding subtraction was a real bug I caught via the live-browser
+  check, not a hypothetical**: an earlier version used the host's raw `clientWidth`
+  (which includes the host's own CSS padding) as available width for `layoutStrip`,
+  over-estimating space and risking grid-track overflow past the element's actual content
+  box. Fixed to subtract `getComputedStyle(this)`'s padding, matching `comic-view.ts`'s
+  own `measure()` pattern. Mentioning because the demo's `body { max-width: 1100px }`
+  also had to be loosened for the fix to still exercise a real 3-column layout in the demo
+  viewport — cosmetic, but explains why the demo's CSS looks different from a first draft.
+- **Exit-criteria verification used a real headless Chromium (Playwright), not just
+  jsdom mocks.** `packages/element/scripts/verify-demo.mjs` loads the actual demo page
+  (served via `python3 -m http.server` over the real `pack-comic-chat` assets), resizes
+  across three breakpoints, confirms `layoutStrip`'s 3/2/1-column policy live, checks
+  real non-blank canvas output and ARIA labels, and runs `axe-core` — result: 0 axe
+  violations, 0 console errors, correct columns at all three widths. This is NOT wired
+  into `pnpm test`/CI (downloading a ~270 MB Chromium isn't in `ci.yml`'s current steps);
+  it's a manual verification script (`pnpm --filter @toonstrip/element run verify:demo`,
+  server must be started separately) for now. Decide before M6 whether to wire a
+  `playwright install --with-deps chromium` step into CI so this runs automatically, or
+  leave it as a manual pre-release check.
+- **`packages/element`'s jsdom-based unit tests (`comic-strip-element.test.ts`) stub
+  `ResizeObserver`/`IntersectionObserver`/`Image`/`fetch` and mock `getContext` to return
+  `null`** (jsdom has no real canvas 2D context without the native `canvas` package,
+  which I deliberately did not add as a devDependency just for tests). These tests prove
+  wiring (canvas count, ARIA attributes, column recompute on a simulated resize), not
+  actual pixel output — that proof is `packages/core`'s fixture render plus the real-
+  browser `verify-demo.mjs` run above.
