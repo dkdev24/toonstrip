@@ -1,0 +1,56 @@
+@toonstrip/pack-comic-chat
+
+This package incorporates components from the following third-party project:
+
+Microsoft Comic Chat
+Copyright (c) Microsoft Corporation
+Licensed under the MIT License
+
+Microsoft Comic Chat's avatar and backdrop art is redistributed in converted
+form: the fifteen character sprite sheets under characters/ are decoded from
+its .avb avatar files, and the three backdrops under backdrops/ (field,
+pastoral, room8bs) are decoded from its original .bmp backdrop bitmaps. Both
+are format conversions of Microsoft's MIT-licensed art, which the MIT License
+permits, and both carry its copyright.
+
+----------------------------------------------------------------------
+
+MIT License (applies to the incorporated Microsoft Comic Chat art above)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+----------------------------------------------------------------------
+
+TRADEMARKS
+
+MICROSOFT and COMIC CHAT are trademarks of the Microsoft group of companies.
+All other trademarks are the property of their respective owners.
+
+toonstrip is an independent project. It is not affiliated with, sponsored by,
+endorsed by, or approved by Microsoft Corporation or any of its affiliates.
+
+The MIT License covering the incorporated Comic Chat art grants copyright
+permissions only. It conveys no trademark rights, and no trademark license is
+granted or implied by this NOTICE, by toonstrip's own MIT License, or by any
+file in this repository.
+
+The COMIC CHAT name appears in this repository solely for nominative and
+descriptive purposes: to identify the historical work this pack's art is
+converted from, and to preserve the upstream copyright notice as the MIT
+License requires. No claim of ownership in that mark is made.

@@ -1,0 +1,117 @@
+{
+  "name": "comic-chat",
+  "version": "1.0.0",
+  "license": "MIT",
+  "characters": [
+    {
+      "id": "dan",
+      "name": "DAN",
+      "manifest": "characters/dan/dan.json",
+      "sheet": "characters/dan/sheet.png"
+    },
+    {
+      "id": "anna",
+      "name": "Anna",
+      "manifest": "characters/anna/anna.json",
+      "sheet": "characters/anna/sheet.png"
+    },
+    {
+      "id": "bolo",
+      "name": "Bolo",
+      "manifest": "characters/bolo/bolo.json",
+      "sheet": "characters/bolo/sheet.png"
+    },
+    {
+      "id": "denise",
+      "name": "Denise",
+      "manifest": "characters/denise/denise.json",
+      "sheet": "characters/denise/sheet.png"
+    },
+    {
+      "id": "kevin",
+      "name": "Kevin",
+      "manifest": "characters/kevin/kevin.json",
+      "sheet": "characters/kevin/sheet.png"
+    },
+    {
+      "id": "lynnea",
+      "name": "Lynnea",
+      "manifest": "characters/lynnea/lynnea.json",
+      "sheet": "characters/lynnea/sheet.png"
+    },
+    {
+      "id": "margaret",
+      "name": "Margaret",
+      "manifest": "characters/margaret/margaret.json",
+      "sheet": "characters/margaret/sheet.png"
+    },
+    {
+      "id": "rebecca",
+      "name": "Rebecca",
+      "manifest": "characters/rebecca/rebecca.json",
+      "sheet": "characters/rebecca/sheet.png"
+    },
+    {
+      "id": "tiki",
+      "name": "Tiki",
+      "manifest": "characters/tiki/tiki.json",
+      "sheet": "characters/tiki/sheet.png"
+    },
+    {
+      "id": "sage",
+      "name": "Sage",
+      "manifest": "characters/sage/sage.json",
+      "sheet": "characters/sage/sheet.png"
+    },
+    {
+      "id": "kwensa",
+      "name": "Kwensa",
+      "manifest": "characters/kwensa/kwensa.json",
+      "sheet": "characters/kwensa/sheet.png"
+    },
+    {
+      "id": "hugh",
+      "name": "Hugh",
+      "manifest": "characters/hugh/hugh.json",
+      "sheet": "characters/hugh/sheet.png"
+    },
+    {
+      "id": "maynard",
+      "name": "Maynard",
+      "manifest": "characters/maynard/maynard.json",
+      "sheet": "characters/maynard/sheet.png"
+    },
+    {
+      "id": "scotty",
+      "name": "Scotty",
+      "manifest": "characters/scotty/scotty.json",
+      "sheet": "characters/scotty/sheet.png"
+    },
+    {
+      "id": "tongtyed",
+      "name": "TongueTyed",
+      "manifest": "characters/tongtyed/tongtyed.json",
+      "sheet": "characters/tongtyed/sheet.png"
+    }
+  ],
+  "backdrops": [
+    {
+      "id": "field",
+      "file": "backdrops/field.png",
+      "width": 315,
+      "height": 315
+    },
+    {
+      "id": "pastoral",
+      "file": "backdrops/pastoral.png",
+      "width": 315,
+      "height": 315
+    },
+    {
+      "id": "room8bs",
+      "file": "backdrops/room8bs.png",
+      "width": 315,
+      "height": 315
+    }
+  ]
+}

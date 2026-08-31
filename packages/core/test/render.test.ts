@@ -6,45 +6,45 @@ import { beforeAll, describe, expect, it } from "vitest";
 import type { Panel } from "@toonstrip/schema";
 import { renderPanel } from "../src/render.js";
 import { layoutStrip } from "../src/layout.js";
-import { buildFixtureCast } from "./fixtures/cast.js";
+import { buildRealCast } from "./fixtures/real-cast.js";
 
 const outDir = join(dirname(fileURLToPath(import.meta.url)), "output");
 mkdirSync(outDir, { recursive: true });
 
 const panels: Panel[] = [
   {
-    backdrop: "meadow",
+    backdrop: "pastoral",
     camera: "establishing",
     roomTitle: "The Meadow",
-    bodies: [{ character: "alex", emotion: { angle: 0, intensity: 0.2 } }],
+    bodies: [{ character: "dan", emotion: { angle: 0, intensity: 0.2 } }],
     speakers: [{ speaker: "caption", balloon: "caption", text: "A quiet meadow." }],
   },
   {
-    backdrop: "meadow",
+    backdrop: "pastoral",
     camera: "medium",
     bodies: [
-      { character: "alex", emotion: { angle: 0, intensity: 1 } },
-      { character: "sam", emotion: { angle: Math.PI, intensity: 0.8 } },
+      { character: "dan", emotion: { angle: 0, intensity: 1 } },
+      { character: "tiki", emotion: { angle: Math.PI, intensity: 0.8 } },
     ],
     speakers: [
-      { speaker: "alex", balloon: "speech", text: "Good to see you again!" },
-      { speaker: "sam", balloon: "thought", text: "I was not expecting this." },
+      { speaker: "dan", balloon: "speech", text: "Good to see you again!" },
+      { speaker: "tiki", balloon: "thought", text: "I was not expecting this." },
     ],
   },
   {
-    backdrop: "meadow",
+    backdrop: "pastoral",
     camera: "reaction",
     dark: false,
-    bodies: [{ character: "sam", emotion: { angle: 0, intensity: 0.5 }, pose: "wave" }],
+    bodies: [{ character: "tiki", emotion: { angle: 0, intensity: 0.5 }, pose: "wave" }],
     speakers: [],
   },
 ];
 
-describe("renderPanel (fixture)", () => {
-  let cast: Awaited<ReturnType<typeof buildFixtureCast>>;
+describe("renderPanel (fixture, real pack-comic-chat assets)", () => {
+  let cast: Awaited<ReturnType<typeof buildRealCast>>;
 
   beforeAll(async () => {
-    cast = await buildFixtureCast();
+    cast = await buildRealCast(["dan", "tiki"], ["pastoral"]);
   });
 
   it("renders a 3-panel document to PNG with non-blank pixels", () => {
@@ -68,15 +68,15 @@ describe("renderPanel (fixture)", () => {
     const canvas = createCanvas(panelWidth, panelHeight);
     const ctx = canvas.getContext("2d") as unknown as CanvasRenderingContext2D;
     const dark: Panel = {
-      backdrop: "meadow",
+      backdrop: "pastoral",
       camera: "medium",
       dark: true,
-      bodies: [{ character: "alex", emotion: { angle: 0, intensity: 0 } }],
+      bodies: [{ character: "dan", emotion: { angle: 0, intensity: 0 } }],
       speakers: [],
     };
     renderPanel(ctx, dark, cast, panelWidth, panelHeight);
     const pixels = canvas.getContext("2d").getImageData(20, 20, 1, 1).data;
-    // near-black interior (#0b0b0b), not the meadow backdrop's sky blue
+    // near-black interior (#0b0b0b), not the pastoral backdrop
     expect(pixels[0]).toBeLessThan(30);
     expect(pixels[2]).toBeLessThan(30);
   });

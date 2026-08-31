@@ -57,3 +57,49 @@ resolved as items get addressed. Newest at bottom, grouped by milestone.
   page.ts-only (multi-panel overflow) and skippable for M1; on closer reading it's used
   by `balloon-layout.ts`'s single-balloon force-fit path too, so it's ported and tested
   (`balloon-layout.test.ts`'s force-fit case).
+
+## M2
+
+- **`CastManifest`/`PackedAvatar`/etc. live in `packages/core`, not `packages/schema`,**
+  but §2 says "asset packs depend on schema only." `pack-comic-chat` does not import
+  `@toonstrip/core` — it re-declares the same shapes locally in its own `src/types.ts`
+  and relies on TypeScript structural typing to unify with `packages/core`'s types at
+  the point a caller (e.g. `packages/core`'s own test fixtures, or a future
+  `packages/element`) passes pack data into the renderer. This works and keeps the
+  dependency graph one-way, but it's a duplicated-type situation. Worth a cleanup pass:
+  move `cast-manifest.ts`'s types from `packages/core` into `packages/schema` so both
+  `packages/core` and every pack package can import one shared definition instead of
+  structurally-compatible copies.
+- **`packages/pack-comic-chat` ships zero runtime dependencies** (not even
+  `@toonstrip/schema`) — a pack is JSON + PNGs + a thin `node:fs`-based loader, nothing
+  in it actually needs schema types. `@napi-rs/canvas`/`@types/node` are devDependencies
+  only, used by `scripts/convert-backdrops.mjs` (a one-time build tool, not shipped —
+  see `files` in its `package.json`) and by the test suite.
+- **Backdrop BMP decoder was rewritten minimally, not ported file-for-file.** Rather than
+  porting `grues-in-comic`'s `art/src/{image,reader,format,inflate}.ts` wholesale (most
+  of which handles `.avb`-only concerns: LZDEFLATE streams, mask palettes, global
+  palettes — none of which apply to a bare 4bpp RLE4 `.bmp`), I wrote a ~140-line
+  self-contained decoder (`packages/pack-comic-chat/scripts/convert-backdrops.mjs`)
+  covering only the `AIF_DIB` + `BI_RLE4`/`BI_RLE8` path actually needed for `field`/
+  `pastoral`/`room8bs`. Verified against all 3 files (RLE4, 315x315, 16-color palette).
+  Output PNGs were checked for pixel variety (15/15/15+ unique colors) and correct
+  dimensions, not compared pixel-for-pixel against a reference render (no ground-truth
+  PNG exists to diff against) — worth an eyeball pass on the actual images.
+- **`toonstrip pack validate` implements only the "at minimum NEUTRAL" gate from §6**,
+  not the full per-role `ROLE_FACE_REQUIREMENTS` inventory check `grues-in-comic`'s
+  `roster.test.ts` does (that check is role-aware — hero vs. guide need different face
+  sets — and toonstrip's schema has no "role" concept, only character ids). It also
+  checks PNG dimensions declared in `pack.json` against the actual file's IHDR chunk.
+  Collision detection across multiple registered packs (§6's "collision = build-time
+  error, not silent shadowing") is NOT implemented — `packages/cli` only validates one
+  pack directory at a time; multi-pack registration doesn't exist yet (no consumer of
+  more than one pack exists until `packages/element`/`astro`).
+- **`docs/packs.md` (§6: "document the contribution path before v0.1.0") was not
+  written this milestone** — M5 is where docs land per the milestone table; flagging so
+  it isn't dropped.
+- **Sheet/backdrop file paths in the runtime `CastManifest`** (`loadCastManifest()`'s
+  output) are rewritten to absolute filesystem paths at load time (`join(PACK_ROOT, ...)`)
+  rather than left pack-relative. This suits every current caller (Node scripts, Node
+  test fixtures) but will need revisiting once a browser consumer (`packages/element`,
+  M3) exists — a browser can't `node:fs` its way to an absolute path; it'll need URLs
+  instead. Flagging now so M3 doesn't have to rediscover this.

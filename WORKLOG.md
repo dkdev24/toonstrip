@@ -115,3 +115,64 @@ rendering core from `grues-in-comic` into `packages/core`.
 
 M1 exit criteria met: a fixture 3-panel document renders to PNG via `@napi-rs/canvas`
 with real figures, balloons, and a backdrop. Next: M2, the default asset pack.
+
+---
+
+## v0.4.0 — M2: Default Asset Pack (`packages/pack-comic-chat`, `packages/cli`)
+
+**Date:** 2026-09-01
+
+### Changes
+
+- `packages/pack-comic-chat` (`@toonstrip/pack-comic-chat`), zero runtime dependencies:
+  - Ported the full 15-character roster (`dan`, `anna`, `bolo`, `denise`, `kevin`,
+    `lynnea`, `margaret`, `rebecca`, `tiki`, `sage`, `kwensa`, `hugh`, `maynard`,
+    `scotty`, `tongtyed`) directly from `grues-in-comic`'s already-decoded, already-packed
+    `web/assets/comic/roster/` — per-character sprite sheets and pose manifests, no
+    re-decoding needed
+  - Decoded and converted the 3 original Comic Chat client backdrop bitmaps (`field`,
+    `pastoral`, `room8bs` — 4bpp RLE4-compressed Windows DIBs, 315x315) to PNG via a new,
+    minimal, self-contained decoder (`scripts/convert-backdrops.mjs`, build-tool only,
+    not part of the published pack) — fresh conversion work, `grues-in-comic` never
+    decoded these itself
+  - `pack.json` (name, version, license, characters, backdrops) plus
+    `characters/<id>/{sheet.png,<id>.json}` and `backdrops/<id>.png`, matching the dev
+    plan's §6 pack layout
+  - `src/index.ts`: `loadPackJson()`/`loadCastManifest()`, a thin `node:fs` loader
+    assembling a `CastManifest`-shaped object (locally typed in `src/types.ts`,
+    structurally compatible with `packages/core`'s types — see `NOTES.md` "M2")
+  - `NOTICE`: Microsoft Comic Chat MIT attribution + trademark disclaimer, scoped to the
+    character and backdrop art actually ported (no Zork notice — nothing Zork-coupled
+    ported here)
+  - 5 vitest tests: roster/backdrop declaration completeness, every character has a
+    NEUTRAL face, every declared file exists on disk
+- Root `NOTICE` and `THIRD_PARTY.md` added, carrying the same Comic Chat attribution
+  forward per dev plan §12
+- `packages/cli` (`@toonstrip/cli`), zero runtime dependencies: `toonstrip pack validate
+  <dir>` — validates `pack.json` shape, that every character's sheet + manifest exist,
+  that every character has at least the minimum required NEUTRAL face (modeled on
+  `grues-in-comic`'s `art/test/roster.test.ts` gate-2 check), and that every backdrop
+  file exists with dimensions matching its `pack.json` declaration (reads the PNG IHDR
+  chunk directly, no image library). 3 vitest tests, incl. a deliberately-broken pack
+  fixture. Verified against the real pack (`OK: ... is a valid pack`, exit 0) and a bare
+  `pack.json`-less directory (fails with a clear error).
+- `packages/core`'s M1 fixture render (`test/render.test.ts`) and standalone example
+  (`examples/render-fixture.ts`) now use the real pack (`dan`, `tiki`, `pastoral`)
+  instead of M1's procedurally-drawn placeholder shapes, via a new
+  `test/fixtures/real-cast.ts` loader — per M2's exit criteria wording exactly
+- `pnpm build` and `pnpm test` verified clean across the whole workspace (45 tests total,
+  up from 30); example script re-run and its output PNGs checked for real, varied pixel
+  content (485/327/187 unique colors across the 3 panels, correct 400x340 dimensions)
+
+### Notes
+
+- Judgment calls (duplicated pack-contract types instead of a shared schema-level home,
+  zero-dependency pack design, decoder scope, validate's coverage vs. `grues-in-comic`'s
+  fuller gate-2 check, deferred `docs/packs.md`, Node-only absolute-path loader) are
+  logged in `NOTES.md` under "M2" — none block M3, all are candidates for later cleanup.
+
+### Status
+
+M2 exit criteria met: `pack-comic-chat` validates via `toonstrip pack validate`, and
+M1's fixture renders using it — real characters and a real backdrop — instead of ad hoc
+test assets. Next: M3, the `<comic-strip>` custom element.

@@ -1,0 +1,39 @@
+toonstrip
+Licensed under the MIT License. See LICENSE for the full license text.
+
+This project incorporates components from the following third-party project,
+via packages/pack-comic-chat:
+
+Microsoft Comic Chat
+Copyright (c) Microsoft Corporation
+Licensed under the MIT License
+
+Microsoft Comic Chat's avatar and backdrop art is redistributed in converted
+form: the fifteen character sprite sheets under packages/pack-comic-chat/characters/
+are decoded from its .avb avatar files, and the three backdrops under
+packages/pack-comic-chat/backdrops/ (field, pastoral, room8bs) are decoded from
+its original .bmp backdrop bitmaps. Both are format conversions of Microsoft's
+MIT-licensed art, which the MIT License permits, and both carry its copyright.
+
+See packages/pack-comic-chat/NOTICE for the full text of that license as it
+applies to this art, and THIRD_PARTY.md for import provenance.
+
+----------------------------------------------------------------------
+
+TRADEMARKS
+
+MICROSOFT and COMIC CHAT are trademarks of the Microsoft group of companies.
+All other trademarks are the property of their respective owners.
+
+toonstrip is an independent project. It is not affiliated with, sponsored by,
+endorsed by, or approved by Microsoft Corporation or any of its affiliates.
+
+The MIT License covering the incorporated Comic Chat art grants copyright
+permissions only. It conveys no trademark rights, and no trademark license is
+granted or implied by this NOTICE, by toonstrip's own MIT License, or by any
+file in this repository.
+
+The COMIC CHAT name appears in this repository solely for nominative and
+descriptive purposes: to identify the historical work this project's default
+asset pack is converted from, and to preserve the upstream copyright notice as
+the MIT License requires. No claim of ownership in that mark is made.
