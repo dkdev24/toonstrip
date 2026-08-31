@@ -1,0 +1,108 @@
+{
+  "name": "Pip",
+  "type": "COMPLEX",
+  "torsoFirst": false,
+  "sheet": "sheet.png",
+  "sheetWidth": 240,
+  "sheetHeight": 160,
+  "torsos": [
+    {
+      "kind": "torso",
+      "index": 0,
+      "emotion": "NEUTRAL",
+      "angle": 0,
+      "intensity": 0,
+      "cx": 40,
+      "cy": 8,
+      "cxDelta": 0,
+      "cyDelta": 0,
+      "x": 40,
+      "figure": {
+        "x": 0,
+        "y": 0,
+        "width": 80,
+        "height": 90
+      },
+      "aura": null
+    },
+    {
+      "kind": "torso",
+      "index": 1,
+      "emotion": "WAVE",
+      "angle": 1001,
+      "intensity": 1,
+      "cx": 40,
+      "cy": 8,
+      "cxDelta": 0,
+      "cyDelta": 0,
+      "x": 40,
+      "figure": {
+        "x": 80,
+        "y": 0,
+        "width": 80,
+        "height": 90
+      },
+      "aura": null
+    },
+    {
+      "kind": "torso",
+      "index": 2,
+      "emotion": "SHRUG",
+      "angle": 1005,
+      "intensity": 1,
+      "cx": 40,
+      "cy": 8,
+      "cxDelta": 0,
+      "cyDelta": 0,
+      "x": 40,
+      "figure": {
+        "x": 160,
+        "y": 0,
+        "width": 80,
+        "height": 90
+      },
+      "aura": null
+    }
+  ],
+  "faces": [
+    {
+      "kind": "face",
+      "index": 0,
+      "emotion": "NEUTRAL",
+      "angle": 0,
+      "intensity": 0,
+      "cx": 35,
+      "cy": 40,
+      "cxDelta": 0,
+      "cyDelta": 0,
+      "x": 35,
+      "figure": {
+        "x": 0,
+        "y": 90,
+        "width": 70,
+        "height": 70
+      },
+      "aura": null
+    },
+    {
+      "kind": "face",
+      "index": 1,
+      "emotion": "HAPPY",
+      "angle": 0,
+      "intensity": 1,
+      "cx": 35,
+      "cy": 40,
+      "cxDelta": 0,
+      "cyDelta": -2,
+      "x": 35,
+      "figure": {
+        "x": 70,
+        "y": 90,
+        "width": 70,
+        "height": 70
+      },
+      "aura": null
+    }
+  ],
+  "bodies": []
+}

@@ -21,7 +21,7 @@ importers:
         version: link:../../packages/schema
       astro:
         specifier: ^7.2.9
-        version: 7.2.9(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.3)(@types/node@22.20.1)
+        version: 7.2.9(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@types/node@22.20.1)
     devDependencies:
       playwright:
         specifier: ^1.48.0
@@ -38,7 +38,7 @@ importers:
     devDependencies:
       astro:
         specifier: ^7.2.9
-        version: 7.2.9(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@types/node@22.20.1)
+        version: 7.2.9(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.3)(@types/node@22.20.1)
       typescript:
         specifier: ^5.6.3
         version: 5.9.3
@@ -70,6 +70,9 @@ importers:
       '@toonstrip/pack-comic-chat':
         specifier: workspace:*
         version: link:../pack-comic-chat
+      '@toonstrip/pack-example':
+        specifier: workspace:*
+        version: link:../pack-example
       typescript:
         specifier: ^5.6.3
         version: 5.9.3
@@ -103,6 +106,21 @@ importers:
         version: 2.1.9(@types/node@22.20.1)(jsdom@25.0.1)(lightningcss@1.33.0)
 
   packages/pack-comic-chat:
+    devDependencies:
+      '@napi-rs/canvas':
+        specifier: ^0.1.65
+        version: 0.1.100
+      '@types/node':
+        specifier: ^22.9.0
+        version: 22.20.1
+      typescript:
+        specifier: ^5.6.3
+        version: 5.9.3
+      vitest:
+        specifier: ^2.1.4
+        version: 2.1.9(@types/node@22.20.1)(jsdom@25.0.1)(lightningcss@1.33.0)
+
+  packages/pack-example:
     devDependencies:
       '@napi-rs/canvas':
         specifier: ^0.1.65

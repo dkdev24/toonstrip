@@ -1,0 +1,9 @@
+@toonstrip/pack-example
+
+All art in this package (characters/pip, backdrops/meadow) is original,
+procedurally generated for this project by scripts/generate.mjs — plain
+canvas-drawing code, not AI image generation and not derived from Microsoft
+Comic Chat or any other third-party asset. No third-party attribution is
+required for this pack.
+
+Licensed under the MIT License (see the repository root LICENSE).

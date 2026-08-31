@@ -1,0 +1,21 @@
+{
+  "name": "example",
+  "version": "0.1.0",
+  "license": "MIT",
+  "characters": [
+    {
+      "id": "pip",
+      "name": "Pip",
+      "manifest": "characters/pip/pip.json",
+      "sheet": "characters/pip/sheet.png"
+    }
+  ],
+  "backdrops": [
+    {
+      "id": "meadow",
+      "file": "backdrops/meadow.png",
+      "width": 240,
+      "height": 240
+    }
+  ]
+}
