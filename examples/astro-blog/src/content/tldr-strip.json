@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "panels": [
+    {
+      "backdrop": "pastoral",
+      "camera": "establishing",
+      "bodies": [
+        { "character": "dan", "emotion": { "angle": 0, "intensity": 0.6 } },
+        { "character": "anna", "emotion": { "angle": 0, "intensity": 0.5 } }
+      ],
+      "speakers": [
+        { "speaker": "caption", "balloon": "caption", "text": "TL;DR: we shipped panel data as JSON, not pixels." }
+      ]
+    },
+    {
+      "backdrop": "pastoral",
+      "camera": "medium",
+      "bodies": [
+        { "character": "dan", "emotion": { "angle": 0, "intensity": 0.7 } },
+        { "character": "anna", "emotion": { "angle": 2.356194490192345, "intensity": 0.6 } }
+      ],
+      "speakers": [
+        { "speaker": "dan", "balloon": "speech", "text": "You hand it panels, characters, and lines." },
+        { "speaker": "anna", "balloon": "speech", "text": "And it draws the strip live, right in the page?" }
+      ]
+    },
+    {
+      "backdrop": "pastoral",
+      "camera": "reaction",
+      "bodies": [
+        { "character": "dan", "emotion": { "angle": 5.497787143782138, "intensity": 0.9 } }
+      ],
+      "speakers": [
+        { "speaker": "dan", "balloon": "speech", "text": "Yep — resizes, redraws, no build step for the art." }
+      ]
+    }
+  ]
+}

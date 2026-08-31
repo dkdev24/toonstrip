@@ -1,0 +1,21 @@
+{
+  "name": "astro-blog",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "verify:client-visible": "node scripts/verify-client-visible.mjs"
+  },
+  "dependencies": {
+    "@toonstrip/astro": "workspace:*",
+    "@toonstrip/pack-comic-chat": "workspace:*",
+    "@toonstrip/schema": "workspace:*",
+    "astro": "^7.2.9"
+  },
+  "devDependencies": {
+    "playwright": "^1.48.0"
+  }
+}

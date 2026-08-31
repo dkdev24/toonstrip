@@ -1,0 +1,26 @@
+{
+  "name": "@toonstrip/astro",
+  "version": "0.1.0",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "lint": "tsc -p tsconfig.json --noEmit"
+  },
+  "peerDependencies": {
+    "astro": "^7.0.0"
+  },
+  "dependencies": {
+    "@toonstrip/element": "workspace:*",
+    "@toonstrip/schema": "workspace:*"
+  },
+  "devDependencies": {
+    "astro": "^7.2.9",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.4"
+  }
+}

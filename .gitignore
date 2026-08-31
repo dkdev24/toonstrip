@@ -3,5 +3,7 @@
 *.log
 dist/
 node_modules/
+.astro/
 **/test/output/
 **/examples/output/
+examples/astro-blog/public/_toonstrip/

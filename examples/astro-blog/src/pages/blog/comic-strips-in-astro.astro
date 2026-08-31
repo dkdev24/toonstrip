@@ -1,0 +1,32 @@
+---
+import { ComicStrip } from "@toonstrip/astro";
+import doc from "../../content/tldr-strip.json";
+---
+
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width" />
+		<title>Comic strips in Astro — toonstrip example</title>
+	</head>
+	<body>
+		<article>
+			<h1>Embedding a live comic strip in an Astro post</h1>
+			<p>
+				This post is the integration test for <code>@toonstrip/astro</code> (M4 of the
+				toonstrip dev plan). Below is a hand-written 3-panel strip — no AI involved in
+				generating it, per the project's own non-goals.
+			</p>
+			<p>
+				Everything below this paragraph is filler height, so the strip starts well below
+				the fold. Scroll down to see it load: open devtools' Network tab first, and you
+				should see no request for <code>@toonstrip/element</code> until the strip
+				scrolls into view — that's <code>client:visible</code> at work.
+			</p>
+			<div style="height: 1400px;" aria-hidden="true"></div>
+			<h2>The TL;DR</h2>
+			<ComicStrip document={doc} packs={["comic-chat"]} client:visible />
+			<p>That's the whole embed: a document, a pack name, and a client directive.</p>
+		</article>
+	</body>
+</html>
