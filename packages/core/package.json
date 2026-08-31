@@ -1,0 +1,23 @@
+{
+  "name": "@toonstrip/core",
+  "version": "0.1.0",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "lint": "tsc -p tsconfig.json --noEmit",
+    "example:render-fixture": "node --experimental-strip-types examples/render-fixture.ts"
+  },
+  "dependencies": {
+    "@toonstrip/schema": "workspace:*",
+    "@napi-rs/canvas": "^0.1.65"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.4"
+  }
+}

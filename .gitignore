@@ -3,3 +3,5 @@
 *.log
 dist/
 node_modules/
+**/test/output/
+**/examples/output/

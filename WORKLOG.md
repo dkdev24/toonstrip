@@ -56,3 +56,62 @@ Repo scaffolding complete; no application code ported yet — next session start
 
 M0 exit criteria met (`pnpm test` runs clean on this checkout). Next: M1, porting the
 rendering core from `grues-in-comic` into `packages/core`.
+
+---
+
+## v0.3.0 — M1: Rendering Core (`packages/core`)
+
+**Date:** 2026-09-01
+
+### Changes
+
+- `packages/core` (`@toonstrip/core`), depending on `@toonstrip/schema` and
+  `@napi-rs/canvas`. Ported from `grues-in-comic` (`web/src/comic/*.ts`, `art/src/*.ts`),
+  adapted to `@toonstrip/schema` types instead of the Zork-coupled `mapper.ts` types:
+  - `cast-manifest.ts` — the pack contract (`CastManifest`/`PackedAvatar`/`PackedPart`/
+    `SheetRect`/`PackedBackdrop`), ported verbatim as types-only (no decode dependency)
+  - `emotion.ts` — emotion wheel constants (`EMOTION_NAMES`, `EMOTION_ANGLES`,
+    `emotionAngle`, `isGesture`, `NEMOTIONS`), trimmed to the runtime subset (dropped the
+    `.avb` binary-format constants, which are M2's decoder concern)
+  - `pose.ts` — nearest-neighbour pose selection (`nearestByAngle`, `nearestGated`,
+    `selectComplexPose`, `selectPose`, `selectBody`), ported near-verbatim
+  - `figure.ts` — `Cast`/`Figure`/`figureFor`/`drawFigure`/`PoseCycle`; dropped the
+    `fetch`-based browser `loadCast`/`loadRoster` loaders (M1 is Node-only per the
+    milestone table; a caller builds a `Cast` object directly for now)
+  - `balloon.ts` — balloon measurement, greedy wrap, force-fit split, and the
+    hand-drawn (wavy-spline) speech/thought/caption drawing, ported verbatim; balloon
+    kind now uses the schema's own `"speech"|"thought"|"caption"` instead of the
+    original's internal `CBWoodring*` class names
+  - `balloon-layout.ts` — the multi-balloon route-region layout driver (deterministic
+    PRNG seeded from panel content), ported verbatim
+  - `layout.ts` — `layoutStrip`/`columnsFor`/`cellFor`, ported verbatim (already fully
+    generic, no Zork coupling)
+  - `render.ts` — `renderPanel` and the six-shot camera table (`SHOTS`), ported and
+    adapted: `Body.pose` gestures mapped to emotion-wheel sentinel angles via a new
+    `emotionOptionsFor` helper (see `NOTES.md`)
+  - `web/src/comic/backdrop.ts` was **not** ported — confirmed its only generic content
+    was the Zork `ROOM_BACKDROPS` room-graph, already covered by the dev plan's "drop
+    this" instruction; nothing else in that file was worth keeping
+- `packages/core/test/fixtures/cast.ts`: a synthetic two-character cast (procedurally
+  drawn shapes, not real art) exercising the same `figureFor`/`drawFigure`/pose-selection
+  code path a real pack will
+- 26 vitest tests across 5 files (pose selection, layout, balloon measurement/wrap,
+  multi-balloon layout incl. force-fit and determinism, and a fixture-based 3-panel
+  render producing real PNGs, plus a dark-panel check)
+- `packages/core/examples/render-fixture.ts`: standalone Node script (run via
+  `node --experimental-strip-types` against the built `dist`) — the milestone's "only
+  caller," no web component yet
+- `pnpm build` and `pnpm test` verified clean across the whole workspace (30 tests total)
+
+### Notes
+
+- Several porting decisions (gesture-to-angle mapping, balloon-kind naming, dropping
+  `backdrop.ts` entirely, deferring cast-loading) are logged in `NOTES.md` under "M1" for
+  review — none are drop-in ports, all are reasoned judgment calls made to keep moving
+  without a human in the loop this session.
+- M1 intentionally ships with placeholder/fixture art only; M2 supplies the real roster.
+
+### Status
+
+M1 exit criteria met: a fixture 3-panel document renders to PNG via `@napi-rs/canvas`
+with real figures, balloons, and a backdrop. Next: M2, the default asset pack.
