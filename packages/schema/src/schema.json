@@ -1,0 +1,72 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://toonstrip.danielkimdev.com/schema/v1.json",
+  "title": "ComicStripDocument",
+  "type": "object",
+  "required": ["version", "panels"],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "const": 1 },
+    "panels": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/Panel" }
+    }
+  },
+  "definitions": {
+    "CameraPreset": {
+      "enum": ["reaction", "establishing", "wide", "close-up", "over-shoulder", "medium"]
+    },
+    "BalloonKind": {
+      "enum": ["speech", "thought", "caption"]
+    },
+    "Emotion": {
+      "type": "object",
+      "required": ["angle", "intensity"],
+      "additionalProperties": false,
+      "properties": {
+        "angle": { "type": "number" },
+        "intensity": { "type": "number" }
+      }
+    },
+    "Body": {
+      "type": "object",
+      "required": ["character", "emotion"],
+      "additionalProperties": false,
+      "properties": {
+        "character": { "type": "string", "minLength": 1 },
+        "emotion": { "$ref": "#/definitions/Emotion" },
+        "pose": { "enum": ["wave", "point", "shrug"] },
+        "requested": { "type": "boolean" }
+      }
+    },
+    "Line": {
+      "type": "object",
+      "required": ["speaker", "balloon", "text"],
+      "additionalProperties": false,
+      "properties": {
+        "speaker": { "type": "string", "minLength": 1 },
+        "balloon": { "$ref": "#/definitions/BalloonKind" },
+        "text": { "type": "string" }
+      }
+    },
+    "Panel": {
+      "type": "object",
+      "required": ["backdrop", "bodies", "speakers"],
+      "additionalProperties": false,
+      "properties": {
+        "backdrop": { "type": "string", "minLength": 1 },
+        "roomTitle": { "type": "string" },
+        "dark": { "type": "boolean" },
+        "camera": { "$ref": "#/definitions/CameraPreset" },
+        "bodies": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Body" }
+        },
+        "speakers": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Line" }
+        }
+      }
+    }
+  }
+}
