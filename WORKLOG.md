@@ -363,3 +363,43 @@ pack.
 M5 exit criteria met: the docs' own "add a character" walkthrough was followed for real
 to build and validate `packages/pack-example`, and it renders. M0–M5 are now all
 complete; only M6 (npm publish, gated on claiming the npm org) remains.
+
+---
+
+## v0.7.1 — M6 (partial): npm Publish
+
+**Date:** 2026-09-01
+
+### Changes
+
+- User claimed the `toonstrip` package name and `@toonstrip` org on npm; registration
+  itself done from the npm CLI this session (`npm login`-based auth, not the website).
+- Added `publishConfig.access: public` to all 7 `@toonstrip/*` package.json files —
+  required for a scoped package's first publish (npm defaults scoped packages to
+  private otherwise).
+- Fixed a Windows-only bug in `packages/cli/test/pack-validate.test.ts`: it built its
+  fixture path via `new URL(...).pathname`, which yields `/C:/Users/...` on win32 and
+  breaks `path.join`; switched to `fileURLToPath`. Test-only, no effect on published
+  code. All 56 tests pass.
+- `pnpm build` across the whole workspace, then published in dependency order:
+  `@toonstrip/schema` → `core` → `element` → `pack-comic-chat`/`pack-example` → `cli` →
+  `astro`, all at `0.1.0`.
+- npm publish required 2FA; the account's existing `~/.npmrc` token was a granular
+  access token without "bypass 2FA" enabled, which `--otp` can't satisfy (OTP flags only
+  work with classic login sessions). User generated a new granular token with bypass-2FA
+  enabled via npmjs.com, which unblocked publishing.
+- Recorded the `pnpm approve-builds esbuild` decision in `pnpm-workspace.yaml`
+  (`allowBuilds: { esbuild: true }`) so future `pnpm install` doesn't prompt.
+
+### Notes
+
+- M6's full exit criteria also requires deploying `examples/astro-blog` to
+  **toonstrip.danielkimdev.com** — not done this session, still open.
+- A future publish for any package needs a token with bypass-2FA (or interactive
+  `npm login` + `--otp`) — plain granular tokens will 403.
+
+### Status
+
+npm packages are live and installable (`npm install @toonstrip/core` etc. work from a
+clean machine). M6 not fully closed: the toonstrip.danielkimdev.com deploy is the
+remaining piece.
