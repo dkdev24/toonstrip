@@ -4,6 +4,43 @@ Persistent project history. Append entries; do not edit past entries.
 
 ---
 
+## v0.7.6 — Fix narrow first-balloon width causing head overlap
+
+**Date:** 2026-09-01
+
+### Changes
+
+- Bug flagged from the `danielkimdev-astro` example strip: in several panels the left
+  character's balloon used only about half the panel's available width, wrapping to more
+  lines than needed; the taller balloon then squeezed the right character's balloon down
+  into their head. A fourth panel's first balloon happened to use the full width and had
+  no overlap.
+- Root cause in `getCloudEstimate` (`packages/core/src/balloon-layout.ts`): the width
+  goal was `minWidth + random() * (maxWidth - minWidth)`, a uniform roll that picked
+  "barely wider than the compact area estimate" as often as "use the free rect." The
+  PRNG is seeded from panel content (`panelSeed`), so it's not really random per render —
+  some speaker/text combinations just hash to a low roll every time.
+- Changed the roll to `minWidth + (1 - random() ** 2) * (maxWidth - minWidth)`: skewed
+  toward `maxWidth`, so a wide balloon is now the common outcome and a narrow one the
+  rare exception, while keeping some visual variety instead of always maxing out.
+- Same `workspace:*`-resolves-at-publish-time issue as v0.7.5: bumped and published
+  `@toonstrip/core` 0.1.2 → 0.1.3, `@toonstrip/element` 0.1.3 → 0.1.4 (picks up the new
+  `core`), `@toonstrip/astro` 0.1.6 → 0.1.7 (picks up the new `element`).
+
+### Verify
+
+- `pnpm build` / `pnpm test` after each bump — all packages clean, `balloon-layout.test.ts`
+  unaffected (no test asserts exact widths).
+- `npm view @toonstrip/element@0.1.4 dependencies` / `npm view @toonstrip/astro@0.1.7
+  dependencies` — both resolve to the newly published upstream versions.
+
+### Status
+
+v0.7.6 is live on npm. `danielkimdev-astro` still needs to bump to `@toonstrip/astro@0.1.7`
+and rebuild — tracked in `HANDOFF.md`.
+
+---
+
 ## v0.7.5 — Follow-up: `element`/`astro` still pinned to pre-fix `schema`
 
 **Date:** 2026-09-01
