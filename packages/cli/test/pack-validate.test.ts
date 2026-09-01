@@ -1,10 +1,11 @@
 import { mkdtempSync, writeFileSync, mkdirSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { describe, expect, it, afterEach } from "vitest";
 import { validatePack } from "../src/pack-validate.js";
 
-const REAL_PACK_DIR = new URL("../../pack-comic-chat", import.meta.url).pathname;
+const REAL_PACK_DIR = fileURLToPath(new URL("../../pack-comic-chat", import.meta.url));
 
 describe("validatePack", () => {
   it("accepts the real pack-comic-chat pack", () => {

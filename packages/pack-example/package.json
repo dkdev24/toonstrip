@@ -5,7 +5,13 @@
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "files": ["dist", "pack.json", "characters", "backdrops", "NOTICE"],
+  "files": [
+    "dist",
+    "pack.json",
+    "characters",
+    "backdrops",
+    "NOTICE"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "generate": "node scripts/generate.mjs",
@@ -17,5 +23,8 @@
     "@types/node": "^22.9.0",
     "typescript": "^5.6.3",
     "vitest": "^2.1.4"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
