@@ -10,7 +10,7 @@ this doc.
 ```js
 // astro.config.mjs
 import { defineConfig } from "astro/config";
-import toonstrip from "@toonstrip/astro";
+import { toonstrip } from "@toonstrip/astro";
 
 export default defineConfig({
   integrations: [
