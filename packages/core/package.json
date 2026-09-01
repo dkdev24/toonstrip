@@ -1,6 +1,7 @@
 {
   "name": "@toonstrip/core",
-  "version": "0.1.0",
+  "version": "0.1.1",
+  "description": "Framework-agnostic canvas rendering engine for toonstrip comic strips.",
   "license": "MIT",
   "type": "module",
   "main": "./dist/index.js",
@@ -26,5 +27,18 @@
   },
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "keywords": [
+    "toonstrip",
+    "comic",
+    "canvas",
+    "rendering"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dkdev24/toonstrip.git",
+    "directory": "packages/core"
+  },
+  "homepage": "https://github.com/dkdev24/toonstrip#readme",
+  "bugs": "https://github.com/dkdev24/toonstrip/issues"
 }

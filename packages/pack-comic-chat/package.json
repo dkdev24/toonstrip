@@ -1,6 +1,7 @@
 {
   "name": "@toonstrip/pack-comic-chat",
-  "version": "0.1.0",
+  "version": "0.1.1",
+  "description": "The default toonstrip asset pack: the 15-character Microsoft Comic Chat roster and 3 backdrops.",
   "license": "MIT",
   "type": "module",
   "main": "./dist/index.js",
@@ -26,5 +27,18 @@
   },
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "keywords": [
+    "toonstrip",
+    "comic",
+    "asset-pack",
+    "comic-chat"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dkdev24/toonstrip.git",
+    "directory": "packages/pack-comic-chat"
+  },
+  "homepage": "https://github.com/dkdev24/toonstrip#readme",
+  "bugs": "https://github.com/dkdev24/toonstrip/issues"
 }

@@ -1,6 +1,7 @@
 {
   "name": "@toonstrip/schema",
-  "version": "0.1.0",
+  "version": "0.1.1",
+  "description": "ComicStripDocument v1 types, JSON Schema, and a runtime validator for toonstrip.",
   "license": "MIT",
   "type": "module",
   "main": "./dist/index.js",
@@ -23,5 +24,19 @@
   },
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "keywords": [
+    "toonstrip",
+    "comic",
+    "schema",
+    "validation",
+    "json-schema"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dkdev24/toonstrip.git",
+    "directory": "packages/schema"
+  },
+  "homepage": "https://github.com/dkdev24/toonstrip#readme",
+  "bugs": "https://github.com/dkdev24/toonstrip/issues"
 }

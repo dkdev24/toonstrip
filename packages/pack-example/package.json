@@ -1,6 +1,7 @@
 {
   "name": "@toonstrip/pack-example",
-  "version": "0.1.0",
+  "version": "0.1.1",
+  "description": "A small, original toonstrip asset pack proving the pack contract, and a starting point for building your own.",
   "license": "MIT",
   "type": "module",
   "main": "./dist/index.js",
@@ -26,5 +27,18 @@
   },
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "keywords": [
+    "toonstrip",
+    "comic",
+    "asset-pack",
+    "example"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dkdev24/toonstrip.git",
+    "directory": "packages/pack-example"
+  },
+  "homepage": "https://github.com/dkdev24/toonstrip#readme",
+  "bugs": "https://github.com/dkdev24/toonstrip/issues"
 }

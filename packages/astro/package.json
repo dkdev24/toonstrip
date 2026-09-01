@@ -1,6 +1,7 @@
 {
   "name": "@toonstrip/astro",
-  "version": "0.1.0",
+  "version": "0.1.1",
+  "description": "Astro integration and <ComicStrip> component for embedding toonstrip comic strips.",
   "license": "MIT",
   "type": "module",
   "main": "./dist/index.js",
@@ -27,5 +28,18 @@
   },
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "keywords": [
+    "toonstrip",
+    "comic",
+    "astro",
+    "astro-integration"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dkdev24/toonstrip.git",
+    "directory": "packages/astro"
+  },
+  "homepage": "https://github.com/dkdev24/toonstrip#readme",
+  "bugs": "https://github.com/dkdev24/toonstrip/issues"
 }
