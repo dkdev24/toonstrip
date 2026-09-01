@@ -61,3 +61,8 @@ Update them at the end.
 - License is MIT; default asset pack (15-character roster + 3 backdrops) carries the same
   MIT/Microsoft terms as the original Comic Chat art — preserve attribution per the dev
   plan's §13.
+- **Before changing `packages/core/src/{balloon,balloon-layout,figure,pose,layout,render}.ts`,
+  read `UPSTREAM_SYNC.md`.** This repo and `grues-in-comic` each carry their own copy of
+  the shared rendering logic and drift apart unless a fix is manually ported both ways;
+  a `packages/core` fix must also cascade through `@toonstrip/element`/`@toonstrip/astro`
+  and into `danielkimdev-astro` — that doc is the checklist for all of it.

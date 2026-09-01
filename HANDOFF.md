@@ -25,18 +25,18 @@ history in `WORKLOG.md`.
 ## Last Session
 
 Swept `toonstrip` against `grues-in-comic`'s comic engine for other divergences worth
-syncing; found `panelSeed` joined speaker/text with a plain space instead of
-grues-in-comic's collision-proof NUL/SOH delimiters, lost in the M1 port since both
-render identically in any normal view. Fixed (as a visible `\x00`/`\x01` escape, not a
-raw byte) and republished `core`/`element`/`astro`. Full writeup: `WORKLOG.md` v0.7.7.
+syncing; found and fixed a `panelSeed` delimiter weakness (v0.7.7), republished
+`core`/`element`/`astro`, bumped+verified `danielkimdev-astro` (locally and live — done).
+Wrote `UPSTREAM_SYNC.md` (docs only, no bump): the cross-repo process for syncing the
+rendering mechanical layer with `grues-in-comic` and propagating a `packages/core` fix
+through npm into `danielkimdev-astro`. `AGENTS.md` points at it. Sibling docs:
+`grues-in-comic/docs/TOONSTRIP_SYNC.md`, `danielkimdev-astro/dev-references/toonstrip-sync.md`.
 
 ---
 
 ## Next Actions
 
-1. In `danielkimdev-astro`: bump `@toonstrip/astro` to `0.1.8`, install, rebuild, verify
-   the example strip still renders correctly.
-2. Start M7: intro/playground site (§10 in `TOONSTRIP_DEV_PLAN.md`), deploy to
+1. Start M7: intro/playground site (§10 in `TOONSTRIP_DEV_PLAN.md`), deploy to
    toonstrip.danielkimdev.com.
 
 ---
