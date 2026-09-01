@@ -232,7 +232,12 @@ function getCloudEstimate(
     const potentialHeight = freeRect.bottom - lowestPreviousBottom(laid, freeRect.top)
       + MIN_HOOK_HEIGHT;
     const minWidth = Math.max(area / potentialHeight, input.metrics.widestWord(input.text));
-    goalWidth = minWidth + random() * (maxWidth - minWidth);
+    // Skewed toward maxWidth: a uniform roll picks "too narrow" as often as
+    // "wide enough", and a narrow early balloon wraps to more lines, grows
+    // taller, and squeezes whatever balloon comes after it down into the
+    // speaker's head. Squaring the roll still allows a narrow balloon
+    // (variety), but makes it the rarer outcome instead of a coin flip.
+    goalWidth = minWidth + (1 - random() ** 2) * (maxWidth - minWidth);
   }
 
   goalWidth = Math.min(goalWidth + WIDTH_FUDGE, maxWidth);
