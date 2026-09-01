@@ -4,6 +4,52 @@ Persistent project history. Append entries; do not edit past entries.
 
 ---
 
+## v0.7.8 — v0.7.6's fix wasn't enough: widen the `stackBalloons` fallback too
+
+**Date:** 2026-09-01
+
+### Changes
+
+- User reported the deployed `danielkimdev-astro` strip still looked "random and mostly narrow"
+  after v0.7.6. Verified directly against the real deployed page: its actual embed size is
+  363×309 (read off the live canvas), not the 400×340 `UNIT` size used by local dev/test
+  fixtures. At that real size, `layoutBalloons` (the driver v0.7.6 fixed) refuses most panels of
+  the real 2-speaker strip and falls back to `stackBalloons` — confirmed by instrumenting the
+  driver's refusal points and rendering the exact blog content through it. v0.7.6's roll fix
+  never reaches this fallback, and — confirmed by toggling the fix on/off against real render
+  output — made one previously-fitting panel *worse*: a wider first balloon has a bigger
+  horizontal footprint, more likely to block the second balloon and push it further down out of
+  the driver's vertical budget.
+- Root cause in the fallback itself: `stackBalloons`' `cap` (`render.ts`) dropped to
+  `width * 0.66` whenever a panel held more than one balloon, and `balloon.ts`'s `goalWidth`
+  (what this fallback's `measureBalloon` actually calls) only pushed halfway to its ceiling
+  (`WIDTH_BIAS = 0.5`). Rendered the real blog content at 363×309 with the old constants and
+  saw the first panel's balloon visibly overlap its own speaker's head — the actual mechanism
+  behind what the user reported.
+- Neither narrowing was load-bearing: `stackBalloons` lays balloons out in a strict vertical
+  sequence (`y` only grows below), so — unlike the driver's side-by-side corridors — there was
+  never a horizontal collision either cap was preventing. Changed `cap` to `width - 20`
+  unconditionally (`render.ts`) and `WIDTH_BIAS` to `0.85` (`balloon.ts`). Verified against all 8
+  real balloons (EN + KO) from the actual blog post at the actual 363×309 size before and after —
+  every panel clean, no overlaps, dan's panel-1 head-overlap specifically fixed.
+- Ported the identical fix to `grues-in-comic` (named divergence, its ADR 0008 "2026-09-01b") —
+  see its `WORKLOG.md` v0.33.6.
+- Publish cascade: core 0.1.5, element 0.1.6, astro 0.1.9.
+
+### Verify
+
+- `pnpm build` / `pnpm test` after each bump — clean.
+- Rendered the real blog document (EN + KO, all 4 panels, both `@toonstrip/pack-comic-chat`
+  characters) through `renderPanel` at the real 363×309 production size — this was the only way
+  the original diagnosis (v0.7.6) turned out to be verifiable as incomplete; a passing unit-test
+  suite at `UNIT` size did not catch it.
+
+### Status
+
+v0.7.8 is live on npm.
+
+---
+
 ## v0.7.7 — Fix a weaker panelSeed delimiter than grues-in-comic's
 
 **Date:** 2026-09-01

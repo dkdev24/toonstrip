@@ -553,11 +553,16 @@ function stackBalloons(
     return { balloon, anchor, face, headX: faceCentre(face) };
   });
 
-  // A balloon that owns the panel spreads across most of it; the original
-  // only tightens the free rect when *other* balloons share the width.
-  // Since balloons always stack vertically here, "shares the width" reduces
-  // to "there is more than one".
-  const cap = queue.length === 1 ? width - 20 : width * 0.66;
+  // Every balloon here gets the same cap regardless of how many share the
+  // panel: balloons are laid out in a strict vertical sequence (`y` only
+  // grows below), so unlike the driver's side-by-side corridors, there is no
+  // horizontal collision a narrower cap would prevent. An earlier version
+  // narrowed this to `width * 0.66` once a panel had more than one balloon,
+  // which bought nothing structurally and just made a wrapped balloon taller
+  // than it needed to be — tall enough, at real embed sizes, to overlap its
+  // own speaker's head (found on a live strip smaller than this renderer's
+  // own UNIT test fixtures; see UPSTREAM_SYNC.md).
+  const cap = width - 20;
   // The tail is capped, not stretched: a balloon docks near its head with a
   // short tail. We pin balloons to the panel top while figures stand at the
   // bottom, so `TAIL_MAX` drops a tailed balloon toward its head until the

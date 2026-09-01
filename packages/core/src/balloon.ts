@@ -59,8 +59,15 @@ export const ONE_LINE_THRESHOLD = 100;
 const TARGET_ASPECT = 1.9;
 /** Ink-area fudge factor used when estimating a compact wrap width. */
 export const AREA_FUDGE = 1.3;
-/** How far the compact goal is pushed toward the free width. */
-const WIDTH_BIAS = 0.5;
+/**
+ * How far the compact goal is pushed toward the free width — close to it
+ * (was 0.5, splitting the difference) since a balloon that stays compact
+ * wraps to more lines, and this is the fallback path (`stackBalloons`,
+ * `render.ts`) used whenever the multi-balloon driver refuses a panel; a
+ * taller balloon there is more likely to grow into its own speaker's head.
+ * See UPSTREAM_SYNC.md.
+ */
+const WIDTH_BIAS = 0.85;
 
 /** Widest single word, the floor a balloon may not wrap below. */
 export function widestWord(ctx: CanvasRenderingContext2D, text: string): number {
