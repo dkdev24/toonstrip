@@ -1,6 +1,6 @@
 {
   "name": "@toonstrip/core",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Framework-agnostic canvas rendering engine for toonstrip comic strips.",
   "license": "MIT",
   "type": "module",
