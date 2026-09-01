@@ -14,26 +14,27 @@ Cross-session context memory. Update this file at the end of every session.
 
 `toonstrip`: framework-embeddable canvas widget rendering a comic strip from
 caller-supplied data. Extraction + generalization of `grues-in-comic`'s comic pane,
-stripped of Zork/game/AI-inference coupling. M0–M5 done; all 7 `@toonstrip/*` packages
-published to npm at 0.1.0. Only the toonstrip.danielkimdev.com deploy remains to close
-M6. Full history in `WORKLOG.md`.
+stripped of Zork/game/AI-inference coupling. M0–M6 done: all 7 `@toonstrip/*` packages
+published to npm at 0.1.0. M7 (introduction site + playground, deployed to
+toonstrip.danielkimdev.com) added as a new milestone. Full history in `WORKLOG.md`.
 
 ---
 
 ## Last Session
 
-M6 (partial): published all 7 `@toonstrip/*` packages to npm at 0.1.0 (public, scoped).
-Added `publishConfig.access: public` to each package.json (required for a scoped
-package's first publish). Fixed a Windows-only test path bug in `packages/cli` along the
-way. Publish needed a granular npm access token with "bypass 2FA" enabled — the prior
-token lacked it and `--otp` doesn't help with token-based auth.
+Closed M6: published all 7 `@toonstrip/*` packages to npm at 0.1.0 (public, scoped).
+Split the old M6 site-deploy criterion into a new **M7** — a properly designed intro
+site with a live playground — since `examples/astro-blog` is a bare integration test,
+not a presentable landing page. Updated `TOONSTRIP_DEV_PLAN.md` §7/§10 accordingly;
+toonstrip.danielkimdev.com deploy now happens at the end of M7.
 
 ---
 
 ## Next Actions
 
-1. Deploy `examples/astro-blog` to **toonstrip.danielkimdev.com** — last piece of M6's
-   exit criteria (§"M6" in `TOONSTRIP_DEV_PLAN.md`).
+1. Start M7: design + build the intro/playground site (§10 in `TOONSTRIP_DEV_PLAN.md`),
+   grown from `examples/astro-blog` or purpose-built. Deploy to
+   toonstrip.danielkimdev.com at the end.
 2. Verify `npm install @toonstrip/core` (etc.) works from a clean machine per the
    README's copy-paste example.
 3. Read `NOTES.md` in full — judgment calls from M1–M5 made without a human in the loop
@@ -43,7 +44,7 @@ token lacked it and `--otp` doesn't help with token-based auth.
 
 ## Open Issues
 
-- toonstrip.danielkimdev.com not yet deployed — blocks closing M6.
+- M7 (intro/playground site) not started; toonstrip.danielkimdev.com not yet deployed.
 - `@toonstrip/schema`'s ajv dependency has no ESM/browser build (`NOTES.md` "M3").
 - `toonstrip pack validate` doesn't check for a missing torso, only a missing NEUTRAL
   face — a pack can pass validation and still render nothing (`NOTES.md` "M5").

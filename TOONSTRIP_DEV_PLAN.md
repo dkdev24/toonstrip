@@ -251,10 +251,12 @@ import doc from './my-strip.json';
   site, one post with a hand-authored 4-panel strip, built and previewed in CI.
 - **This example is also the seed of the public demo/docs site**, deployed to
   **toonstrip.danielkimdev.com** (Astro, matching the tool's own MVP target — dogfooding
-  the integration on its own marketing site). Grow `astro-blog` into that site rather
-  than building a separate one: same repo, same component, the demo *is* the proof the
-  Astro integration works. Deploy it as part of M6, not before — a public URL before
-  the API is stable just creates a page to keep rewriting.
+  the integration on its own marketing site). Grow `astro-blog` (or a purpose-built
+  site) into that site rather than building something unrelated: same repo, same
+  component, the demo *is* the proof the Astro integration works. The properly-designed
+  version of this site, with an interactive playground, is M7 — deploy it at the end of
+  M7, not before; a public URL before the API is stable and the site is actually
+  designed just creates a page to keep rewriting.
 
 ## 8. Build-time static fallback (secondary, not MVP-blocking)
 
@@ -291,11 +293,14 @@ allows, not before.
 | M3 | `packages/element`: the custom element, ported responsive layout + canvas pool + ResizeObserver + a11y (§5). Plain-HTML demo page, no framework. | Resizing the browser window changes column count live, matching the ported `layoutStrip` policy; Lighthouse/axe a11y check passes on the demo page. |
 | M4 | `packages/astro` + `examples/astro-blog` (§7). | A real Astro dev server renders a blog post with an embedded strip; `client:visible` defers JS as expected (verify in devtools). |
 | M5 | Asset pack docs (`docs/packs.md`), schema docs, contribution guide, a second (small, original, non-Comic-Chat) example pack to prove the contract isn't secretly coupled to the default one. | An outside contributor (or a fresh agent session with no prior context) can follow the docs alone to add one new character and see it render. |
-| M6 | v0.1.0: publish `@toonstrip/*` npm packages, write the README/landing example, deploy `examples/astro-blog` to **toonstrip.danielkimdev.com** (§7). | `npm install` + the README's copy-paste example works from a clean machine; the subdomain is live and matches what the README shows. |
+| M6 | v0.1.0: publish `@toonstrip/*` npm packages, write the README/landing example. | `npm install` + the README's copy-paste example works from a clean machine. |
+| M7 | A properly designed introduction/marketing site with a live playground for the component (edit a `ComicStripDocument`, see it render), built on `examples/astro-blog` or a purpose-built Astro site. Deploy to **toonstrip.danielkimdev.com** at the end of this milestone (§7). | The subdomain is live, presents the project (not just a blog-post embed), and a visitor can interactively try the component in the playground without installing anything. |
 
 Sequence M1→M4 in order; M5 can start once M2 lands (docs can be written against a
 stable pack format before the element exists). Do not start M6 packaging concerns
-before M4 — an Astro-embeddable proof is the MVP; npm publishing polish is not.
+before M4 — an Astro-embeddable proof is the MVP; npm publishing polish is not. M7 is
+post-publish polish — it depends on M6's published packages but is not required to
+close M6.
 
 ## 11. Open decisions
 

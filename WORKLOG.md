@@ -401,5 +401,9 @@ complete; only M6 (npm publish, gated on claiming the npm org) remains.
 ### Status
 
 npm packages are live and installable (`npm install @toonstrip/core` etc. work from a
-clean machine). M6 not fully closed: the toonstrip.danielkimdev.com deploy is the
-remaining piece.
+clean machine). User confirmed `examples/astro-blog` renders correctly locally but is a
+bare integration test, not a presentable site — the toonstrip.danielkimdev.com deploy
+criterion was split out into a new **M7** milestone (a properly designed intro site with
+a live playground) rather than tacked onto M6. `TOONSTRIP_DEV_PLAN.md` §7/§10 updated:
+M6 now closes on npm publish alone; M7 covers the site design, playground, and deploy.
+M6 is now fully closed.
