@@ -1,6 +1,6 @@
 {
   "name": "@toonstrip/schema",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "ComicStripDocument v1 types, JSON Schema, and a runtime validator for toonstrip.",
   "license": "MIT",
   "type": "module",

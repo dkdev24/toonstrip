@@ -487,3 +487,54 @@ Fixes are code-complete and test-verified in this repo; not published. Next npm 
 of `@toonstrip/astro` and `@toonstrip/schema` should include these before Daniel's blog
 post ships without its own site-level workarounds (it currently has none — verified
 clean — because it's testing directly against this repo's unpublished `dist/`).
+
+---
+
+## v0.7.3 — Publish v0.7.2 Fixes; Column-Layout Bug Report Investigated
+
+**Date:** 2026-09-01
+
+### Changes
+
+- Bumped `@toonstrip/schema` 0.1.1 → 0.1.2 and `@toonstrip/astro` 0.1.3 → 0.1.4 (the two
+  packages v0.7.2 touched; `core`/`element` unchanged, no bump needed) and published
+  both — `schema` via `npm publish` (plain `ajv` dependency, no workspace refs), `astro`
+  via `pnpm publish` so its `workspace:*` deps on `@toonstrip/element`/`@toonstrip/schema`
+  resolve to real semver in the published `package.json` (`pnpm pack` confirmed
+  `"0.1.2"`/`"0.1.2"` in the tarball before publishing; a plain `npm publish` would have
+  shipped the literal string `"workspace:*"`, the exact bug v0.1.2's changelog already
+  fixed once for other packages).
+- Investigated a second bug report surfaced from `danielkimdev-astro`: "column count is
+  fixed, the two-column strip clips on narrow screens." Read `layout.ts`'s `columnsFor`/
+  `layoutStrip` — panel width is always derived as a share of the measured available
+  width (`Math.min(share, UNIT.width)`), so a hardcoded/overflowing column count isn't
+  possible by construction. Verified directly: mounted a fresh `<comic-strip>` in a
+  320px-wide container and confirmed it renders 1 column with `scrollWidth` exactly
+  matching the host width (no overflow). No bug found in this repo.
+
+### Verify
+
+- `pnpm test` — 58 tests pass across all 7 packages.
+- `pnpm build` — clean, including `examples/astro-blog`.
+- `pnpm pack --pack-destination` + tarball inspection for `@toonstrip/astro` before
+  publish, confirming `workspace:*` → real version rewrite.
+- Fresh-mount column test (see above) in a live Chrome tab via `danielkimdev-astro`'s
+  dev server, both for the reported bug and to confirm `@toonstrip/element@0.1.2`'s
+  `ResizeObserver`-driven relayout does eventually run correctly on an existing mount
+  once the tab gets a real paint — it just doesn't fire promptly in a backgrounded
+  automated tab, same `document.visibilityState` limitation v0.7.2's Verify section
+  already hit.
+
+### Notes
+
+- The consuming session's actual root cause for the column-mismatch complaint (EN vs KO
+  panels differing) was `danielkimdev-astro`'s own prose CSS: a `max-width: 72ch` reading
+  measure resolves to a different pixel width per body font (Latin vs Pretendard for
+  Korean), landing Korean under this package's 2-column width threshold. Fixed on that
+  side with a fixed-pixel breakout wrapper; nothing in this repo needed to change for it.
+
+### Status
+
+v0.7.2 is now live on npm. `danielkimdev-astro` still needs to bump its own
+`package.json`/lockfile off the manual `dist/` copy and re-verify with a real
+`npm install` — tracked in `HANDOFF.md`.
