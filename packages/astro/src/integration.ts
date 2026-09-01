@@ -42,7 +42,7 @@ export default function toonstrip(options: ToonstripOptions = {}): AstroIntegrat
   return {
     name: "@toonstrip/astro",
     hooks: {
-      "astro:config:setup": async ({ addRenderer, config }) => {
+      "astro:config:setup": async ({ addRenderer, config, updateConfig }) => {
         addRenderer({
           name: "@toonstrip/astro",
           // Bare specifiers (not `new URL(...).href`) so Vite can place these
@@ -51,6 +51,27 @@ export default function toonstrip(options: ToonstripOptions = {}): AstroIntegrat
           // which only resolves entrypoints it can trace through that graph.
           serverEntrypoint: "@toonstrip/astro/dist/renderer/server.js",
           clientEntrypoint: "@toonstrip/astro/dist/renderer/client.js",
+        });
+
+        // `<ComicStrip>` only ever loads client-side by way of an
+        // astro-island's fully runtime-computed `import(this.component-url)`
+        // (an Astro core hydration mechanism, not a specifier this
+        // integration or its clientEntrypoint controls) — never through a
+        // statically written `import "@toonstrip/astro"` Vite's dev-server
+        // dependency crawl could discover on its own. Everything reachable
+        // only from there (this renderer, `@toonstrip/element`,
+        // `@toonstrip/schema`, and `@toonstrip/schema`'s CJS `ajv`
+        // dependency) is invisible to that crawl and would otherwise be
+        // served unbundled — which breaks for `ajv` specifically, a CJS
+        // package Vite would normally interop into a real `default` export
+        // only by pre-bundling it. Listing it here is what makes that
+        // happen anyway.
+        updateConfig({
+          vite: {
+            optimizeDeps: {
+              include: ["ajv"],
+            },
+          },
         });
 
         const { fileURLToPath } = await import("node:url");

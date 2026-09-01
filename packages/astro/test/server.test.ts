@@ -9,9 +9,12 @@ describe("renderer/server", () => {
     expect(renderer.check(() => {})).toBe(false);
   });
 
-  it("renderToStaticMarkup() emits an inert placeholder tag", () => {
-    expect(renderer.renderToStaticMarkup(ComicStrip)).toEqual({
-      html: "<comic-strip></comic-strip>",
-    });
+  it("renderToStaticMarkup() emits an inert placeholder tag with a non-zero box", () => {
+    // The box matters, not just the tag: a zero-size placeholder never
+    // triggers `client:visible`'s IntersectionObserver in Chromium (see
+    // server.ts), so this asserts a non-empty `min-height` is present rather
+    // than pinning the exact style string.
+    const { html } = renderer.renderToStaticMarkup(ComicStrip);
+    expect(html).toMatch(/^<comic-strip style="[^"]*min-height:\s*[1-9]\d*px[^"]*"><\/comic-strip>$/);
   });
 });

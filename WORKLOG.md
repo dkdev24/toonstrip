@@ -407,3 +407,83 @@ criterion was split out into a new **M7** milestone (a properly designed intro s
 a live playground) rather than tacked onto M6. `TOONSTRIP_DEV_PLAN.md` §7/§10 updated:
 M6 now closes on npm publish alone; M7 covers the site design, playground, and deploy.
 M6 is now fully closed.
+
+---
+
+## v0.7.2 — Fix `<ComicStrip>` never hydrating under `client:visible` in Astro
+
+**Date:** 2026-09-01
+
+### Changes
+
+Both bugs surfaced from the consuming side, not from this repo: Daniel embedded a live
+`<ComicStrip>` demo in a `danielkimdev-astro` blog post (published `@toonstrip/astro`
+0.1.3 / `@toonstrip/schema` 0.1.1) and it silently rendered nothing in `npm run dev`.
+Diagnosed and fixed here, in the site's session, working across both repos.
+
+- **`packages/astro/src/renderer/server.ts`**: the SSR placeholder was a bare
+  `<comic-strip></comic-strip>` — zero size until `@toonstrip/element` upgrades it.
+  Chromium never reports a zero-area `IntersectionObserver` target as intersecting, so
+  `client:visible` (which hydrates on exactly that signal) could never fire, on any page
+  using that directive, no matter how long a reader scrolled. Fixed by giving the
+  placeholder an inline `style="display:block;min-height:340px"` (a one-row guess at
+  final size — the element re-measures and repaints for real once it upgrades).
+  `test/server.test.ts` updated to assert a non-zero `min-height` instead of the old
+  empty tag.
+- **`packages/astro/src/integration.ts`**: this is the M3 ajv/browser gap flagged in
+  `NOTES.md` ("`@toonstrip/schema`'s ajv dependency has no ESM/browser build"), hit here
+  for the first time by a *bundled* (Vite) consumer rather than the plain-HTML case
+  `NOTES.md` describes. `<ComicStrip>` is only ever reached client-side through an
+  astro-island's fully runtime-computed `import(url)` — a specifier Vite's dev-server
+  dependency crawl can't discover ahead of time, since it isn't a static string literal
+  anywhere in the site's own source. Everything reachable only from there (this
+  renderer, `@toonstrip/element`, `@toonstrip/schema`, and schema's CJS `ajv`
+  dependency) was invisible to that crawl and got served unbundled — which throws for
+  `ajv` specifically (`"does not provide an export named 'default'"` or, depending on
+  the exact miss, `ReferenceError: exports is not defined`), since a CJS package with no
+  `"exports"`/`"module"` field needs a bundler's interop pass to expose a `default`
+  export at all. Fixed by having the integration call
+  `updateConfig({ vite: { optimizeDeps: { include: ["ajv"] } } })` in
+  `astro:config:setup`, so every Astro/Vite consumer gets `ajv` correctly pre-bundled
+  automatically — no per-project Vite config needed on the consumer's side.
+- `packages/schema/src/validate.ts`: no code change, but investigated two alternative
+  fixes here first (named `{ Ajv }` import, a dynamic top-level `await import("ajv")`) —
+  both failed differently under Vite's raw/unbundled serve path, which turned out not to
+  synthesize *any* usable export shape for an undiscovered CJS dependency, named or
+  default. That ruled out an import-style fix entirely and pointed at the integration's
+  `optimizeDeps` fix above as the only complete answer. Left a comment on the existing
+  `import Ajv from "ajv"` pointing at `integration.ts` for why it works.
+
+### Verify
+
+- `pnpm --filter @toonstrip/schema --filter @toonstrip/astro --filter @toonstrip/element
+  --filter @toonstrip/core run test` — all 43 tests pass (2 new/updated in
+  `packages/astro/test/server.test.ts`).
+- End-to-end in `danielkimdev-astro` (the consuming site): built `dist`, copied into its
+  `node_modules`, confirmed via Chrome (claude-in-chrome) that `ajv` is auto-discovered
+  and pre-bundled by Vite from installing `@toonstrip/astro` alone (no site-level
+  `vite.optimizeDeps` needed), the SSR placeholder carries the new non-zero
+  `min-height`, and — using `client:load` in place of `client:visible` for the check
+  itself, since the automated browser tab used for testing stayed backgrounded
+  (`document.visibilityState` stuck `"hidden"`, which Chrome's `IntersectionObserver`
+  never fires callbacks for regardless of target size, making `client:visible` itself
+  unverifiable in that specific harness) — hydration completed cleanly with a populated
+  shadow root and no console errors.
+
+### Notes
+
+- Not yet published to npm — these fixes exist only in this repo's working tree as of
+  this session. `danielkimdev-astro` verified them by copying built `dist/` output
+  directly into its `node_modules`, not through a real npm install.
+- `NOTES.md`'s M3 ajv gap is only *partially* closed: this fixes the Vite/Astro-bundled
+  consumer. The plain-HTML, no-bundler case that note originally describes (`ajv`
+  unresolvable by a bare-specifier `<script type="module">` import map) is untouched —
+  still needs either a pre-bundled `dist/browser.js` with `ajv` inlined, or swapping
+  `ajv` for a validator with a real ESM/browser build, per that note's original framing.
+
+### Status
+
+Fixes are code-complete and test-verified in this repo; not published. Next npm publish
+of `@toonstrip/astro` and `@toonstrip/schema` should include these before Daniel's blog
+post ships without its own site-level workarounds (it currently has none — verified
+clean — because it's testing directly against this repo's unpublished `dist/`).

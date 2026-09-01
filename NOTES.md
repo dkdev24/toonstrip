@@ -156,6 +156,11 @@ resolved as items get addressed. Newest at bottom, grouped by milestone.
   anyone not using a bundler. Worth deciding before M6: pre-bundle `@toonstrip/schema`'s
   validator for browser consumers (e.g. ship a bundled `dist/browser.js` with ajv inlined),
   or replace ajv with a validator that has both a CJS and a real ESM/browser build.
+  **Partially resolved, v0.7.2 (`WORKLOG.md`):** the Vite-bundled case (an Astro site
+  using `@toonstrip/astro`) is fixed — the integration now adds `ajv` to
+  `vite.optimizeDeps.include` so Vite pre-bundles it regardless of whether its own
+  dependency crawl can discover it. The plain-HTML/no-bundler case this note originally
+  describes is untouched; the CDN import-map workaround is still the only answer there.
 - **Browser pack loading (`packages/element/src/load-pack.ts`) is new work, not a port**
   — `grues-in-comic` never had a "fetch a pack from a URL" concept; the closest reference
   (`loadCast`/`loadRoster` in the pre-M1 `figure.ts`) was already dropped in M1. Implements
