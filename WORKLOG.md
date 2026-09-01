@@ -4,6 +4,43 @@ Persistent project history. Append entries; do not edit past entries.
 
 ---
 
+## v0.7.5 — Follow-up: `element`/`astro` still pinned to pre-fix `schema`
+
+**Date:** 2026-09-01
+
+### Changes
+
+- v0.7.4 fixed `@toonstrip/schema`'s CSP `unsafe-eval` bug and published `schema@0.1.3`
+  / `astro@0.1.5`, but missed that `@toonstrip/element@0.1.2` — the package that actually
+  calls `validateDocument()` at runtime (`comic-strip-element.ts`) — was still on the
+  npm registry pinned to `@toonstrip/schema@0.1.1`. `workspace:*` gets rewritten to a
+  real version at *that package's own* publish time, not retroactively: bumping
+  `schema` doesn't change what an already-published `element@0.1.2` resolves to.
+  Confirmed by a clean `npm install` in `danielkimdev-astro` re-pinned to `astro@0.1.5`:
+  `npm ls` showed `@toonstrip/schema@0.1.1` still in the tree under `element`/`core`,
+  alongside the new `0.1.3` under `astro` directly — two copies, the buggy one still
+  reachable from the actual call site.
+- Bumped and published `@toonstrip/element` 0.1.2 → 0.1.3 (`pnpm publish`; confirmed via
+  `npm view` its `@toonstrip/schema` dependency now resolves to `0.1.3`), then
+  `@toonstrip/astro` 0.1.5 → 0.1.6 (same reason one level up: astro's published
+  `element` dependency was still pinned to `0.1.2`). `@toonstrip/core`'s dependency on
+  `schema` is type-only (erased at compile, confirmed no runtime import in its `dist/`
+  output) — left unpublished, no behavioral effect.
+
+### Verify
+
+- `pnpm build` / `pnpm test` after each bump — 58 tests, clean build.
+- `npm view @toonstrip/astro@0.1.6 dependencies` — `{ element: '0.1.3', schema: '0.1.3'
+  }`, confirming the full chain now resolves to the fix with no stale copies.
+
+### Status
+
+v0.7.5 is live on npm — this time with every package in the `<ComicStrip>` call chain
+actually resolving to the fixed `schema`. `danielkimdev-astro` re-pinning to
+`astro@^0.1.6` tracked in its own `HANDOFF.md`.
+
+---
+
 ## v0.7.4 — Fix `@toonstrip/schema` validator needing `unsafe-eval` under CSP
 
 **Date:** 2026-09-01
