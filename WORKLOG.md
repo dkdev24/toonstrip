@@ -4,6 +4,73 @@ Persistent project history. Append entries; do not edit past entries.
 
 ---
 
+## v0.7.4 — Fix `@toonstrip/schema` validator needing `unsafe-eval` under CSP
+
+**Date:** 2026-09-01
+
+### Changes
+
+- Bug report from `danielkimdev-astro`: `<comic-strip>` rendered fine in `astro dev` but
+  was blank on the deployed production site (danielkimdev.com). Root cause:
+  `@toonstrip/schema`'s `validateDocument()` called `ajv.compile()` at runtime, which
+  compiles the JSON Schema into a validator function via `new Function(...)` — this
+  needs `'unsafe-eval'` in the page's Content-Security-Policy. `astro dev` sends no CSP
+  header at all, so it worked there; the deployed site's `_headers` CSP has no
+  `unsafe-eval`, so the call threw and hydration died silently, leaving only the SSR
+  placeholder box.
+- Fixed in `@toonstrip/schema`: the validator is now precompiled at build time via ajv's
+  "standalone" code-generation mode (`scripts/generate-validator.mjs`, run as a
+  `prebuild`/`pretest` hook) instead of compiled from `schema.json` at runtime. Standalone
+  mode alone wasn't quite enough — our schema's `minLength` keywords pull in ajv's
+  `ucs2length` runtime helper, which standalone mode emits as a bare CJS `require(...)`
+  even with `code.esm: true` (a documented ajv limitation: https://ajv.js.org/standalone.html).
+  A raw `require()` has no meaning in this package's `"type": "module"` output — Node's
+  native ESM loader has no `require` in scope — so the generator also bundles the
+  standalone output through esbuild, which inlines the helper into one dependency-free
+  ESM file. `ajv` itself moved from a real runtime dependency to devDependency-only
+  usage (still listed in `dependencies` for its `ErrorObject` type, but never imported by
+  the shipped code path).
+- Removed `@toonstrip/astro`'s now-dead `vite.optimizeDeps.include: ["ajv"]` workaround
+  (added in v0.7.2 specifically to force Vite dev to pre-bundle `ajv`'s CJS import) —
+  nothing imports `ajv` at runtime anymore, so the config injection was pure dead weight
+  (confirmed: leaving it in produced a `Failed to resolve dependency: ajv` Vite build
+  warning).
+- Bumped and published `@toonstrip/schema` 0.1.2 → 0.1.3 (`npm publish`) and
+  `@toonstrip/astro` 0.1.4 → 0.1.5 (`pnpm publish`, `workspace:*` deps rewritten to real
+  semver — confirmed via `npm view @toonstrip/astro@0.1.5 dependencies`). `core`/`element`
+  unchanged, no bump needed.
+
+### Verify
+
+- `pnpm test` — 58 tests pass across all 7 packages, including `@toonstrip/schema`'s
+  existing 4 validator tests (accept/reject cases unchanged, same behavior via the
+  precompiled path).
+- `pnpm build` — clean, including `examples/astro-blog`; no more `ajv` Vite warning.
+- End-to-end production repro: built `danielkimdev-astro` against the fixed packages
+  (via `pnpm pack` tarballs, `npm install --no-save` before publishing), served the
+  static `dist/` through `wrangler pages dev` (applies the real `_headers` CSP, no
+  `unsafe-eval`), and drove it with a headless Playwright script — before the fix, this
+  reproduced the exact reported bug (`pageerror`: "Evaluating a string as JavaScript
+  violates the following Content Security Policy directive... 'unsafe-eval' is not an
+  allowed source"); after the fix, zero CSP/eval errors and all 4 panel canvases painted
+  with real non-zero dimensions.
+
+### Notes
+
+- Ajv's own docs recommend exactly this generate-then-bundle pattern for CSP-restricted
+  environments; there's no ajv option that skips the runtime helper split entirely.
+- This also closes the "no ESM/browser build for unbundled consumers" open issue from
+  v0.7.2 — since the shipped validator is a single self-contained ESM file with zero
+  imports, it now works identically for bundled and unbundled consumers.
+
+### Status
+
+v0.7.4 is live on npm. Next: re-pin `danielkimdev-astro` to `@toonstrip/schema@0.1.3` /
+`@toonstrip/astro@0.1.5` and re-verify the deployed site once redeployed — tracked in
+`danielkimdev-astro`'s own `HANDOFF.md`.
+
+---
+
 ## v0.1.0 — Repository Initialization
 
 **Date:** 2026-09-01

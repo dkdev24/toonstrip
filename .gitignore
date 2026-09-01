@@ -7,3 +7,4 @@ node_modules/
 **/test/output/
 **/examples/output/
 examples/astro-blog/public/_toonstrip/
+packages/schema/src/generated-validate.js

@@ -42,7 +42,7 @@ export default function toonstrip(options: ToonstripOptions = {}): AstroIntegrat
   return {
     name: "@toonstrip/astro",
     hooks: {
-      "astro:config:setup": async ({ addRenderer, config, updateConfig }) => {
+      "astro:config:setup": async ({ addRenderer, config }) => {
         addRenderer({
           name: "@toonstrip/astro",
           // Bare specifiers (not `new URL(...).href`) so Vite can place these
@@ -53,26 +53,18 @@ export default function toonstrip(options: ToonstripOptions = {}): AstroIntegrat
           clientEntrypoint: "@toonstrip/astro/dist/renderer/client.js",
         });
 
-        // `<ComicStrip>` only ever loads client-side by way of an
-        // astro-island's fully runtime-computed `import(this.component-url)`
-        // (an Astro core hydration mechanism, not a specifier this
-        // integration or its clientEntrypoint controls) — never through a
-        // statically written `import "@toonstrip/astro"` Vite's dev-server
-        // dependency crawl could discover on its own. Everything reachable
-        // only from there (this renderer, `@toonstrip/element`,
-        // `@toonstrip/schema`, and `@toonstrip/schema`'s CJS `ajv`
-        // dependency) is invisible to that crawl and would otherwise be
-        // served unbundled — which breaks for `ajv` specifically, a CJS
-        // package Vite would normally interop into a real `default` export
-        // only by pre-bundling it. Listing it here is what makes that
-        // happen anyway.
-        updateConfig({
-          vite: {
-            optimizeDeps: {
-              include: ["ajv"],
-            },
-          },
-        });
+        // Historical note: this hook used to also add `ajv` to
+        // `vite.optimizeDeps.include`, because `@toonstrip/schema` used to
+        // `import Ajv from "ajv"` and compile the JSON Schema into a
+        // validator function at runtime — reachable client-side only through
+        // an astro-island's fully runtime-computed `import(this.component-
+        // url)`, invisible to Vite dev's static dependency crawl, so `ajv`'s
+        // CJS/ESM interop had to be forced via `optimizeDeps.include`.
+        // `@toonstrip/schema` now ships a build-time-precompiled, ajv-free
+        // validator (also fixes `new Function()`-based compilation needing
+        // `unsafe-eval` in a page's CSP — see its own source comments), so
+        // nothing here imports `ajv` anymore and this hook no longer needs
+        // to touch Vite config at all.
 
         const { fileURLToPath } = await import("node:url");
         const publicDir = fileURLToPath(config.publicDir);
