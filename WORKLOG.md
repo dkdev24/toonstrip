@@ -4,6 +4,45 @@ Persistent project history. Append entries; do not edit past entries.
 
 ---
 
+## v0.7.7 — Fix a weaker panelSeed delimiter than grues-in-comic's
+
+**Date:** 2026-09-01
+
+### Changes
+
+- Found while sweeping `toonstrip` against `grues-in-comic`'s comic engine for other
+  enhancements to sync (after v0.7.6's balloon-width fix): `panelSeed`
+  (`packages/core/src/balloon-layout.ts`) joined `speaker`/`text` with a plain ASCII
+  space — `` `${speaker} ${text}` `` — while `grues-in-comic`'s original hashes the same
+  fields with NUL/SOH control-byte delimiters. A space is content either field could
+  itself contain, so two different panels could collide on the same seed (speaker
+  `"a b"` + text `"c"` vs. speaker `"a"` + text `"b c"`); control bytes can't appear in
+  either field, so grues-in-comic's join was already unambiguous.
+- This was a transcription loss from the M1 port, not a deliberate simplification: NUL
+  and SOH bytes are invisible in every normal view (editor, terminal, `git diff`,
+  `grep` without `-a`), so the M1 port had no way to see the delimiter wasn't a plain
+  space and reproduced what it looked like.
+- Fixed with the same collision-proof delimiter, but written as the literal escape
+  sequence `\x00`/`\x01` in source (evaluates to the same NUL/SOH characters at
+  runtime as grues-in-comic's raw bytes) rather than an embedded raw byte — greppable
+  and won't silently read as binary to plain-text tooling the way the raw-byte version
+  did.
+- Publish cascade: core 0.1.4, element 0.1.5, astro 0.1.8 (same
+  `workspace:*`-resolves-at-publish-time reason as v0.7.5/v0.7.6).
+
+### Verify
+
+- `pnpm build` / `pnpm test` after each bump — all clean; no test pins an exact seed or
+  hash value, so none needed updating.
+- Confirmed via raw byte dump that the fix landed as the 4-character escape sequence
+  text, not a raw invisible byte.
+
+### Status
+
+v0.7.7 is live on npm.
+
+---
+
 ## v0.7.6 — Fix narrow first-balloon width causing head overlap
 
 **Date:** 2026-09-01

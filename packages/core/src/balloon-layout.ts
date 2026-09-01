@@ -139,11 +139,17 @@ export function makeRandom(seed: number): () => number {
  * The panel's seed, derived from its own content (FNV-1a over each speaker
  * and line). Two panels that say the same thing lay out the same way, and a
  * replayed panel lays out as it did the first time.
+ *
+ * Speaker and text are joined with NUL/SOH control bytes, not a plain space:
+ * a space is content a real speaker id or line could itself contain, which
+ * would let two different panels collide on the same seed (speaker `"a b"`
+ * + text `"c"` vs. speaker `"a"` + text `"b c"`). Control bytes can't appear
+ * in either field, so the join is unambiguous.
  */
 export function panelSeed(inputs: readonly BalloonInput[]): number {
   let hash = 0x811c9dc5;
   for (const input of inputs) {
-    for (const ch of `${input.speaker} ${input.text}`) {
+    for (const ch of `${input.speaker}\x00${input.text}\x01`) {
       hash ^= ch.codePointAt(0) ?? 0;
       hash = Math.imul(hash, 0x01000193) >>> 0;
     }
