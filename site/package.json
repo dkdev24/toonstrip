@@ -1,7 +1,7 @@
 {
   "name": "toonstrip-site",
   "private": true,
-  "version": "0.8.4",
+  "version": "0.8.5",
   "type": "module",
   "description": "toonstrip.danielkimdev.com: intro, docs, changelog, and playground for toonstrip. Deployed by Cloudflare Pages on push (see SITE_DEV_PLAN.md section 9).",
   "scripts": {

@@ -10,3 +10,5 @@ examples/astro-blog/public/_toonstrip/
 site/public/_toonstrip/
 site/.astro/
 packages/schema/src/generated-validate.js
+site/test-results/
+site/playwright-report/

@@ -1,16 +1,100 @@
 ---
+import { getEntry, render } from "astro:content";
 import Base from "../layouts/Base.astro";
+import { changelogVersions } from "../data/changelog";
 import { packageVersions } from "../lib/version";
+
+const entry = await getEntry("changelog", "changelog");
+if (!entry) throw new Error("CHANGELOG.md not found at the repo root");
+const { Content } = await render(entry);
+const versions = await changelogVersions();
 ---
 
-<Base title="Changelog" description="Release notes for the toonstrip packages.">
-  <div class="prose">
-    <h1>Changelog</h1>
-    <p class="lead">Coming in S5. Versions this site was built against:</p>
-    <ul>
-      {Object.entries(packageVersions).map(([name, version]) => (
-        <li><span class="mono">{name} {version}</span></li>
-      ))}
-    </ul>
+<Base title="Changelog" description="Release notes for the toonstrip packages and this site, newest first.">
+  <div class="changelog">
+    <aside class="changelog__nav" aria-label="Versions">
+      <p class="caption">Versions</p>
+      <ul>
+        {versions.map((v) => (
+          <li><a href={`#${v.slug}`}><span class="mono">{v.version}</span> <span class="changelog__date">{v.date}</span></a></li>
+        ))}
+      </ul>
+      <p class="caption" style="margin-top: var(--space-24)">This site runs</p>
+      <ul class="changelog__running">
+        {Object.entries(packageVersions).map(([name, version]) => (
+          <li><span class="badge">{name.replace("@toonstrip/", "")} {version}</span></li>
+        ))}
+      </ul>
+      <p><a href="/changelog.xml">Atom feed</a></p>
+    </aside>
+    <article class="prose changelog__body">
+      <Content />
+    </article>
   </div>
 </Base>
+
+<style>
+  .changelog {
+    display: grid;
+    gap: var(--space-32);
+    align-items: start;
+  }
+  @media (min-width: 900px) {
+    .changelog {
+      grid-template-columns: 14rem minmax(0, 1fr);
+    }
+  }
+  .changelog__nav {
+    position: sticky;
+    top: calc(var(--header-height) + var(--space-24));
+    font-size: var(--text-small);
+  }
+  .changelog__nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    max-height: 50vh;
+    overflow: auto;
+  }
+  .changelog__nav li a {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-8);
+    padding: var(--space-4) 0;
+    color: var(--ink-2);
+    text-decoration: none;
+  }
+  .changelog__nav li a:hover {
+    color: var(--ink);
+  }
+  .changelog__date {
+    font-size: var(--text-caption);
+    color: var(--ink-3);
+    font-variant-numeric: tabular-nums;
+  }
+  .changelog__running li {
+    margin-bottom: var(--space-4);
+  }
+  .changelog__body :global(h1) {
+    margin-bottom: var(--space-24);
+  }
+  .changelog__body :global(h2) {
+    font-family: var(--font-mono);
+    font-size: var(--text-h3);
+    font-weight: 500;
+    margin-top: var(--space-48);
+    padding-top: var(--space-24);
+    border-top: 1px solid var(--rule);
+    scroll-margin-top: calc(var(--header-height) + var(--space-16));
+  }
+  .changelog__body :global(h3) {
+    font-family: var(--font-body);
+    font-size: var(--text-caption);
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+    margin-top: var(--space-16);
+    margin-bottom: var(--space-8);
+  }
+</style>

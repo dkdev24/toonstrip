@@ -4,6 +4,30 @@ Persistent project history. Append entries; do not edit past entries.
 
 ---
 
+## v0.8.5 — M7 S5: public changelog
+
+**Date:** 2026-09-02
+
+### Changes
+
+- Root `CHANGELOG.md` (Keep a Changelog form, newest first, a **Packages** line per entry
+  because npm versions are not lockstep), backfilled for every WORKLOG version 0.1.0 →
+  0.8.5, written for users in 1–4 lines each.
+- Site loads it as a one-entry content collection (`glob` loader with `base: "../"`), so
+  Astro renders the Markdown; `src/data/changelog.ts` parses versions/dates/packages out
+  of the body for the sticky version list and the Atom feed at `/changelog.xml` (24
+  entries, well-formed). Heading anchors match Astro's slugger (`085--2026-09-02`).
+- `/changelog` page: version nav + "This site runs" badges from `lib/version.ts`.
+- `CONTRIBUTING.md` "Releasing": add a CHANGELOG entry before `pnpm publish`.
+- `.gitignore`: `site/test-results/`, `site/playwright-report/` (test-results had been
+  committed in v0.8.4; untracked now).
+
+### Status
+
+axe clean on `/changelog` both themes. Next: S6 polish.
+
+---
+
 ## v0.8.4 — M7 S4: playground
 
 **Date:** 2026-09-02

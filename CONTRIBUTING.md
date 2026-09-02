@@ -74,3 +74,10 @@ session), read `HANDOFF.md` first — it's the current-state snapshot (version,
 what's done, what's next, open issues). `WORKLOG.md` has the full version
 history if you need it; `NOTES.md` has open review items flagged during
 autonomous work sessions that may still need a maintainer's judgment call.
+
+## Releasing
+
+Before `pnpm publish` of any package, add an entry to the root `CHANGELOG.md` (newest
+first, Keep a Changelog form) with a **Packages** line naming the npm versions that ship.
+It is the public changelog on toonstrip.danielkimdev.com and its feed; `WORKLOG.md` stays
+the internal history and is not generated from it.

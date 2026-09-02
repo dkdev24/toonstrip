@@ -16,4 +16,14 @@ const docs = defineCollection({
   }),
 });
 
-export const collections = { docs };
+/**
+ * The public changelog is the repo-root CHANGELOG.md (SITE_DEV_PLAN.md §7),
+ * loaded as a one-entry collection so Astro renders its Markdown; the page and
+ * the feed parse versions out of the body (src/data/changelog.ts).
+ */
+const changelog = defineCollection({
+  loader: glob({ pattern: "CHANGELOG.md", base: "../" }),
+  schema: z.object({}).passthrough(),
+});
+
+export const collections = { docs, changelog };
