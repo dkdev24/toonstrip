@@ -344,3 +344,17 @@ resolved as items get addressed. Newest at bottom, grouped by milestone.
   Node and the browser bundle.
 - **Git Bash mangles `/route` CLI args into `C:/Program Files/Git/route`**; set
   `MSYS_NO_PATHCONV=1` when running `check-page.mjs` from Bash.
+
+## M7 S2
+
+- **`packages/element` leaves a 2-panel strip left-aligned in a 3-column container.**
+  `#measure()` sets `grid-template-columns: repeat(columns, …)` from `layoutStrip(width)`
+  regardless of how many panels the document has, so a 2-panel strip in a 1100 px
+  container gets a 3-column grid with an empty third column and the strip sits left with
+  a big gap on the right (visible on every 2-panel use case on `/`). Suggested fix:
+  `columns = min(layout.columns, panels.length)` and recompute `panelWidth` for that
+  count (or keep the width and just centre). It's a `packages/element` change, so it goes
+  through `UPSTREAM_SYNC.md`; the site has not worked around it.
+- **Shiki `github-dark` comment colour fails AA** on `--paper-raised` dark (`#1E1D18`);
+  `github-dark-default` passes. `danielkimdev-astro` uses `github-dark` on a different
+  surface and may or may not have the same problem — worth an axe run there.

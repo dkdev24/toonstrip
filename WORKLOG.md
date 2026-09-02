@@ -4,6 +4,34 @@ Persistent project history. Append entries; do not edit past entries.
 
 ---
 
+## v0.8.2 — M7 S2: intro page
+
+**Date:** 2026-09-02
+
+### Changes
+
+- `/` per `SITE_DEV_PLAN.md` §4: hero with the strip inside `WidthSlider` (first
+  interaction = watching columns change), 30-second install (pm tabs + config + page
+  snippet, with the `quickstart` strip rendered as the result, sticky beside the code),
+  "How it works" cards (JSON, sprite thumbnails, canvas tags), six use-case strips full
+  width with title/text/"Open in playground" beneath, "Bring your own characters" roster
+  (all 15 + `pip`), and the PNG/SVG/toonstrip comparison table.
+- Seven hand-written strips in `site/src/content/strips/` (`quickstart`, `tldr`,
+  `tutorial`, `release-notes`, `objection`, `transcript`, `cms`); no AI involved.
+  `scripts/validate-strips.mjs` validates every strip against `@toonstrip/schema` and
+  checks character/backdrop ids exist in the served packs and every speaker is on stage.
+- `lib/roster.ts` (build-time read of both packs' manifests) + `Sprite.astro` (CSS crop
+  of the neutral face from the sheet: thumbnails without canvases).
+- Dark Shiki theme switched to `github-dark-default` (github-dark's comment grey failed
+  AA on the site's raised surface). Comparison table's empty corner header got hidden text.
+
+### Status
+
+axe clean: `/` light desktop + dark 390 px; `/kitchen-sink` both. 16 canvases on `/`,
+no console errors. Next: S3 docs (parallel-able with S4 playground).
+
+---
+
 ## v0.8.1 — M7 S1: site shell components
 
 **Date:** 2026-09-02

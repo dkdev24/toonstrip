@@ -1,0 +1,78 @@
+{
+  "version": 1,
+  "panels": [
+    {
+      "backdrop": "room8bs",
+      "camera": "wide",
+      "bodies": [
+        {
+          "character": "scotty",
+          "emotion": {
+            "angle": 0,
+            "intensity": 0.5
+          }
+        },
+        {
+          "character": "rebecca",
+          "emotion": {
+            "angle": 1.5707963267948966,
+            "intensity": 0.5
+          }
+        },
+        {
+          "character": "denise",
+          "emotion": {
+            "angle": 0,
+            "intensity": 0.3
+          }
+        }
+      ],
+      "speakers": [
+        {
+          "speaker": "scotty",
+          "balloon": "speech",
+          "text": "Can we ship the redesign Friday?"
+        },
+        {
+          "speaker": "rebecca",
+          "balloon": "speech",
+          "text": "Only if the docs page is cut."
+        }
+      ],
+      "roomTitle": "#design-review"
+    },
+    {
+      "backdrop": "room8bs",
+      "camera": "medium",
+      "bodies": [
+        {
+          "character": "denise",
+          "emotion": {
+            "angle": 4.71238898038469,
+            "intensity": 0.6
+          }
+        },
+        {
+          "character": "rebecca",
+          "emotion": {
+            "angle": 2.356194490192345,
+            "intensity": 0.4
+          }
+        }
+      ],
+      "speakers": [
+        {
+          "speaker": "denise",
+          "balloon": "speech",
+          "text": "The docs page is the redesign."
+        },
+        {
+          "speaker": "rebecca",
+          "balloon": "speech",
+          "text": "Monday, then."
+        }
+      ],
+      "roomTitle": "#design-review"
+    }
+  ]
+}

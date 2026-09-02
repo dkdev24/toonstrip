@@ -1,0 +1,62 @@
+{
+  "version": 1,
+  "panels": [
+    {
+      "backdrop": "room8bs",
+      "camera": "medium",
+      "bodies": [
+        {
+          "character": "margaret",
+          "emotion": {
+            "angle": 0,
+            "intensity": 0.6
+          }
+        },
+        {
+          "character": "hugh",
+          "emotion": {
+            "angle": 1.5707963267948966,
+            "intensity": 0.4
+          }
+        }
+      ],
+      "speakers": [
+        {
+          "speaker": "caption",
+          "balloon": "caption",
+          "text": "v0.7.11"
+        },
+        {
+          "speaker": "margaret",
+          "balloon": "speech",
+          "text": "Balloon text and padding now scale with the panel, so narrow embeds stop looking cramped."
+        },
+        {
+          "speaker": "hugh",
+          "balloon": "speech",
+          "text": "Anything I have to change?"
+        }
+      ]
+    },
+    {
+      "backdrop": "room8bs",
+      "camera": "reaction",
+      "bodies": [
+        {
+          "character": "margaret",
+          "emotion": {
+            "angle": 5.497787143782138,
+            "intensity": 0.7
+          }
+        }
+      ],
+      "speakers": [
+        {
+          "speaker": "margaret",
+          "balloon": "speech",
+          "text": "Nothing. Bump the package."
+        }
+      ]
+    }
+  ]
+}

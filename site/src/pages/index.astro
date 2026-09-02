@@ -1,35 +1,217 @@
 ---
+/** Intro page — SITE_DEV_PLAN.md §4, section by section. */
 import { ComicStrip } from "@toonstrip/astro";
+import type { ComicStripDocument } from "@toonstrip/schema";
 import Base from "../layouts/Base.astro";
-import hero from "../content/strips/hero.json";
+import CodeBlock from "../components/site/CodeBlock.astro";
+import PackageManagerTabs from "../components/site/PackageManagerTabs.astro";
+import Sprite from "../components/site/Sprite.astro";
+import WidthSlider from "../components/demo/WidthSlider.astro";
 import { coreVersion } from "../lib/version";
+import { loadRoster } from "../lib/roster";
+import { playgroundUrl } from "../lib/share";
+import hero from "../content/strips/hero.json";
+import quickstart from "../content/strips/quickstart.json";
+import tldr from "../content/strips/tldr.json";
+import tutorial from "../content/strips/tutorial.json";
+import releaseNotes from "../content/strips/release-notes.json";
+import objection from "../content/strips/objection.json";
+import transcript from "../content/strips/transcript.json";
+import cms from "../content/strips/cms.json";
+
+const roster = loadRoster(["@toonstrip/pack-comic-chat", "@toonstrip/pack-example"]);
+const comicChat = roster.characters.filter((c) => c.pack === "comic-chat");
+const example = roster.characters.filter((c) => c.pack === "example");
+
+const useCases: { title: string; text: string; doc: ComicStripDocument }[] = [
+  { title: "TL;DR at the top of a long post", text: "Three panels that say what four thousand words say. The post stays; the strip is the summary.", doc: tldr as ComicStripDocument },
+  { title: "Tutorials and FAQs as dialogue", text: "A question and an answer read faster with two faces than with a definition list.", doc: tutorial as ComicStripDocument },
+  { title: "Release notes", text: "What changed, what you have to do, in two panels. This one is a real toonstrip release.", doc: releaseNotes as ComicStripDocument },
+  { title: "Objection and answer", text: "The reader's doubt, voiced by a character, then answered. Over-the-shoulder and reaction shots do the work.", doc: objection as ComicStripDocument },
+  { title: "Replaying a conversation", text: "A chat thread or interview excerpt, with the room title as the channel name. Lines map straight to balloons.", doc: transcript as ComicStripDocument },
+  { title: "Data from anywhere", text: "The document is JSON. Write it by hand, generate it from a script, store it in a CMS field, or have an LLM you call yourself produce it. toonstrip only renders.", doc: cms as ComicStripDocument },
+];
+
+const configSnippet = `// astro.config.mjs
+import { defineConfig } from "astro/config";
+import { toonstrip } from "@toonstrip/astro";
+
+export default defineConfig({
+  integrations: [toonstrip({ packs: ["@toonstrip/pack-comic-chat"] })],
+});`;
+
+const pageSnippet = `---
+import { ComicStrip } from "@toonstrip/astro";
+---
+<ComicStrip
+  document={{
+    version: 1,
+    panels: [{
+      backdrop: "field",
+      bodies: [{ character: "dan", emotion: { angle: 0, intensity: 0.8 }, pose: "wave" }],
+      speakers: [{ speaker: "dan", balloon: "speech", text: "Hello from toonstrip!" }],
+    }],
+  }}
+  packs={["comic-chat"]}
+  client:visible
+/>`;
 ---
 
-<Base title="toonstrip" description="A framework-embeddable library that renders comic strips from caller-supplied data as live, responsive canvas widgets.">
+<Base title="toonstrip" description="A framework-embeddable library that renders comic strips from caller-supplied data as live, responsive canvas widgets. Astro-ready, MIT.">
+  <!-- 1. Hero -->
   <section class="hero">
-    <p class="caption">toonstrip <span class="mono">v{coreVersion}</span> · MIT</p>
+    <p class="caption">toonstrip <span class="mono">v{coreVersion}</span> · MIT · Astro integration</p>
     <h1 class="hero__title">Comic strips from data, drawn live on your page.</h1>
     <p class="lead">
       Write panels, characters, and lines as JSON. toonstrip renders them on real canvases that
-      reflow with the page. No AI, no image exports to keep in sync.
+      reflow with the page and read aloud to screen readers. No image exports to keep in sync.
     </p>
     <p class="hero__actions">
       <a class="button button--primary" href="/playground/">Open the playground</a>
       <a class="button button--secondary" href="/docs/">Read the docs</a>
     </p>
   </section>
-  <section class="hero-strip" aria-label="Example strip">
-    <ComicStrip document={hero} packs={["comic-chat"]} client:load />
+  <section class="hero-strip" aria-label="Example strip, with a width control">
+    <WidthSlider doc={hero as ComicStripDocument} load="load" initial={1100} />
+    <p class="hero-strip__hint">
+      Drag the slider. The strip is not an image: each panel is a canvas, and the column count
+      comes from the container width. <a href={playgroundUrl(hero as ComicStripDocument)}>Edit this strip in the playground →</a>
+    </p>
   </section>
-  <p class="caption" style="margin-top: var(--space-16)">
-    Site under construction (S0 scaffold). Sections per SITE_DEV_PLAN.md §4 land in S2.
-  </p>
+
+  <!-- 2. The 30-second install -->
+  <section class="section" id="install">
+    <div class="section__intro">
+      <p class="caption">30-second install</p>
+      <h2>Three steps, one strip.</h2>
+      <p>Install two packages, register the integration, drop the component in a page. The panel on the right is exactly what the snippet renders.</p>
+    </div>
+    <div class="install">
+      <div class="install__steps">
+        <PackageManagerTabs packages={["@toonstrip/astro", "@toonstrip/pack-comic-chat"]} />
+        <CodeBlock code={configSnippet} lang="js" title="astro.config.mjs" />
+        <CodeBlock code={pageSnippet} lang="astro" title="src/pages/index.astro" />
+      </div>
+      <div class="stage install__result">
+        <ComicStrip document={quickstart as ComicStripDocument} packs={["comic-chat"]} client:visible />
+        <p class="caption" style="margin: var(--space-12) 0 0">Result</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. How it works -->
+  <section class="section" id="how">
+    <div class="section__intro">
+      <p class="caption">How it works</p>
+      <h2>You write data. A pack supplies the art. It renders live.</h2>
+    </div>
+    <div class="grid grid--3">
+      <div class="card">
+        <div class="card__media">
+          <pre class="how__json">{`{ "backdrop": "field",
+  "camera": "medium",
+  "bodies": [{ "character": "dan",
+               "emotion": { "angle": 0, "intensity": 0.8 } }],
+  "speakers": [{ "speaker": "dan", "balloon": "speech",
+                 "text": "Hello!" }] }`}</pre>
+        </div>
+        <h3>You write data</h3>
+        <p>A <em>Comic Strip Document</em>: panels, who is on stage, what they feel, what they say. Plain JSON with a published schema. No TypeScript required to produce it.</p>
+      </div>
+      <div class="card">
+        <div class="card__media how__sprites">
+          {comicChat.slice(0, 6).map((c) => <Sprite entry={c} size={48} label={false} />)}
+        </div>
+        <h3>A pack supplies the art</h3>
+        <p>Characters, poses, expressions, and backdrops come from an asset pack. Fifteen characters and three backdrops ship by default; add your own with a sprite sheet and a JSON manifest.</p>
+      </div>
+      <div class="card">
+        <div class="card__media how__live">
+          <span class="how__tag">canvas</span>
+          <span class="how__tag">devicePixelRatio</span>
+          <span class="how__tag">ResizeObserver</span>
+          <span class="how__tag">role="img"</span>
+        </div>
+        <h3>It renders live</h3>
+        <p>Each panel is its own canvas, sharp at any zoom, re-laid out when the container resizes, and described to assistive tech from the dialogue itself.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. Use cases -->
+  <section class="section" id="use-cases">
+    <div class="section__intro">
+      <p class="caption">Use cases</p>
+      <h2>Where a strip beats a paragraph.</h2>
+      <p>Every strip below is hand-written JSON, rendered live. Open any of them in the playground.</p>
+    </div>
+    <div class="use-cases">
+      {useCases.map((u) => (
+        <article class="use-case">
+          <div class="stage use-case__strip">
+            <ComicStrip document={u.doc} packs={["comic-chat"]} client:visible />
+          </div>
+          <div class="use-case__text">
+            <h3>{u.title}</h3>
+            <p>{u.text}</p>
+            <a href={playgroundUrl(u.doc)}>Open in playground →</a>
+          </div>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <!-- 5. Bring your own characters -->
+  <section class="section" id="packs">
+    <div class="section__intro">
+      <p class="caption">Asset packs</p>
+      <h2>Bring your own characters.</h2>
+      <p>
+        The default pack is the original Microsoft Comic Chat roster, redistributed under MIT.
+        The second pack is one original character and one backdrop: the smallest proof that the
+        pack contract is not tied to the default art.
+      </p>
+    </div>
+    <div class="roster">
+      <div class="roster__pack">
+        <p class="caption">comic-chat · {comicChat.length} characters · {roster.backdrops.filter((b) => b.pack === "comic-chat").length} backdrops</p>
+        <div class="roster__grid">{comicChat.map((c) => <Sprite entry={c} />)}</div>
+      </div>
+      <div class="roster__pack">
+        <p class="caption">example · {example.length} character · 1 backdrop</p>
+        <div class="roster__grid">{example.map((c) => <Sprite entry={c} />)}</div>
+        <p style="margin-top: var(--space-16)"><a class="button button--secondary" href="/docs/asset-packs/">How to add a character</a></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. Why not an image? -->
+  <section class="section" id="why">
+    <div class="section__intro">
+      <p class="caption">Why not an image?</p>
+      <h2>What a live canvas gives you that a PNG can't.</h2>
+    </div>
+    <div class="compare">
+      <table>
+        <thead>
+          <tr><th scope="col"><span class="visually-hidden">Property</span></th><th scope="col">Pre-rendered PNG</th><th scope="col">Exported SVG</th><th scope="col">toonstrip</th></tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row">Reflows to the container</th><td>No. One fixed layout.</td><td>Scales, doesn't reflow.</td><td>Column count follows width.</td></tr>
+          <tr><th scope="row">Sharp on any display</th><td>Only at export size.</td><td>Yes.</td><td>Yes, DPR-aware backing store.</td></tr>
+          <tr><th scope="row">Screen readers</th><td>One alt text, if you wrote it.</td><td>Depends on the export.</td><td>Every panel described from its own lines.</td></tr>
+          <tr><th scope="row">Change one line of dialogue</th><td>Re-render, re-upload.</td><td>Re-export.</td><td>Edit the JSON.</td></tr>
+          <tr><th scope="row">Page weight for a 3-panel strip</th><td>One large image.</td><td>Text-heavy vector.</td><td>Only the sprites it references.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
 </Base>
 
 <style>
   .hero {
     padding-top: var(--space-32);
-    max-width: 44rem;
+    max-width: 46rem;
   }
   .hero__title {
     font-size: var(--text-hero);
@@ -44,8 +226,115 @@ import { coreVersion } from "../lib/version";
   }
   .hero-strip {
     margin-top: var(--space-48);
-    padding: var(--space-24);
-    background: var(--paper-sunken);
-    border-radius: var(--radius-lg);
+  }
+  .hero-strip__hint {
+    font-size: var(--text-small);
+    color: var(--ink-2);
+    max-width: 60ch;
+  }
+
+  .install {
+    display: grid;
+    gap: var(--space-24);
+    align-items: start;
+  }
+  @media (min-width: 900px) {
+    .install {
+      grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    }
+  }
+  .install__result {
+    position: sticky;
+    top: calc(var(--header-height) + var(--space-24));
+  }
+
+  .how__json {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    font-size: 0.75rem;
+    line-height: 1.5;
+    color: var(--ink-2);
+    white-space: pre;
+    overflow: hidden;
+  }
+  .how__sprites {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-8);
+    align-items: center;
+    min-height: 96px;
+  }
+  .how__live {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-8);
+    align-content: center;
+    min-height: 96px;
+  }
+  .how__tag {
+    font-family: var(--font-mono);
+    font-size: var(--text-caption);
+    padding: var(--space-4) var(--space-8);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-sm);
+    background: var(--paper-raised);
+  }
+
+  .use-cases {
+    display: grid;
+    gap: var(--space-48);
+  }
+  .use-case {
+    display: grid;
+    gap: var(--space-16);
+  }
+  .use-case__text {
+    display: grid;
+    gap: var(--space-4) var(--space-32);
+    align-items: baseline;
+  }
+  @media (min-width: 900px) {
+    .use-case__text {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) auto;
+    }
+  }
+  .use-case__text h3 {
+    margin: 0;
+  }
+  .use-case__text p {
+    margin: 0;
+    color: var(--ink-2);
+    font-size: var(--text-small);
+  }
+
+  .roster {
+    display: grid;
+    gap: var(--space-32);
+  }
+  @media (min-width: 900px) {
+    .roster {
+      grid-template-columns: minmax(0, 3fr) minmax(0, 1fr);
+    }
+  }
+  .roster__grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-16);
+  }
+
+  .compare th[scope="row"] {
+    font-family: var(--font-body);
+    font-size: var(--text-small);
+    font-weight: 500;
+    text-transform: none;
+    letter-spacing: 0;
+    color: var(--ink);
+    border-bottom: 1px solid var(--rule);
+  }
+  .compare td:last-child {
+    font-weight: 500;
+    color: var(--ink);
   }
 </style>

@@ -1,0 +1,64 @@
+{
+  "version": 1,
+  "panels": [
+    {
+      "backdrop": "pastoral",
+      "camera": "over-shoulder",
+      "bodies": [
+        {
+          "character": "bolo",
+          "emotion": {
+            "angle": 3.9269908169872414,
+            "intensity": 0.5
+          }
+        },
+        {
+          "character": "anna",
+          "emotion": {
+            "angle": 0,
+            "intensity": 0.4
+          }
+        }
+      ],
+      "speakers": [
+        {
+          "speaker": "bolo",
+          "balloon": "speech",
+          "text": "Isn't this just an image with extra steps?"
+        }
+      ]
+    },
+    {
+      "backdrop": "pastoral",
+      "camera": "medium",
+      "bodies": [
+        {
+          "character": "bolo",
+          "emotion": {
+            "angle": 0.7853981633974483,
+            "intensity": 0.4
+          }
+        },
+        {
+          "character": "anna",
+          "emotion": {
+            "angle": 0,
+            "intensity": 0.8
+          }
+        }
+      ],
+      "speakers": [
+        {
+          "speaker": "anna",
+          "balloon": "speech",
+          "text": "An image can't reflow, can't be read aloud, and can't be edited by changing one line of JSON."
+        },
+        {
+          "speaker": "bolo",
+          "balloon": "speech",
+          "text": "...fair."
+        }
+      ]
+    }
+  ]
+}

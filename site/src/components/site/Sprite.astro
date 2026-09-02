@@ -1,0 +1,59 @@
+---
+/**
+ * A character thumbnail cropped from its pack sheet with CSS (no canvas).
+ * Sized to `size` px on the longer edge; the sheet is scaled accordingly so
+ * pixels stay crisp (`image-rendering: auto`, never upscaled beyond 2×).
+ */
+import type { RosterEntry } from "../../lib/roster";
+
+interface Props {
+  entry: RosterEntry;
+  size?: number;
+  label?: boolean;
+}
+const { entry, size = 64, label = true } = Astro.props;
+const { thumb } = entry;
+const scale = Math.min(size / Math.max(thumb.width, thumb.height), 2);
+const w = Math.round(thumb.width * scale);
+const h = Math.round(thumb.height * scale);
+const style = [
+  `width:${w}px`,
+  `height:${h}px`,
+  `background-image:url(${entry.sheetUrl})`,
+  `background-size:${Math.round(entry.sheetWidth * scale)}px ${Math.round(entry.sheetHeight * scale)}px`,
+  `background-position:-${Math.round(thumb.x * scale)}px -${Math.round(thumb.y * scale)}px`,
+].join(";");
+---
+
+<figure class="sprite" title={`${entry.name} (${entry.pack})`}>
+  <div class="sprite__box" style={`width:${size}px;height:${size}px`}>
+    <div class="sprite__img" style={style} role="img" aria-label={`${entry.name}, from the ${entry.pack} pack`}></div>
+  </div>
+  {label && <figcaption class="sprite__label mono">{entry.id}</figcaption>}
+</figure>
+
+<style>
+  .sprite {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-4);
+  }
+  .sprite__box {
+    display: grid;
+    place-items: center;
+    background: var(--paper-raised);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+  }
+  .sprite__img {
+    background-repeat: no-repeat;
+    image-rendering: auto;
+  }
+  .sprite__label {
+    font-size: var(--text-caption);
+    color: var(--ink-2);
+  }
+</style>

@@ -1,0 +1,69 @@
+{
+  "version": 1,
+  "panels": [
+    {
+      "backdrop": "field",
+      "camera": "medium",
+      "bodies": [
+        {
+          "character": "tiki",
+          "emotion": {
+            "angle": 0.7853981633974483,
+            "intensity": 0.5
+          }
+        },
+        {
+          "character": "sage",
+          "emotion": {
+            "angle": 0,
+            "intensity": 0.4
+          }
+        }
+      ],
+      "speakers": [
+        {
+          "speaker": "tiki",
+          "balloon": "speech",
+          "text": "Do I need a build step for the art?"
+        },
+        {
+          "speaker": "sage",
+          "balloon": "speech",
+          "text": "No. The pack ships sprite sheets; the element fetches only the characters your strip uses."
+        }
+      ]
+    },
+    {
+      "backdrop": "field",
+      "camera": "over-shoulder",
+      "bodies": [
+        {
+          "character": "tiki",
+          "emotion": {
+            "angle": 0,
+            "intensity": 0.7
+          }
+        },
+        {
+          "character": "sage",
+          "emotion": {
+            "angle": 0,
+            "intensity": 0.5
+          }
+        }
+      ],
+      "speakers": [
+        {
+          "speaker": "tiki",
+          "balloon": "speech",
+          "text": "And on a phone?"
+        },
+        {
+          "speaker": "sage",
+          "balloon": "speech",
+          "text": "Same JSON. The strip drops to one column and the panels scale down."
+        }
+      ]
+    }
+  ]
+}
