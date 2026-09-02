@@ -6,8 +6,8 @@ Cross-session context memory. Update this file at the end of every session.
 
 ## Current Version
 
-**0.8.9** (Korean font fix; npm still: schema 0.1.3, core 0.1.6, element 0.1.7,
-astro 0.1.10, cli 0.2.0, packs 0.1.1 — core 0.1.7/element 0.1.8/astro 0.1.11/cli 0.2.1 unpublished)
+**0.8.9** (Korean font fix; npm: schema 0.1.3, core 0.1.7, element 0.1.8, astro 0.1.11,
+cli 0.2.1, packs 0.1.1)
 
 ---
 
@@ -33,8 +33,8 @@ Fixed in core/element/cli, site declares Noto Sans KR; SITE_DEV_PLAN §13 (S9 KO
 
 ## Next Actions
 
-1. **Publish cascade** core 0.1.7 → element 0.1.8 → astro 0.1.11 (+ cli 0.2.1), then
-   `danielkimdev-astro` bump and port the font stack to `grues-in-comic` (ADR note).
+1. Port the font stack (`COMIC_FONT_FAMILY`, WORKLOG v0.8.9) to `grues-in-comic` with an
+   ADR 0008 divergence note (`UPSTREAM_SYNC.md`).
 2. **Daniel:** copy pass in his voice over
    `site/src/pages/index.astro` and `site/src/content/docs/*.mdx`. Link to the site from
    `danielkimdev.com`.

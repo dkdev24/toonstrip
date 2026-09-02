@@ -9,7 +9,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## 0.8.9 — 2026-09-02
 
 **Packages:** `@toonstrip/core` 0.1.7, `@toonstrip/element` 0.1.8, `@toonstrip/astro` 0.1.11,
-`@toonstrip/cli` 0.2.1 (unpublished until the next release)
+`@toonstrip/cli` 0.2.1 (all published)
 
 ### Fixed
 
