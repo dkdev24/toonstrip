@@ -2,14 +2,10 @@
 
 Cross-session context memory. Update this file at the end of every session.
 
----
-
 ## Current Version
 
-**0.8.9** (Korean font fix; npm: schema 0.1.3, core 0.1.7, element 0.1.8, astro 0.1.11,
-cli 0.2.1, packs 0.1.1)
-
----
+**0.8.10** (site content fixes + M8-M13 roadmap; npm unchanged: schema 0.1.3, core 0.1.7,
+element 0.1.8, astro 0.1.11, cli 0.2.1, packs 0.1.1)
 
 ## Project Status
 
@@ -17,32 +13,28 @@ cli 0.2.1, packs 0.1.1)
 caller-supplied data, extracted/generalized from `grues-in-comic`'s comic pane (Zork/game/
 AI-inference coupling stripped). M0–M7 done. All 7 `@toonstrip/*` packages on npm. Site
 live at **https://toonstrip.danielkimdev.com** (intro, docs, playground, changelog).
-Full history in `WORKLOG.md`. **Deploy:** Cloudflare Pages project `toonstrip`, GitHub integration. Push to `main`
-deploys production; other branches get a preview URL. Root `wrangler.toml` sets the output
-dir (`site/dist`); root `pnpm build` is the Pages build. No manual steps.
-
----
+Full history in `WORKLOG.md`. **Deploy:** Cloudflare Pages project `toonstrip`, GitHub
+integration. Push to `main` deploys production; other branches get a preview URL. Root
+`wrangler.toml` sets the output dir (`site/dist`); root `pnpm build` is the Pages build.
 
 ## Last Session
 
-2026-09-02, launch (v0.8.8) then v0.8.9: Korean balloon text fell to Gungseo because the
-core font stack named no Korean face and the element painted before webfonts loaded.
-Fixed in core/element/cli, site declares Noto Sans KR; SITE_DEV_PLAN §13 (S9 KO locale).
-
----
+2026-09-02: trimmed intro-page use cases from 7 to 5; added "Where it came from" section
+crediting `grues-in-comic`. Fixed a "missing character" bug (`requested` defaults false
+without a matching speaker line) across 4 strip JSON files on two docs pages, and
+swapped anna→sage / dan→tiki there after their SCARED/SAD/ANGRY/SHOUT faces proved
+visually identical or missing entirely. Added `TOONSTRIP_DEV_PLAN.md` §13: M8-M13
+roadmap, sequenced before Korean (S9).
 
 ## Next Actions
 
-1. Port the font stack (`COMIC_FONT_FAMILY`, WORKLOG v0.8.9) to `grues-in-comic` with an
-   ADR 0008 divergence note (`UPSTREAM_SYNC.md`).
-2. **Daniel:** copy pass in his voice over
-   `site/src/pages/index.astro` and `site/src/content/docs/*.mdx`. Link to the site from
-   `danielkimdev.com`.
-3. **S9 Korean locale** per `SITE_DEV_PLAN.md` §13 (EN root, KO under `/ko/`, model copied
-   from `danielkimdev-astro`). Start with config + `src/i18n` + wrappers, then docs, strips.
-4. Only if usage warrants: per-page OG images via `toonstrip render`, Pagefind, short-link
-   Worker (`SITE_DEV_PLAN.md` §9).
----
+1. Playground UI renewal before starting Korean, to avoid re-touching markup twice.
+2. M8-M13 per `TOONSTRIP_DEV_PLAN.md` §13: vanilla-HTML/SSG docs + agent skill first
+   (no dependencies), then React/Vue wrappers, then Next.js, then general SSR.
+3. **S9 Korean locale** per `SITE_DEV_PLAN.md` §13, after 1 and 2 land.
+4. **Daniel:** copy pass in his voice over `index.astro` (incl. new origin section)
+   and `docs/*.mdx`. Link to the site from `danielkimdev.com`.
+5. If usage warrants: per-page OG images, Pagefind, short-link Worker (§9).
 
 ## Open Issues
 

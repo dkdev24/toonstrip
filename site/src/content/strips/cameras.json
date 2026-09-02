@@ -10,14 +10,16 @@
           "emotion": {
             "angle": 0,
             "intensity": 0.6
-          }
+          },
+          "requested": true
         },
         {
           "character": "anna",
           "emotion": {
             "angle": 0,
             "intensity": 0.4
-          }
+          },
+          "requested": true
         }
       ],
       "speakers": [
@@ -37,14 +39,16 @@
           "emotion": {
             "angle": 0,
             "intensity": 0.6
-          }
+          },
+          "requested": true
         },
         {
           "character": "anna",
           "emotion": {
             "angle": 0,
             "intensity": 0.4
-          }
+          },
+          "requested": true
         }
       ],
       "speakers": [
@@ -64,14 +68,16 @@
           "emotion": {
             "angle": 0,
             "intensity": 0.6
-          }
+          },
+          "requested": true
         },
         {
           "character": "anna",
           "emotion": {
             "angle": 0,
             "intensity": 0.4
-          }
+          },
+          "requested": true
         }
       ],
       "speakers": [
@@ -91,14 +97,16 @@
           "emotion": {
             "angle": 0,
             "intensity": 0.6
-          }
+          },
+          "requested": true
         },
         {
           "character": "anna",
           "emotion": {
             "angle": 0,
             "intensity": 0.4
-          }
+          },
+          "requested": true
         }
       ],
       "speakers": [
@@ -118,14 +126,16 @@
           "emotion": {
             "angle": 0,
             "intensity": 0.6
-          }
+          },
+          "requested": true
         },
         {
           "character": "anna",
           "emotion": {
             "angle": 0,
             "intensity": 0.4
-          }
+          },
+          "requested": true
         }
       ],
       "speakers": [
@@ -145,14 +155,16 @@
           "emotion": {
             "angle": 0,
             "intensity": 0.6
-          }
+          },
+          "requested": true
         },
         {
           "character": "anna",
           "emotion": {
             "angle": 0,
             "intensity": 0.4
-          }
+          },
+          "requested": true
         }
       ],
       "speakers": [

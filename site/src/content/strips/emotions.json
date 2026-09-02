@@ -6,11 +6,12 @@
       "camera": "close-up",
       "bodies": [
         {
-          "character": "anna",
+          "character": "sage",
           "emotion": {
             "angle": 0,
             "intensity": 0
-          }
+          },
+          "requested": true
         }
       ],
       "speakers": [
@@ -26,11 +27,12 @@
       "camera": "close-up",
       "bodies": [
         {
-          "character": "anna",
+          "character": "sage",
           "emotion": {
             "angle": 0.0,
             "intensity": 0.8
-          }
+          },
+          "requested": true
         }
       ],
       "speakers": [
@@ -46,11 +48,12 @@
       "camera": "close-up",
       "bodies": [
         {
-          "character": "anna",
+          "character": "sage",
           "emotion": {
             "angle": 0.785398,
             "intensity": 0.8
-          }
+          },
+          "requested": true
         }
       ],
       "speakers": [
@@ -66,11 +69,12 @@
       "camera": "close-up",
       "bodies": [
         {
-          "character": "anna",
+          "character": "sage",
           "emotion": {
             "angle": 1.570796,
             "intensity": 0.8
-          }
+          },
+          "requested": true
         }
       ],
       "speakers": [
@@ -86,11 +90,12 @@
       "camera": "close-up",
       "bodies": [
         {
-          "character": "anna",
+          "character": "sage",
           "emotion": {
             "angle": 2.356194,
             "intensity": 0.8
-          }
+          },
+          "requested": true
         }
       ],
       "speakers": [
@@ -106,11 +111,12 @@
       "camera": "close-up",
       "bodies": [
         {
-          "character": "anna",
+          "character": "sage",
           "emotion": {
             "angle": 3.141593,
             "intensity": 0.8
-          }
+          },
+          "requested": true
         }
       ],
       "speakers": [
@@ -126,11 +132,12 @@
       "camera": "close-up",
       "bodies": [
         {
-          "character": "anna",
+          "character": "sage",
           "emotion": {
             "angle": 3.926991,
             "intensity": 0.8
-          }
+          },
+          "requested": true
         }
       ],
       "speakers": [
@@ -146,11 +153,12 @@
       "camera": "close-up",
       "bodies": [
         {
-          "character": "anna",
+          "character": "sage",
           "emotion": {
             "angle": 4.712389,
             "intensity": 0.8
-          }
+          },
+          "requested": true
         }
       ],
       "speakers": [
@@ -166,11 +174,12 @@
       "camera": "close-up",
       "bodies": [
         {
-          "character": "anna",
+          "character": "sage",
           "emotion": {
             "angle": 5.497787,
             "intensity": 0.8
-          }
+          },
+          "requested": true
         }
       ],
       "speakers": [

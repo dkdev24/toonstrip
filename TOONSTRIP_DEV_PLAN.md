@@ -76,6 +76,9 @@ packages/
   avb-import/      # Optional CLI: .avb → canonical pack format, for anyone converting
                    # further original Comic Chat art. Not a runtime dependency of core.
   cli/             # `toonstrip` CLI — the static-PNG fallback path (§8) and pack tooling (§6).
+  react/           # planned, M10 (§13): thin wrapper around `element`, no new rendering logic.
+  vue/             # planned, M11 (§13): same pattern as `react/`.
+  next/            # planned, M12 (§13): wraps `react/` with an App-Router-safe client boundary.
 examples/
   astro-blog/      # A minimal Astro site embedding the element, incl. a TL;DR strip
                    # built *by hand* (proving non-goal: no AI in the example, either —
@@ -295,12 +298,26 @@ allows, not before.
 | M5 | Asset pack docs (`docs/packs.md`), schema docs, contribution guide, a second (small, original, non-Comic-Chat) example pack to prove the contract isn't secretly coupled to the default one. | An outside contributor (or a fresh agent session with no prior context) can follow the docs alone to add one new character and see it render. |
 | M6 | v0.1.0: publish `@toonstrip/*` npm packages, write the README/landing example. | `npm install` + the README's copy-paste example works from a clean machine. |
 | M7 | (Detailed in `SITE_DEV_PLAN.md` + `DESIGN.md`.) A properly designed introduction/marketing site with a live playground for the component (edit a `ComicStripDocument`, see it render), built on `examples/astro-blog` or a purpose-built Astro site. Deploy to **toonstrip.danielkimdev.com** at the end of this milestone (§7). | The subdomain is live, presents the project (not just a blog-post embed), and a visitor can interactively try the component in the playground without installing anything. |
+| M8 | Vanilla HTML/JS + "any SSG" support (§13.1): a docs page and `examples/vanilla-html` proving `packages/element`'s custom element works with a bare `<script type="module">` import and no build step. | The example renders correctly opened directly from disk (`file://`) and from a static file server, with no framework and no bundler config. |
+| M9 | Agent skill (§13.2): package the schema + validator + CLI usage into a distributable skill (e.g. a `SKILL.md`) that teaches an AI coding agent to author and validate a `ComicStripDocument` without guessing the shape. | A fresh agent session, given only the skill and a one-line request, produces a schema-valid document that renders correctly on the first `toonstrip pack validate` / render attempt. |
+| M10 | `@toonstrip/react` (§13.3): thin wrapper around `packages/element`, same non-goal as §7 (no React-specific rendering logic). | A minimal Create React App / Vite+React example embeds a strip and updates it on prop change without a full remount. |
+| M11 | `@toonstrip/vue` (§13.3): same pattern as M10, Vue's component wrapper conventions instead of React's. | A minimal Vue 3 (Composition API) example embeds a strip and updates it reactively. |
+| M12 | `@toonstrip/next` (§13.4): wraps `@toonstrip/react` behind an App-Router-safe `'use client'` boundary; the first framework target where the server actually executes a render pass. | A Next.js App Router page embeds a strip with no server-side `document`/`window`/`customElements` errors and no hydration-mismatch warning. |
+| M13 | General SSR support (§13.4): server-rendered placeholder (via `packages/cli`'s existing headless-canvas path, §8) swapped for the live canvas on hydration, plus SSR-safety guards in `packages/element` so importing it on the server never throws. | A Next.js (or Nuxt) SSR page shows the correct strip content in "view source" / with JS disabled, then upgrades to the live canvas once hydrated, with no visible layout shift. |
 
 Sequence M1→M4 in order; M5 can start once M2 lands (docs can be written against a
 stable pack format before the element exists). Do not start M6 packaging concerns
-before M4 — an Astro-embeddable proof is the MVP; npm publishing polish is not. M7 is
-post-publish polish — it depends on M6's published packages but is not required to
+before M4 (an Astro-embeddable proof is the MVP; npm publishing polish is not). M7 is
+post-publish polish: it depends on M6's published packages but is not required to
 close M6.
+
+M8 and M9 have no dependency on each other or on M10 through M13, and can run in either
+order or in parallel, once M7 is done (see §13.1 for why they're sequenced first). M10
+and M11 are independent of each other but both depend on M3 (`element`) only, already
+done. M12 depends on M10, since it wraps `@toonstrip/react` rather than `element`
+directly. M13 depends on M12: it needs one real SSR framework target to build and
+verify the pattern against before generalizing it, and reuses §8's static-render path
+(already built and published in `packages/cli`) rather than inventing a second one.
 
 ## 11. Open decisions
 
@@ -350,3 +367,76 @@ separate case. Porting either into the new repo requires:
   are this project's own IP under that same MIT default; keep pack-level `license`
   fields (§6) so a third-party pack can still carry a different license from core
   without ambiguity.
+
+## 13. Framework reach & agent tooling (M8 through M13, post-launch)
+
+Four items raised after M0 through M7 shipped: an agent skill for authoring documents,
+wrapper packages for React/Vue/Next.js, an explicit vanilla HTML/"any SSG" story, and
+SSR support. None of these reopen §0's non-goals: the agent skill teaches authoring
+against the existing schema and CLI validator, it does not add an LLM call or a
+content-generation feature into `core`.
+
+Do this work before the Korean locale (`SITE_DEV_PLAN.md` §13, S9) rather than after,
+for the same reason the playground UI renewal comes first: every item here adds at
+least one new website docs page or example, and once `/ko/` exists that content has to
+be written and kept in sync in two languages instead of one. Landing the English
+content and the API shape first means S9 translates a finished target instead of a
+moving one.
+
+### 13.1 Vanilla HTML/JS and "any SSG" support (M8)
+
+`packages/element` (§2, §5) is already a zero-framework-dependency Web Component; the
+mission statement in §0 already claims this ("other frameworks, or plain HTML, can
+consume it later without a rewrite"). Nothing in `core` or `element` needs to change.
+The gap is proof and discoverability: there is no example showing a bare
+`<script type="module">` import with no build step, and no docs page telling a reader
+who is not using Astro that this is already supported. Ship `examples/vanilla-html`
+(a single `.html` file, no bundler, opens from `file://` and from any static file
+server) and a docs page describing the pattern. Smallest item on this list; sequence it
+first because it is nearly free and de-risks nothing else.
+
+### 13.2 Agent skill (M9)
+
+Package `packages/schema`'s types, JSON Schema, and runtime validator, plus
+`packages/cli`'s `toonstrip pack validate` / `toonstrip render`, into a distributable
+skill (a `SKILL.md`, following the same shape as this repository's own project-level
+skills) that teaches an AI coding agent the `ComicStripDocument` shape, the emotion-wheel
+angle/intensity convention (§3), and how to validate a document before claiming it
+works. No dependency on M8 or M10 through M13: the schema and CLI it teaches are already
+stable and published. Small effort (mostly authoring and testing against a real agent
+session, no new runtime code), independent track, can ship in parallel with M8.
+
+### 13.3 Framework wrappers: React and Vue (M10, M11)
+
+Both follow the §7 Astro pattern exactly: a thin package that mounts
+`packages/element`'s custom element, forwards the `document`/`packs` props, and manages
+its lifecycle idiomatically for the framework (a ref-based mount and prop-diffing
+effect in React, a wrapper component using Vue's custom-element interop in Vue).
+Neither adds rendering logic of its own, the same restraint §7 already calls out for
+Astro. Medium effort each. They depend only on `packages/element` (M3, done) and are
+independent of each other, but treat them as sequential work in one session or PR series
+rather than parallel forks: the first one built (React, given its larger install base)
+establishes the wrapper-testing pattern (an example app, a prop-change-without-remount
+check) that the second one (Vue) should reuse rather than reinvent.
+
+### 13.4 Next.js and general SSR support (M12, M13)
+
+Next.js is a React framework, so `@toonstrip/next` wraps `@toonstrip/react` (M10) behind
+an App-Router-safe `'use client'` boundary rather than reimplementing anything against
+`element` directly. It is also the first framework target where a server actually
+executes a render pass before the client does, so it is the natural place to first hit
+(and fix) whatever breaks when `packages/element` is imported outside a browser:
+`customElements`/`document` access needs to be guarded so the module does not throw on
+the server, and the framework wrapper needs to decide what renders during that
+server-only pass. Medium-large effort; depends on M10.
+
+General SSR support (M13, the largest item on this list) generalizes that fix: instead
+of a blank shell during the server pass, reuse §8's existing headless-canvas render path
+(`packages/cli`, already built and published) to produce a real server-rendered
+placeholder image of the strip, then swap it for the live canvas element on hydration.
+This avoids both a content-less server response (bad for anything that reads
+"view source", including some crawlers) and a layout shift on hydration. Sequence it
+after M12, not before or in parallel with it: building it against Next.js first gives
+one concrete, testable SSR target to prove the placeholder-then-upgrade pattern against
+before writing it as a general mechanism other framework wrappers (Vue's Nuxt, a future
+Svelte wrapper) can reuse.

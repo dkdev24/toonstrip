@@ -14,8 +14,6 @@ import hero from "../content/strips/hero.json";
 import quickstart from "../content/strips/quickstart.json";
 import tldr from "../content/strips/tldr.json";
 import tutorial from "../content/strips/tutorial.json";
-import releaseNotes from "../content/strips/release-notes.json";
-import objection from "../content/strips/objection.json";
 import transcript from "../content/strips/transcript.json";
 import cms from "../content/strips/cms.json";
 import staticPng from "../content/strips/static-png.json";
@@ -27,8 +25,6 @@ const example = roster.characters.filter((c) => c.pack === "example");
 const useCases: { title: string; text: string; doc: ComicStripDocument; code?: string }[] = [
   { title: "TL;DR at the top of a long post", text: "Three panels that say what four thousand words say. The post stays; the strip is the summary.", doc: tldr as ComicStripDocument },
   { title: "Tutorials and FAQs as dialogue", text: "A question and an answer read faster with two faces than with a definition list.", doc: tutorial as ComicStripDocument },
-  { title: "Release notes", text: "What changed, what you have to do, in two panels. This one is a real toonstrip release.", doc: releaseNotes as ComicStripDocument },
-  { title: "Objection and answer", text: "The reader's doubt, voiced by a character, then answered. Over-the-shoulder and reaction shots do the work.", doc: objection as ComicStripDocument },
   { title: "Replaying a conversation", text: "A chat thread or interview excerpt, with the room title as the channel name. Lines map straight to balloons.", doc: transcript as ComicStripDocument },
   { title: "Data from anywhere", text: "The document is JSON. Write it by hand, generate it from a script, store it in a CMS field, or have an LLM you call yourself produce it. toonstrip only renders.", doc: cms as ComicStripDocument },
   { title: "A static PNG when you need one", text: "npm READMEs, emails, social cards, and OG images can't run a canvas. The CLI renders the same document to a PNG with the same layout and art, so one JSON file feeds both.", doc: staticPng as ComicStripDocument, code: "npx toonstrip render strip.json --out strip.png --width 1200" },
@@ -207,6 +203,27 @@ import { ComicStrip } from "@toonstrip/astro";
           <tr><th scope="row">Page weight for a 3-panel strip</th><td>One large image.</td><td>Text-heavy vector.</td><td>Only the sprites it references.</td></tr>
         </tbody>
       </table>
+    </div>
+  </section>
+
+  <!-- 7. Where it came from -->
+  <section class="section" id="origin">
+    <div class="section__intro">
+      <p class="caption">Where it came from</p>
+      <h2>Extracted from a bigger, weirder project.</h2>
+      <p>
+        toonstrip started as the comic-rendering half of <a href="https://grues.danielkimdev.com">Grues in Comic</a>,
+        a project that plays classic Zork-style interactive fiction and renders the
+        playthrough live as a Comic Chat-style strip. Panels, poses, and speech balloons
+        are driven by the original Comic Chat engine's own text-to-affect logic, ported
+        as-is with no runtime LLM involved.
+      </p>
+      <p>
+        That rendering engine (panels, characters, poses, emotions, balloons, backdrops)
+        turned out to be useful on its own, with no game and no Zork coupling attached.
+        toonstrip is that half, pulled out and generalized: same canvas renderer and the
+        same default Comic Chat asset pack, but driven by plain data you supply yourself.
+      </p>
     </div>
   </section>
 </Base>

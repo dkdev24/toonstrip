@@ -17,7 +17,8 @@
           "emotion": {
             "angle": 0,
             "intensity": 0.4
-          }
+          },
+          "requested": true
         }
       ],
       "speakers": [

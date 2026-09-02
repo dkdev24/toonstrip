@@ -1263,3 +1263,52 @@ clean — because it's testing directly against this repo's unpublished `dist/`)
 v0.7.2 is now live on npm. `danielkimdev-astro` still needs to bump its own
 `package.json`/lockfile off the manual `dist/` copy and re-verify with a real
 `npm install` — tracked in `HANDOFF.md`.
+
+## v0.8.10 — Site Content Fixes; M8 through M13 Roadmap Added to Dev Plan
+
+**Date:** 2026-09-02
+
+### Changes
+
+- Use cases section on the intro page trimmed from 7 to 5 items: removed "Release notes"
+  and "Objection and answer" cards and their now-unused `releaseNotes`/`objection`
+  imports (`site/src/pages/index.astro`).
+- Added a "Where it came from" section after "Why not an image?" on the intro page,
+  crediting `grues-in-comic` (grues.danielkimdev.com) as the project's origin. An early
+  draft wrongly attributed pose/emotion selection to an AI layer; corrected to say it is
+  the original Comic Chat engine's own text-to-affect logic, ported with no runtime LLM
+  involved.
+- Fixed a "missing character" bug on `/docs/emotions-and-poses/` and
+  `/docs/cameras-and-panels/`: `requested` defaults to `false` on a body with no
+  matching-character line (§3, `TOONSTRIP_DEV_PLAN.md`), and every panel in
+  `emotions.json`, `intensity.json`, and `cameras.json` spoke through a `caption`
+  channel instead of the body's own character, so the character silently never
+  rendered. Added `requested: true` to the affected bodies, and fixed one silent body
+  with the same issue in `panel-options.json`'s `roomTitle` panel.
+- Swapped the emotion-wheel example character from `anna` to `sage`, and the intensity
+  example from `dan` to `tiki`. Rendering both through `@toonstrip/cli` confirmed
+  Anna's SCARED/SAD and ANGRY/SHOUT faces read as nearly identical at intensity 0.8,
+  and that Dan has zero SAD-labelled faces at all (nearest-neighbour was silently
+  falling back to his ANGRY face, exactly the "sad looks angry" bug reported). Checked
+  all 15 default-pack characters' face manifests for angle/intensity coverage: `sage`
+  has real, distinct art near intensity 0.8 for all 8 named emotions, and `tiki` is the
+  only character with three visually distinct SAD faces (used at 0.6/0.8/1.0, replacing
+  0.2/0.5/0.9).
+- Added §13 to `TOONSTRIP_DEV_PLAN.md`: M8 through M13, covering vanilla HTML/"any SSG"
+  docs, an AI-agent authoring skill, `@toonstrip/react`/`@toonstrip/vue`/`@toonstrip/next`
+  wrappers, and general SSR support, with dependency order and sizing. Sequenced before
+  the Korean locale (S9) for the same reason as the playground UI renewal: each item
+  adds new site docs or examples that would otherwise need duplicating across `/ko/`.
+
+### Verify
+
+- `node site/scripts/validate-strips.mjs` — all strips pass, including the four edited.
+- `pnpm --filter @toonstrip/cli build` then `toonstrip render` on `emotions.json`,
+  `intensity.json`, and throwaway candidate documents, output inspected panel by panel
+  to confirm the new characters' faces are actually visually distinct before committing
+  to them, rather than trusting the face manifest's angle/intensity numbers alone.
+
+### Status
+
+Site content and docs only; no `@toonstrip/*` package versions bumped, nothing
+published to npm.

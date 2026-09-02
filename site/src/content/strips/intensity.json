@@ -6,18 +6,19 @@
       "camera": "close-up",
       "bodies": [
         {
-          "character": "dan",
+          "character": "tiki",
           "emotion": {
             "angle": 3.141593,
-            "intensity": 0.2
-          }
+            "intensity": 0.6
+          },
+          "requested": true
         }
       ],
       "speakers": [
         {
           "speaker": "caption",
           "balloon": "caption",
-          "text": "SAD at intensity 0.2"
+          "text": "SAD at intensity 0.6"
         }
       ]
     },
@@ -26,18 +27,19 @@
       "camera": "close-up",
       "bodies": [
         {
-          "character": "dan",
+          "character": "tiki",
           "emotion": {
             "angle": 3.141593,
-            "intensity": 0.5
-          }
+            "intensity": 0.8
+          },
+          "requested": true
         }
       ],
       "speakers": [
         {
           "speaker": "caption",
           "balloon": "caption",
-          "text": "SAD at intensity 0.5"
+          "text": "SAD at intensity 0.8"
         }
       ]
     },
@@ -46,18 +48,19 @@
       "camera": "close-up",
       "bodies": [
         {
-          "character": "dan",
+          "character": "tiki",
           "emotion": {
             "angle": 3.141593,
-            "intensity": 0.9
-          }
+            "intensity": 1.0
+          },
+          "requested": true
         }
       ],
       "speakers": [
         {
           "speaker": "caption",
           "balloon": "caption",
-          "text": "SAD at intensity 0.9"
+          "text": "SAD at intensity 1.0"
         }
       ]
     }
