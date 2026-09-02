@@ -13,18 +13,23 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 
-- Playground layout: Configure and JSON side by side on top, the live preview full width
-  below, with draggable splits that are remembered between visits. Nothing on the page
-  scrolls except the panes themselves. The JSON pane collapses to a slim bar.
-- The Configure pane is now tabbed: a Strip tab (asset packs, presets, a summary) and
-  one tab per panel. Clicking a panel in the preview opens its tab.
-- Every playground control moved to shadcn/ui components (tabs, selects, toggle groups,
-  popovers, menus, tooltips, a bottom sheet on phones), themed from the site tokens in
-  both light and dark mode.
+- **Playground layout.** The strip now previews full width along the bottom of the
+  screen, with the visual configuration on the left and the JSON editor on the right
+  above it. Drag either divider to resize, and the proportions are remembered for your
+  next visit. The whole editor fits one screen: each section scrolls on its own instead
+  of the page scrolling. The JSON pane collapses to a slim bar when you want the width.
+- **Panels are tabs.** The configuration side leads with a Strip tab for asset packs,
+  presets and a summary of the document, followed by one tab per panel. Clicking a panel
+  in the preview jumps to its tab, and the tab you are editing stays outlined in the
+  preview.
+- **Rebuilt controls.** Backdrop and character pickers, camera and pose selectors, the
+  speaker and balloon menus, the width slider and the Presets and Export menus were all
+  rebuilt on a consistent component set, with clearer focus states and full keyboard
+  operation. Phones keep the Configure / JSON / Preview tabs and the slide-up preview.
 
 ### Fixed
 
-- The keyboard-only and JSON-edit end-to-end tests now pass on macOS as well.
+- Removing a panel no longer leaves the editor pointing at a panel that is gone.
 
 ## 0.8.9 — 2026-09-02
 
