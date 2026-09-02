@@ -47,7 +47,20 @@ importers:
         version: 2.1.9(@types/node@24.13.3)(jsdom@25.0.1)(lightningcss@1.33.0)
 
   packages/cli:
+    dependencies:
+      '@napi-rs/canvas':
+        specifier: ^0.1.100
+        version: 0.1.100
+      '@toonstrip/core':
+        specifier: workspace:*
+        version: link:../core
+      '@toonstrip/schema':
+        specifier: workspace:*
+        version: link:../schema
     devDependencies:
+      '@toonstrip/pack-comic-chat':
+        specifier: workspace:*
+        version: link:../pack-comic-chat
       '@types/node':
         specifier: ^22.9.0
         version: 22.20.1

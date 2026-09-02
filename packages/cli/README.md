@@ -48,3 +48,25 @@ in the repo for the full pack contract and a walkthrough for building one.
 ## License
 
 MIT
+
+## `toonstrip render`
+
+Render a `ComicStripDocument` to a single PNG in Node, with the same layout policy and
+figure selection as the browser element. Useful for Open Graph images, RSS embeds, and a
+`<noscript>` fallback.
+
+```
+npx toonstrip render strip.json --out strip.png
+npx toonstrip render strip.json --out strip.png --width 900 --scale 2 --pack ./my-pack --transparent
+```
+
+| Flag | Default | Meaning |
+|---|---|---|
+| `--out <file>` | required | Output PNG path |
+| `--width <px>` | `1200` | Container width; decides 1, 2, or 3 columns |
+| `--scale <n>` | `2` | Backing-store scale (2 = retina) |
+| `--pack <dir>` | installed `@toonstrip/pack-comic-chat` | A directory containing `pack.json`; repeatable |
+| `--transparent` | off | Transparent background instead of white |
+| `--background <css>` | `#ffffff` | Background colour |
+
+Also available from code: `renderDocument(doc, options)` returns `{ png, width, height, columns }`.

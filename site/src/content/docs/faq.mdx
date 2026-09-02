@@ -38,10 +38,13 @@ every current browser. No polyfills are shipped.
 
 ## Does it render on the server?
 
-Not yet in the Astro component: the server emits an inert tag and the browser draws. The
-core renderer is canvas-agnostic and runs in Node with `@napi-rs/canvas`, which is how the
-repository's tests produce PNGs. A CLI command for build-time PNGs (Open Graph images,
-`<noscript>` fallbacks) is planned.
+Not in the Astro component: the server emits an inert tag and the browser draws. For a
+static PNG (Open Graph images, RSS, `<noscript>` fallbacks) use the CLI, which runs the
+same renderer in Node:
+
+```
+npx toonstrip render strip.json --out strip.png --width 1200
+```
 
 ## Can I use it outside Astro?
 

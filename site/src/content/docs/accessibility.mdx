@@ -46,6 +46,7 @@ for a visible transcript or a `<figcaption>`.
 ## Known gaps
 
 - There is no visible-text fallback when JavaScript is off, because the labels are
-  generated client-side. A build-time renderer that also emits a transcript is planned.
+  generated client-side. Pair a `<noscript>` image from `toonstrip render` with a written
+  transcript if that matters for your page.
 - Focus: canvases are not focusable and there is nothing to operate, so the strip is
   skipped in the tab order, which is correct for an image.

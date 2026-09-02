@@ -4,6 +4,37 @@ Persistent project history. Append entries; do not edit past entries.
 
 ---
 
+## v0.8.7 — M7 S7: `toonstrip render` (static PNG fallback)
+
+**Date:** 2026-09-02
+
+### Changes
+
+- `packages/cli/src/render.ts` + `bin.ts`: `toonstrip render <doc.json> --out strip.png
+  [--width 1200] [--scale 2] [--pack <dir>]... [--transparent] [--background]`. Loads
+  packs from directories (default: the installed `@toonstrip/pack-comic-chat`), rejects
+  duplicate ids across packs and unknown ids (no silent fallback), validates the document,
+  lays panels out with `layoutStrip` capped at the panel count, freezes figures per panel
+  in document order like the element, composites into one PNG via `@napi-rs/canvas`.
+  Exported as `renderDocument()`; dev plan §8 delivered.
+- `@toonstrip/cli` 0.2.0 (not yet published): new deps `@toonstrip/core`,
+  `@toonstrip/schema`, `@napi-rs/canvas`; dev dep on `pack-comic-chat` for tests. 3 new
+  tests (column policy + dimensions, unknown id, invalid doc). README section.
+- Two `as unknown as` casts bridge `@napi-rs/canvas` types to the DOM `Cast`/`Canvas
+  RenderingContext2D` types `@toonstrip/core` declares (vitest passed without them; `tsc`
+  did not).
+- Docs updated where they said a renderer was "planned" (astro-reference, faq,
+  accessibility). CHANGELOG 0.8.6 + 0.8.7.
+- Not done from S7's optional list: per-docs-page OG images at build (would put
+  `@napi-rs/canvas` in the Pages build); the static `og.png` from S6 stands.
+
+### Status
+
+Root build + test clean (cli 6 tests). Smoke: `render` of a one-panel doc → 800×680 PNG,
+correct. Next: S8 launch (needs the Pages project), publish `@toonstrip/cli@0.2.0`.
+
+---
+
 ## v0.8.6 — M7 S6: polish (budgets, OG image, CI)
 
 **Date:** 2026-09-02

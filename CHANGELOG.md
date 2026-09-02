@@ -6,6 +6,31 @@ shipped. Written for users; the engineering history behind each entry is in `WOR
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.8.7 — 2026-09-02
+
+**Packages:** `@toonstrip/cli` 0.2.0 (unpublished until the next release)
+
+### Added
+
+- `toonstrip render <doc.json> --out strip.png`: render a Comic Strip Document to one PNG
+  in Node, with the element's column policy and figure selection. `--width`, `--scale`,
+  `--pack <dir>` (repeatable), `--transparent`, `--background`. Also exported as
+  `renderDocument()`.
+
+### Changed
+
+- `@toonstrip/cli` now depends on `@toonstrip/core`, `@toonstrip/schema`, and
+  `@napi-rs/canvas`.
+
+## 0.8.6 — 2026-09-02
+
+**Packages:** no npm release (site only)
+
+### Added
+
+- Per-route JavaScript budgets enforced in CI, an Open Graph image rendered from the hero
+  strip, and the site's end-to-end tests running in CI.
+
 ## 0.8.5 — 2026-09-02
 
 **Packages:** no npm release (site only)
