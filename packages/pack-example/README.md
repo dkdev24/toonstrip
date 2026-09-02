@@ -9,7 +9,8 @@ origin, and to serve as a minimal starting point for building your own pack.
 Zero runtime dependencies.
 
 Part of [toonstrip](https://github.com/dkdev24/toonstrip), a
-framework-embeddable comic-strip renderer.
+framework-embeddable comic-strip renderer. Docs, playground, and
+changelog: [toonstrip.danielkimdev.com](https://toonstrip.danielkimdev.com).
 
 ## Install
 

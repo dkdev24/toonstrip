@@ -8,7 +8,8 @@ character with sprite sheets covering the full emotion wheel. Zero runtime
 dependencies.
 
 Part of [toonstrip](https://github.com/dkdev24/toonstrip), a
-framework-embeddable comic-strip renderer.
+framework-embeddable comic-strip renderer. Docs, playground, and
+changelog: [toonstrip.danielkimdev.com](https://toonstrip.danielkimdev.com).
 
 ## Install
 

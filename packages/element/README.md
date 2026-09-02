@@ -6,7 +6,8 @@ of `<canvas>` panels, wrapping `@toonstrip/core`. Works in any framework, or
 none.
 
 Part of [toonstrip](https://github.com/dkdev24/toonstrip), a
-framework-embeddable comic-strip renderer. Using Astro? See
+framework-embeddable comic-strip renderer. Docs, playground, and
+changelog: [toonstrip.danielkimdev.com](https://toonstrip.danielkimdev.com). Using Astro? See
 [`@toonstrip/astro`](https://www.npmjs.com/package/@toonstrip/astro) for a
 ready-made `<ComicStrip>` component instead.
 

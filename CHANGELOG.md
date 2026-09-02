@@ -6,9 +6,18 @@ shipped. Written for users; the engineering history behind each entry is in `WOR
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.8.8 — 2026-09-02
+
+**Packages:** `@toonstrip/cli` 0.2.0 (published)
+
+### Added
+
+- The site is live at [toonstrip.danielkimdev.com](https://toonstrip.danielkimdev.com):
+  intro, docs, playground, and this changelog. Every `@toonstrip/*` README links to it.
+
 ## 0.8.7 — 2026-09-02
 
-**Packages:** `@toonstrip/cli` 0.2.0 (unpublished until the next release)
+**Packages:** `@toonstrip/cli` 0.2.0 (published 2026-09-02 with 0.8.8)
 
 ### Added
 

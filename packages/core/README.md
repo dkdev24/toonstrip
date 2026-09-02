@@ -6,7 +6,8 @@ speech/thought/caption balloons, backdrops, camera framing, and strip layout.
 No DOM dependency; runs in Node via `@napi-rs/canvas` or in a browser.
 
 Part of [toonstrip](https://github.com/dkdev24/toonstrip), a
-framework-embeddable comic-strip renderer. Most consumers want
+framework-embeddable comic-strip renderer. Docs, playground, and
+changelog: [toonstrip.danielkimdev.com](https://toonstrip.danielkimdev.com). Most consumers want
 `@toonstrip/element` (a ready-made `<comic-strip>` custom element) rather
 than calling this package directly — reach for `core` when you're rendering
 outside the DOM (a Node script, a build-time static fallback) or building

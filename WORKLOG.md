@@ -4,6 +4,30 @@ Persistent project history. Append entries; do not edit past entries.
 
 ---
 
+## v0.8.8 — M7 S8: launch
+
+**Date:** 2026-09-02
+
+### Changes
+
+- Daniel created the Cloudflare Pages project `toonstrip` via the GitHub integration
+  (settings from NOTES.md "M7 S0"; `wrangler.toml` at the repo root supplies the output
+  dir) and attached the custom domain. `https://toonstrip.danielkimdev.com` is live.
+  Deploy procedure: push to `main` deploys production; any other branch push produces a
+  preview URL. No manual step.
+- Published `@toonstrip/cli@0.2.0` (`pnpm publish`, 6 tests green first).
+- Every `packages/*/README.md` links to the site; cli README no longer says "one command".
+- CHANGELOG 0.8.8; 0.8.7's "unpublished" note resolved.
+
+### Status
+
+M7 exit criterion met: subdomain live, presents the project, playground usable without
+installing anything. Still open from the plan: Cloudflare Web Analytics toggle in the
+dashboard (CSP already allows the beacon), Daniel's copy pass (S6), a link from
+`danielkimdev.com`. Deferred by design: per-page OG images, Pagefind, short-link Worker.
+
+---
+
 ## v0.8.7 — M7 S7: `toonstrip render` (static PNG fallback)
 
 **Date:** 2026-09-02

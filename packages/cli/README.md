@@ -1,10 +1,12 @@
 # @toonstrip/cli
 
-The `toonstrip` command-line tool. Currently one command: validating an
-asset pack against the toonstrip pack contract.
+The `toonstrip` command-line tool. Two commands: validating an
+asset pack against the toonstrip pack contract, and rendering a Comic Strip
+Document to a static PNG.
 
 Part of [toonstrip](https://github.com/dkdev24/toonstrip), a
-framework-embeddable comic-strip renderer.
+framework-embeddable comic-strip renderer. Docs, playground, and
+changelog: [toonstrip.danielkimdev.com](https://toonstrip.danielkimdev.com).
 
 ## Install
 

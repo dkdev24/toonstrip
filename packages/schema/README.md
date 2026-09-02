@@ -6,7 +6,8 @@ common contract between a caller (who writes panels, dialogue, and emotion)
 and toonstrip (which only draws them).
 
 Part of [toonstrip](https://github.com/dkdev24/toonstrip), a
-framework-embeddable comic-strip renderer. toonstrip generates no content —
+framework-embeddable comic-strip renderer. Docs, playground, and
+changelog: [toonstrip.danielkimdev.com](https://toonstrip.danielkimdev.com). toonstrip generates no content —
 you supply the document.
 
 ## Install
