@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from "preact/hooks";
 import { useSignalEffect } from "@preact/signals";
 import { layoutStrip } from "@toonstrip/core";
-import { doc, packs, packUrls, selectedPanel, shareHash, presets, loadPreset, showToast, undo, redo, canUndo, canRedo } from "../../lib/playground/state";
+import { doc, packs, packUrls, selectedPanel, stripTab, shareHash, presets, loadPreset, showToast, undo, redo, canUndo, canRedo } from "../../lib/playground/state";
 import { renderStripPng, downloadBlob, astroSnippet, htmlSnippet } from "../../lib/playground/export";
 
 const GUTTER = 10;
@@ -181,8 +181,15 @@ export function Preview() {
       </div>
       <div ref={stageRef} class={`pg-stage${dark ? " pg-stage--dark" : ""}`}>
         <div class="pg-stage__container" style={width === 0 ? "width:100%" : `width:${Math.min(width, stageWidth || width)}px`}>
+          {/* Clicking a panel selects it in the Configure pane (its tab opens). */}
           {/* @ts-expect-error custom element */}
-          {elementReady && <comic-strip ref={stripRef} />}
+          {elementReady && <comic-strip ref={stripRef} onClick={(e: MouseEvent) => {
+            const canvas = e.composedPath().find((n) => n instanceof HTMLCanvasElement) as HTMLCanvasElement | undefined;
+            if (!canvas) return;
+            const all = Array.from(stripRef.current?.shadowRoot?.querySelectorAll("canvas") ?? []);
+            const i = all.indexOf(canvas);
+            if (i >= 0) { selectedPanel.value = i; stripTab.value = false; }
+          }} />}
         </div>
       </div>
       <p class="pg-statusline mono">

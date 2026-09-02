@@ -54,6 +54,8 @@ const HISTORY_LIMIT = 50;
 export const doc = signal<Doc>({ version: 1, panels: [] });
 export const packs = signal<string[]>([...DEFAULT_PACKS]);
 export const selectedPanel = signal(0);
+/** Configure pane shows the Strip tab (document-level settings) instead of a panel. */
+export const stripTab = signal(false);
 export const jsonText = signal("");
 export const jsonProblems = signal<JsonProblem[]>([]);
 export const lastSource = signal<Source>("load");
@@ -200,6 +202,7 @@ export function removePanel(i: number) {
     panels.splice(i, 1);
     return panels;
   });
+  selectedPanel.value = Math.max(0, Math.min(selectedPanel.value, doc.value.panels.length - 1));
 }
 
 export function movePanel(i: number, delta: number) {

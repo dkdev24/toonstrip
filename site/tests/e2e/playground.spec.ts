@@ -39,7 +39,7 @@ test("JSON edit updates the form and preview; invalid JSON keeps the last valid 
   };
   await page.keyboard.insertText(JSON.stringify(doc, null, 2));
   await expect(strip(page)).toHaveCount(1);
-  await expect(page.locator(".pg-panels .pg-panel")).toHaveCount(1);
+  await expect(page.getByRole("tab", { name: /^Panel \d+$/ })).toHaveCount(1);
   // Break it.
   await page.keyboard.press("End");
   await page.keyboard.insertText("garbage");
@@ -154,4 +154,28 @@ test("shell: no page scroll at three viewports; split ratio and JSON collapse su
   expect(stored.h?.[0]).toBeGreaterThan(50);
   await page.getByRole("button", { name: "Expand JSON" }).click();
   await expect.poll(async () => Math.round((await configure.boundingBox())!.width - before)).toBe(150);
+});
+
+test("configure tabs: one tab per panel, preview click opens the panel, add and remove keep selection sane", async ({ page }) => {
+  await page.goto("/playground/");
+  await expect(strip(page)).toHaveCount(3);
+  const panelTabs = page.getByRole("tab", { name: /^Panel \d+$/ });
+  await expect(panelTabs).toHaveCount(3);
+  await expect(page.getByRole("tab", { name: "Panel 1" })).toHaveAttribute("aria-selected", "true");
+  await strip(page).nth(2).click({ position: { x: 10, y: 10 } });
+  await expect(page.getByRole("tab", { name: "Panel 3" })).toHaveAttribute("aria-selected", "true");
+  await expect(page.locator(".pg-panel-editor")).toHaveAttribute("aria-label", "Panel 3");
+  await page.getByRole("button", { name: "+ Add panel" }).click();
+  await expect(panelTabs).toHaveCount(4);
+  await expect(page.locator(".pg-panel-editor")).toHaveAttribute("aria-label", "Panel 4");
+  await page.getByRole("group", { name: "Panel 4 actions" }).getByRole("button", { name: "Remove" }).click();
+  await page.getByRole("button", { name: "Remove panel" }).click();
+  await expect(panelTabs).toHaveCount(3);
+  await expect(strip(page)).toHaveCount(3);
+  await expect(page.locator(".pg-panel-editor")).toHaveAttribute("aria-label", "Panel 3");
+  await page.getByRole("tab", { name: "Strip" }).click();
+  await expect(page.getByRole("group", { name: "Asset packs" })).toBeVisible();
+  await page.getByRole("combobox", { name: "Load a preset" }).click();
+  await page.getByRole("option", { name: "Six cameras" }).click();
+  await expect(panelTabs).toHaveCount(6);
 });

@@ -19,16 +19,18 @@ integration. Push to `main` deploys production; other branches get a preview URL
 
 ## Last Session
 
-2026-09-03: `PLAYGROUND_UI_PLAN.md` written; steps 1 and 2 done. Step 1: shadcn/ui on
-`preact({ compat: true })`, Tailwind v4 scoped to the island, eleven `site/src/components/ui/`
-components (Radix Slider and react-resizable-panels replaced, plan §2.1). Step 2: new shell
-in `Playground.tsx`: Configure | JSON over a full-width Preview with draggable, persisted
-splits; tabs + sheet under 900 px; JSON collapses to a bar. e2e "shell:" test added.
+2026-09-03: `PLAYGROUND_UI_PLAN.md` written; steps 1-3 done. shadcn/ui on
+`preact({ compat: true })` with Tailwind v4 scoped to the island (`site/src/components/ui/`,
+compat rules in plan §2.1). New shell: Configure | JSON over a full-width Preview with
+persisted draggable splits, tabs + sheet under 900 px. Configure pane is a Strip tab
+(packs, presets, reset) plus one tab per panel; clicking a preview panel opens its tab.
+e2e tests "shell:" and "configure tabs:" added.
 
 ## Next Actions
 
-1. Playground UI renewal, `PLAYGROUND_UI_PLAN.md` steps 3-5 (per-panel tabs in the
-   Configure pane, control swap onto `ui/`, docs). §2.1 lists the compat rules.
+1. Playground UI renewal, `PLAYGROUND_UI_PLAN.md` steps 4-5: swap the remaining form
+   and toolbar controls onto `ui/`, remove dead CSS, then rewrite `DESIGN.md` §6.1 and
+   `SITE_DEV_PLAN.md` §6.1, worklog entry, site 0.9.0.
 2. M8-M13 per `TOONSTRIP_DEV_PLAN.md` §13: vanilla-HTML/SSG docs + agent skill first
    (no dependencies), then React/Vue wrappers, then Next.js, then general SSR.
 3. **S9 Korean locale** per `SITE_DEV_PLAN.md` §13, after 1 and 2 land.

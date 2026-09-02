@@ -1,9 +1,14 @@
 /** The WYSIWYG form (SITE_DEV_PLAN.md §6.3, DESIGN.md §6.2). */
 import { useState } from "preact/hooks";
+import { ChevronLeft, ChevronRight, Copy, Plus, Trash2 } from "lucide-preact";
 import type { Panel, CameraPreset } from "@toonstrip/schema";
 import { EmotionWheel, emotionName } from "./EmotionWheel";
+import { Button } from "../ui/button";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "../ui/tabs";
+import { Popover, PopoverTrigger, PopoverContent, PopoverClose } from "../ui/popover";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "../ui/select";
 import {
-  doc, selectedPanel, activeCharacters, activeBackdrops, roster, packs, togglePack,
+  doc, selectedPanel, stripTab, activeCharacters, activeBackdrops, roster, packs, togglePack, presets, loadPreset,
   addPanel, duplicatePanel, removePanel, movePanel, updatePanel,
   addBody, updateBody, removeBody, moveBody,
   addLine, updateLine, removeLine, moveLine,
@@ -24,10 +29,57 @@ function spriteStyle(c: RosterCharacter, size: number): string {
   ].join(";");
 }
 
+/**
+ * Configure pane (PLAYGROUND_UI_PLAN.md §4): a Strip tab for document-level settings,
+ * then one tab per panel. The active panel tab is the selected panel, which the
+ * preview outlines and whose canvas, when clicked, opens the tab.
+ */
 export function PanelForm() {
   const d = doc.value;
+  const last = Math.max(0, d.panels.length - 1);
+  const current = Math.min(selectedPanel.value, last);
+  const value = stripTab.value || d.panels.length === 0 ? "strip" : String(current);
+  const onTab = (v: string) => {
+    if (v === "strip") stripTab.value = true;
+    else {
+      stripTab.value = false;
+      selectedPanel.value = Number(v);
+    }
+  };
   return (
-    <div class="pg-form">
+    <Tabs value={value} onValueChange={onTab} class="pg-form gap-0">
+      <div class="sticky -top-4 z-10 -mx-4 -mt-4 mb-4 flex items-center gap-2 border-b border-border bg-background px-4 py-2">
+        <TabsList aria-label="Strip and panels" class="max-w-full flex-nowrap justify-start overflow-x-auto">
+          <TabsTrigger value="strip" class="flex-none">Strip</TabsTrigger>
+          {d.panels.map((p, i) => (
+            <TabsTrigger key={i} value={String(i)} class="min-w-8 flex-none" aria-label={`Panel ${i + 1}`} title={p.roomTitle ? `Panel ${i + 1}: ${p.roomTitle}` : `Panel ${i + 1}`}>
+              {i + 1}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+        <Button variant="ghost" class="ml-auto shrink-0" aria-label="+ Add panel" onClick={() => addPanel()}>
+          <Plus /> Add panel
+        </Button>
+      </div>
+
+      <TabsContent value="strip">
+        <StripSettings />
+      </TabsContent>
+      {d.panels.map((panel, i) => (
+        <TabsContent key={i} value={String(i)}>
+          <PanelCard panel={panel} index={i} total={d.panels.length} />
+        </TabsContent>
+      ))}
+    </Tabs>
+  );
+}
+
+function StripSettings() {
+  const d = doc.value;
+  const list = presets.value;
+  const bodies = new Set(d.panels.flatMap((p) => p.bodies.map((b) => b.character)));
+  return (
+    <div class="flex flex-col gap-4">
       <div class="pg-form__packs" role="group" aria-label="Asset packs">
         <span class="caption">Packs</span>
         {roster.value.packNames.map((name) => (
@@ -36,39 +88,40 @@ export function PanelForm() {
           </button>
         ))}
       </div>
-      <ol class="pg-panels">
-        {d.panels.map((panel, i) => (
-          <PanelCard key={i} panel={panel} index={i} total={d.panels.length} />
-        ))}
-      </ol>
-      <button type="button" class="pg-add pg-add--panel" onClick={() => addPanel()}>
-        + Add panel
-      </button>
+      <div class="pg-field">
+        <label class="pg-label" for="pg-preset">Load a preset</label>
+        <Select onValueChange={(name: string) => { const p = list.find((x) => x.name === name); if (p) loadPreset(p); }}>
+          <SelectTrigger id="pg-preset" class="max-w-xs" aria-label="Load a preset">
+            <SelectValue placeholder="Choose a preset…" />
+          </SelectTrigger>
+          <SelectContent>
+            {list.map((p) => (
+              <SelectItem key={p.name} value={p.name}>{p.name}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <p class="caption">Replaces the current strip. Undo with Ctrl/Cmd+Z.</p>
+      </div>
+      <dl class="mono grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
+        <dt class="text-muted-foreground">panels</dt><dd>{d.panels.length}</dd>
+        <dt class="text-muted-foreground">characters</dt><dd>{bodies.size === 0 ? "none" : [...bodies].join(", ")}</dd>
+        <dt class="text-muted-foreground">lines</dt><dd>{d.panels.reduce((n, p) => n + p.speakers.length, 0)}</dd>
+      </dl>
+      {list[0] && (
+        <Button class="self-start" onClick={() => loadPreset(list[0])}>Reset to the first preset</Button>
+      )}
     </div>
   );
 }
 
 function PanelCard({ panel, index, total }: { panel: Panel; index: number; total: number }) {
-  const selected = selectedPanel.value === index;
   const [showCharacters, setShowCharacters] = useState(false);
   const backdrops = activeBackdrops.value;
   const characters = activeCharacters.value;
   const onStage = panel.bodies.map((b) => b.character);
 
   return (
-    <li class={`pg-panel${selected ? " is-selected" : ""}`} onFocusCapture={() => (selectedPanel.value = index)} onClick={() => (selectedPanel.value = index)}>
-      <div class="pg-panel__head">
-        <span class="pg-panel__title">
-          Panel {index + 1}
-          {selected && <span class="visually-hidden"> (selected)</span>}
-        </span>
-        <span class="pg-panel__actions">
-          <button type="button" class="button button--ghost button--icon" aria-label="Move panel up" disabled={index === 0} onClick={() => movePanel(index, -1)}>▲</button>
-          <button type="button" class="button button--ghost button--icon" aria-label="Move panel down" disabled={index === total - 1} onClick={() => movePanel(index, 1)}>▼</button>
-          <button type="button" class="button button--ghost button--dense" onClick={() => duplicatePanel(index)}>Duplicate</button>
-          <button type="button" class="button button--danger button--dense" onClick={() => removePanel(index)} disabled={total === 1}>Remove</button>
-        </span>
-      </div>
+    <div class="pg-panel-editor flex flex-col gap-4" aria-label={`Panel ${index + 1}`}>
 
       <fieldset class="pg-group">
         <legend class="caption">Scene</legend>
@@ -245,6 +298,24 @@ function PanelCard({ panel, index, total }: { panel: Panel; index: number; total
           </button>
         </div>
       </fieldset>
-    </li>
+
+      <div class="flex flex-wrap items-center gap-2 border-t border-border pt-4" role="group" aria-label={`Panel ${index + 1} actions`}>
+        <Button variant="ghost" size="icon" aria-label="Move panel left" disabled={index === 0} onClick={() => movePanel(index, -1)}><ChevronLeft /></Button>
+        <Button variant="ghost" size="icon" aria-label="Move panel right" disabled={index === total - 1} onClick={() => movePanel(index, 1)}><ChevronRight /></Button>
+        <Button variant="ghost" onClick={() => duplicatePanel(index)}><Copy /> Duplicate</Button>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="destructive" class="ml-auto" disabled={total === 1}><Trash2 /> Remove</Button>
+          </PopoverTrigger>
+          <PopoverContent align="end" class="w-60">
+            <p class="mb-3 text-sm">Remove panel {index + 1}? Undo restores it.</p>
+            <div class="flex justify-end gap-2">
+              <PopoverClose asChild><Button variant="ghost" size="sm">Cancel</Button></PopoverClose>
+              <PopoverClose asChild><Button variant="primary" size="sm" onClick={() => removePanel(index)}>Remove panel</Button></PopoverClose>
+            </div>
+          </PopoverContent>
+        </Popover>
+      </div>
+    </div>
   );
 }
