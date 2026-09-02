@@ -1,0 +1,49 @@
+/*
+ * Tailwind v4, scoped to the playground island (PLAYGROUND_UI_PLAN.md §2).
+ * No preflight: the site's global.css owns resets. Utilities are only generated
+ * for classes found under components/playground and components/ui, and the
+ * shadcn theme names map onto tokens.css so the ui components recolour with the
+ * site's [data-theme] toggle.
+ */
+@layer theme, base, components, utilities;
+@import "tailwindcss/theme.css" layer(theme) source(none);
+@import "tailwindcss/utilities.css" layer(utilities) source(none);
+@source "../components/playground";
+@source "../components/ui";
+
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+@theme inline {
+  --color-background: var(--paper);
+  --color-foreground: var(--ink);
+  --color-card: var(--paper-raised);
+  --color-card-foreground: var(--ink);
+  --color-popover: var(--paper-raised);
+  --color-popover-foreground: var(--ink);
+  --color-primary: var(--accent);
+  --color-primary-foreground: var(--accent-ink);
+  --color-secondary: var(--paper-sunken);
+  --color-secondary-foreground: var(--ink);
+  --color-muted: var(--paper-sunken);
+  --color-muted-foreground: var(--ink-3);
+  --color-accent: var(--accent-soft);
+  --color-accent-foreground: var(--ink);
+  --color-destructive: var(--danger);
+  --color-destructive-foreground: var(--paper-raised);
+  --color-border: var(--rule);
+  --color-border-strong: var(--rule-strong);
+  --color-input: var(--rule);
+  --color-ring: var(--accent);
+  --color-success: var(--success);
+  --color-warn: var(--warn);
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-lg);
+  --shadow-md: var(--shadow);
+  --shadow-lg: var(--shadow);
+  --font-sans: var(--font-body);
+  --font-mono: var(--font-mono);
+  --font-display: var(--font-display);
+  --ease-out: var(--ease);
+}

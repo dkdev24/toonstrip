@@ -51,6 +51,29 @@ is copy-in, so nothing else ships.
 Do not use shadcn's `Form` (react-hook-form) or `Command`; the existing signals state
 model stays.
 
+### 2.1 Spike result (2026-09-03, step 1 done)
+
+Gate passed: build green, budget holds, keyboard and theme checks pass on the kitchen
+sink (`site/src/components/playground/UiSpike.tsx`, kept as the ui design check).
+Findings that shape the rest of the work:
+
+- **Works on compat**: Tabs, Select, ToggleGroup, Popover, DropdownMenu, Tooltip, Sheet
+  (Dialog), ScrollArea, Slot/Button. Radix moves focus in a `setTimeout`, so e2e tests
+  need a short settle after an arrow key.
+- **Replaced**: Radix Slider (thumb index memoised before Preact's passive effects
+  register collection items, so the thumb renders `display:none`) is a native
+  `<input type="range">` with the shadcn look. react-resizable-panels v4 (wrong sizes,
+  no drag or keyboard response on compat) is a 150-line two-pane split in
+  `ui/resizable.tsx` with the same component names, `defaultLayout`/`onLayoutChange`.
+- **Rules for new ui files**: any component passed as an `asChild` child must be a
+  `forwardRef` component (Preact hands a plain function component's ref to the
+  instance, which broke trigger focus-return). Icons from `lucide-preact`.
+- **Config**: `preact({ compat: true })`; `tslib` aliased to its ESM build and Radix
+  deps in `noExternal` for the prerender environment (see `astro.config.mjs`);
+  `tsconfig` paths map `react` to `preact/compat`; Tailwind v4 scoped through
+  `@source` in `playground-ui.css`, no preflight.
+- Kitchen-sink JS is 75 KB gzipped for all eleven components plus preact/compat.
+
 ## 3. Layout spec
 
 Desktop (`≥ 900 px`), full-bleed under the header, no page scroll:
@@ -107,7 +130,7 @@ Configure or JSON. This is the current mobile behaviour on new primitives.
 
 | # | Work | Gate | Estimate |
 |---|---|---|---|
-| 1 | Spike: `compat: true`, Tailwind v4 scoped, add Tabs + ResizablePanelGroup + Select, wire into a throwaway `kitchen-sink` section. | `pnpm build && pnpm test:budgets` green; keyboard nav works in Tabs and Select; theme toggle recolours them. | Half a day. Decides shadcn vs fallback. |
+| 1 | **Done.** Spike: `compat: true`, Tailwind v4 scoped, all eleven ui components on the `kitchen-sink` page. | Passed, see §2.1. | Half a day. Decided: shadcn on compat, with Slider and Resizable replaced. |
 | 2 | New shell: `Playground.tsx` becomes the two-level `ResizablePanelGroup` with pane headers; mobile `Tabs` and `Sheet`. Delete the old grid rules from `playground.css`. | No page scroll at 1280×720, 1440×900, 390×844. Split ratios survive reload. | 1 day |
 | 3 | Configure pane: per-panel `Tabs`, Strip tab, panel footer actions; preview click activates the tab. | Existing e2e passes unchanged; add a test for tab ↔ preview selection sync. | 1 day |
 | 4 | Swap remaining controls (pickers, camera, pose, speaker, balloon, presets, Export menu) onto the ui components; remove dead CSS. | `axe` clean; `playground.spec.ts` green; keyboard-only 2-panel authoring still passes. | 1 day |

@@ -19,18 +19,16 @@ integration. Push to `main` deploys production; other branches get a preview URL
 
 ## Last Session
 
-2026-09-02: trimmed intro-page use cases from 7 to 5; added "Where it came from" section
-crediting `grues-in-comic`. Fixed a "missing character" bug (`requested` defaults false
-without a matching speaker line) across 4 strip JSON files on two docs pages, and
-swapped anna→sage / dan→tiki there after their SCARED/SAD/ANGRY/SHOUT faces proved
-visually identical or missing entirely. Added `TOONSTRIP_DEV_PLAN.md` §13: M8-M13
-roadmap, sequenced before Korean (S9).
+2026-09-03: wrote `PLAYGROUND_UI_PLAN.md` (preview full-width bottom, Configure left /
+JSON right, per-panel tabs, shadcn/ui on preact/compat) and finished its step 1 spike:
+`preact({ compat: true })`, Tailwind v4 scoped to the island, eleven `site/src/components/ui/`
+components checked on the kitchen sink. Radix Slider and react-resizable-panels do not
+work on compat and were replaced (plan §2.1). Playground budget 134.5 KB of 450 KB.
 
 ## Next Actions
 
-1. Playground UI renewal per `PLAYGROUND_UI_PLAN.md` (written 2026-09-03: preview
-   full-width bottom, form left / JSON right, per-panel tabs, shadcn on preact/compat).
-   Start with step 1, the compat + Tailwind spike, before anything else.
+1. Playground UI renewal, `PLAYGROUND_UI_PLAN.md` steps 2-5 (shell, per-panel tabs,
+   control swap, docs). Step 1 is done; §2.1 lists the compat rules to follow.
 2. M8-M13 per `TOONSTRIP_DEV_PLAN.md` §13: vanilla-HTML/SSG docs + agent skill first
    (no dependencies), then React/Vue wrappers, then Next.js, then general SSR.
 3. **S9 Korean locale** per `SITE_DEV_PLAN.md` §13, after 1 and 2 land.
@@ -40,5 +38,8 @@ roadmap, sequenced before Korean (S9).
 
 ## Open Issues
 
+- Two playground e2e tests fail before any UI work (`playground.spec.ts` "JSON edit
+  updates…" and "keyboard-only…"): the CodeMirror `Control+A` + insertText edit does not
+  replace the document, so the canvas count stays 3. Reproduced on the untouched tree.
 - `toonstrip pack validate` misses a missing torso (checks NEUTRAL only); Playwright verify
   scripts are manual-only (`NOTES.md` M1–M5).
