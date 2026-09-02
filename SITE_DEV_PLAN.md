@@ -388,7 +388,7 @@ Each phase ends with the site building, deploying to the `pages.dev` preview, an
 | # | Scope | Exit criteria |
 |---|---|---|
 | S0 | Scaffold `site/`, Astro static config, integration wired with both packs, root `wrangler.toml`, `packageManager`/`.node-version`, Pages project `toonstrip` connected to the GitHub repo with the §9 dashboard settings, CI builds the site, placeholder pages for all four surfaces, `DESIGN.md` tokens landed as `tokens.css`. | Pushing to `main` puts a placeholder on `toonstrip.pages.dev` with no manual step; a feature branch push produces a preview URL; CI green. |
-| S1 | Shell: `Base` layout, header/nav, footer, theme toggle, fonts, `CodeBlock`, `Callout`, `CodeAndStrip`, `WidthSlider`, `share.ts`, 404. | Every `DESIGN.md` §5 component exists on a `/_kitchen-sink` page (excluded from the sitemap) and passes axe. |
+| S1 | Shell: `Base` layout, header/nav, footer, theme toggle, fonts, `CodeBlock`, `Callout`, `CodeAndStrip`, `WidthSlider`, `share.ts`, 404. | Every `DESIGN.md` §5 component exists on a `/kitchen-sink` page (noindex, excluded from the sitemap; Astro skips `_`-prefixed pages) and passes axe. |
 | S2 | Intro page (§4), including the hero strip and six use-case strips authored by hand. | §4 exit criteria; Lighthouse mobile ≥ 95 across the board. |
 | S3 | Docs (§5): layout, sidebar, ToC, all 12 pages, generated schema reference, `llms.txt`. | §5 exit criteria; every docs strip's "open in playground" link lands the correct hash. |
 | S4 | Playground (§6): Preact island, form, CodeMirror, preview and toolbar, share, presets, export, autosave, undo. | §6 exit criteria; Playwright covers round-trip, share-link restore, non-blank PNG export, and keyboard-only authoring of a 2-panel strip. |

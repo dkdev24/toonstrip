@@ -220,6 +220,9 @@ importers:
       '@axe-core/playwright':
         specifier: ^4.13.0
         version: 4.13.0(playwright-core@1.62.1)
+      '@napi-rs/canvas':
+        specifier: ^0.1.100
+        version: 0.1.100
       '@playwright/test':
         specifier: ^1.48.0
         version: 1.62.1

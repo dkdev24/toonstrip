@@ -1,7 +1,7 @@
 {
   "name": "toonstrip-site",
   "private": true,
-  "version": "0.8.5",
+  "version": "0.8.6",
   "type": "module",
   "description": "toonstrip.danielkimdev.com: intro, docs, changelog, and playground for toonstrip. Deployed by Cloudflare Pages on push (see SITE_DEV_PLAN.md section 9).",
   "scripts": {
@@ -10,7 +10,9 @@
     "preview": "astro preview",
     "check": "node scripts/check-page.mjs",
     "test": "node scripts/validate-strips.mjs",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "test:budgets": "node scripts/check-budgets.mjs",
+    "og": "node scripts/build-og.mjs"
   },
   "dependencies": {
     "@astrojs/mdx": "^7.0.0",
@@ -37,6 +39,7 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",
+    "@napi-rs/canvas": "^0.1.100",
     "@playwright/test": "^1.48.0"
   }
 }
