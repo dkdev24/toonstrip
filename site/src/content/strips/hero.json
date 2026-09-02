@@ -17,8 +17,8 @@
       "backdrop": "pastoral",
       "camera": "medium",
       "bodies": [
-        { "character": "dan", "emotion": { "angle": 0, "intensity": 0.7 } },
-        { "character": "anna", "emotion": { "angle": 2.356194490192345, "intensity": 0.6 } }
+        { "character": "anna", "emotion": { "angle": 2.356194490192345, "intensity": 0.6 } },
+        { "character": "dan", "emotion": { "angle": 0, "intensity": 0.7 } }
       ],
       "speakers": [
         { "speaker": "anna", "balloon": "speech", "text": "And it draws them right here, on a canvas?" },

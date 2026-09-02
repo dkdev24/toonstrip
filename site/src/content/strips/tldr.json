@@ -38,17 +38,17 @@
       "camera": "medium",
       "bodies": [
         {
-          "character": "kevin",
-          "emotion": {
-            "angle": 2.356194490192345,
-            "intensity": 0.5
-          }
-        },
-        {
           "character": "lynnea",
           "emotion": {
             "angle": 0,
             "intensity": 0.6
+          }
+        },
+        {
+          "character": "kevin",
+          "emotion": {
+            "angle": 2.356194490192345,
+            "intensity": 0.5
           }
         }
       ],
