@@ -18,4 +18,7 @@ jobs:
           node-version: 20
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      # Workspace packages resolve each other through their built dist/ entry points
+      # (gitignored), so the packs and schema must be built before core's tests import them.
+      - run: pnpm build
       - run: pnpm test

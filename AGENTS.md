@@ -48,7 +48,8 @@ Update them at the end.
 ## AI Development Workflow
 
 1. Read `HANDOFF.md` for current state and next actions.
-2. Consult `TOONSTRIP_DEV_PLAN.md` for scope on the milestone in progress.
+2. Consult `TOONSTRIP_DEV_PLAN.md` for scope on the milestone in progress. For M7 (the
+   public site) the scope is `SITE_DEV_PLAN.md` and its UI/UX guide `DESIGN.md`.
 3. Do the work.
 4. Update `HANDOFF.md` (Last Session, Next Actions, Open Issues) and, if a version
    milestone was reached, append a `WORKLOG.md` entry.

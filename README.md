@@ -45,6 +45,8 @@ including how to add a new character or asset pack.
   worked walkthrough for adding a character
 - [`docs/astro.md`](./docs/astro.md) — embedding a strip in Astro
 - [`TOONSTRIP_DEV_PLAN.md`](./TOONSTRIP_DEV_PLAN.md) — the full project plan
+- [`SITE_DEV_PLAN.md`](./SITE_DEV_PLAN.md) / [`DESIGN.md`](./DESIGN.md) — the M7
+  plan and UI/UX guide for the public site, toonstrip.danielkimdev.com
 - [`HANDOFF.md`](./HANDOFF.md) / [`WORKLOG.md`](./WORKLOG.md) — cross-session
   state and version history, for anyone (human or agent) picking up this
   project across sessions

@@ -22,25 +22,24 @@ lockstep). M7 (intro/playground) not started. Full history in `WORKLOG.md`.
 
 ## Last Session
 
-Three balloon-layout fixes, same session, **published together** (core 0.1.6 → element
-0.1.7 → astro 0.1.10, cascade verified resolving). **v0.7.9**: `stackBalloons` fallback
-overlapped a straddling speech balloon with a *neighbour's* head/tail — fixed w/
-`speakerCorridor`. **v0.7.10** root-causes the fallback: driver refused 2/4 real 2-speaker
-panels even at native `UNIT` size — fixed w/ `speakerCorridors`. **v0.7.11**, user-directed:
-layout constants (font, line height, chrome, margins) were fixed CSS px regardless of panel
-size — scaled by `width/UNIT.width` throughout. Fit rate now **4/4 uniformly 400px→260px**,
-tests clean (30). `grues-in-comic` port started but **blocked on this machine**: its ADR
-0008/`PITFALLS.md` mandate `gate:accept`/`density:accept` run only on macOS (host-specific
-font rasterization) — this session is Windows.
+M7 planning (2026-09-02). Wrote `SITE_DEV_PLAN.md` — the plan for toonstrip.danielkimdev.com:
+purpose-built `site/` workspace package (not `examples/astro-blog`), Astro 7 static,
+hand-built MDX docs (Starlight rejected), Preact+signals playground island with CodeMirror
+6, URL-hash sharing (no backend), public `CHANGELOG.md` (Keep a Changelog, backfilled from
+WORKLOG) feeding `/changelog`, Cloudflare Pages via GitHub integration (push to `main`
+deploys, like the other sites; root `wrangler.toml`; Workers only for an optional short-link fn), phases S0–S8 with exit criteria. Wrote
+`DESIGN.md` — tokens (paper/ink/balloon-yellow, light+dark), type (Bricolage Grotesque /
+DM Sans / JetBrains Mono), layout, components, playground spec, a11y, motion, voice.
+Linked both from README, AGENTS.md, dev plan §10. No code written; nothing published.
 
 ---
 
 ## Next Actions
 
-1. `danielkimdev-astro`: bump to `@toonstrip/astro@0.1.10`, rebuild, verify real embed
-   width before pushing.
-2. `grues-in-comic` port: code/ADR on any machine; `gate`/`density` accept needs macOS.
-3. Start M7 (§10, `TOONSTRIP_DEV_PLAN.md`).
+1. Start M7 S0 per `SITE_DEV_PLAN.md` §10: scaffold `site/`, `tokens.css` from
+   `DESIGN.md` §2–§4, root `wrangler.toml`, Pages project `toonstrip` connected to GitHub (§9 settings).
+2. `danielkimdev-astro`: bump to `@toonstrip/astro@0.1.10`, rebuild, verify embed width.
+3. `grues-in-comic` port: code/ADR on any machine; `gate`/`density` accept needs macOS.
 
 ---
 
