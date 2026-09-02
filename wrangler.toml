@@ -1,0 +1,14 @@
+#:schema node_modules/wrangler/config-schema.json
+# Cloudflare Pages configuration for toonstrip.danielkimdev.com (SITE_DEV_PLAN.md section 9).
+#
+# This file lives at the REPO ROOT, not in site/, because the Pages project is
+# connected to GitHub with the repo root as its root directory and the Git
+# integration reads wrangler.toml from there. Once this file exists, Pages takes
+# the output directory (and any bindings) from HERE and ignores the dashboard's
+# equivalents: keep `pages_build_output_dir` matching what `pnpm build` emits.
+# The build command itself is dashboard-only: `pnpm build` (workspace order builds
+# the packages before site/).
+
+name = "toonstrip"
+compatibility_date = "2026-09-02"
+pages_build_output_dir = "site/dist"

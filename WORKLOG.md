@@ -4,6 +4,39 @@ Persistent project history. Append entries; do not edit past entries.
 
 ---
 
+## v0.8.0 — M7 S0: site scaffold (`site/`)
+
+**Date:** 2026-09-02
+
+### Changes
+
+- New workspace package `site/` (`toonstrip-site`, private): Astro 7 static, integration
+  wired with both packs, MDX + sitemap, Shiki dual theme, Astro fonts API (Bricolage
+  Grotesque / DM Sans / JetBrains Mono per `DESIGN.md` §3), `devToolbar` off (same reason
+  as `examples/astro-blog`).
+- `DESIGN.md` §2–§4 tokens landed verbatim in `site/src/styles/tokens.css` (light + dark
+  via `data-theme`), base styles in `global.css`. Shell components: `ThemeScript`,
+  `ThemeToggle`, `Header`, `Footer`, `Base` layout. `lib/version.ts` reads package
+  versions from the workspace at build time for the badge/footer.
+- Placeholder pages for all four surfaces (`/`, `/docs/`, `/playground/`, `/changelog/`)
+  plus 404; the intro page already renders the hand-written hero strip
+  (`content/strips/hero.json`) with `client:load`.
+- `public/`: `robots.txt`, `_headers` (immutable `/_astro/*`, 1-day `/_toonstrip/*`, CSP
+  without `unsafe-eval`), `favicon.svg`.
+- Repo root: `wrangler.toml` (`pages_build_output_dir = "site/dist"`), `.node-version`
+  = 22, `packageManager` = pnpm 11.1.1 in `package.json`, `site` added to
+  `pnpm-workspace.yaml`, `.gitignore` for `site/public/_toonstrip/` and `site/.astro/`.
+- `ci.yml`: pnpm version now comes from `packageManager`; Node from `.node-version`.
+
+### Status
+
+`pnpm build` builds packages then site (5 routes). Verified in headless Chromium: hero
+strip renders 3 canvases with correct `aria-label`s, zero console errors, light and dark
+screenshots. **Pages project not yet connected** — dashboard step for Daniel (NOTES.md
+"M7 S0"). Next: S1 (shell components, `CodeAndStrip`, `WidthSlider`, kitchen sink).
+
+---
+
 ## v0.7.11 — Scale every layout constant to the actual panel size
 
 **Date:** 2026-09-02

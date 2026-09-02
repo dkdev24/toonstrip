@@ -1,0 +1,239 @@
+/* Global base styles. Tokens live in tokens.css; components in their own files. */
+@import "./tokens.css";
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 100%;
+  -webkit-text-size-adjust: 100%;
+  scroll-padding-top: calc(var(--header-height) + var(--space-16));
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  font-size: var(--text-body);
+  line-height: 1.6;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+main {
+  flex: 1 0 auto;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  margin: 0 0 var(--space-16);
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+h1 {
+  font-size: var(--text-h1);
+  line-height: 1.1;
+  font-weight: 700;
+}
+
+h2 {
+  font-size: var(--text-h2);
+  line-height: 1.2;
+  font-weight: 600;
+}
+
+h3 {
+  font-size: var(--text-h3);
+  line-height: 1.3;
+  font-weight: 600;
+}
+
+p,
+ul,
+ol {
+  margin: 0 0 var(--space-16);
+}
+
+.prose {
+  max-width: 68ch;
+}
+
+.prose > * + h2 {
+  margin-top: var(--space-48);
+}
+
+.prose > * + h3 {
+  margin-top: var(--space-32);
+}
+
+a {
+  color: var(--link);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.15em;
+  transition: color var(--dur-fast) var(--ease);
+}
+
+a:hover {
+  color: var(--link-hover);
+}
+
+code,
+kbd,
+pre,
+samp {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+}
+
+:not(pre) > code {
+  background: var(--paper-sunken);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-sm);
+  padding: 0.05em 0.35em;
+}
+
+pre {
+  margin: 0 0 var(--space-24);
+  padding: var(--space-16);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-md);
+  background: var(--paper-raised);
+  line-height: 1.6;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* Shiki dual theme: github-dark under the dark attribute. */
+:root[data-theme="dark"] .astro-code,
+:root[data-theme="dark"] .astro-code span {
+  color: var(--shiki-dark) !important;
+  background-color: var(--paper-raised) !important;
+}
+
+img,
+canvas,
+svg {
+  max-width: 100%;
+  height: auto;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 0 0 var(--space-24);
+  font-size: var(--text-small);
+  font-variant-numeric: tabular-nums;
+}
+
+th,
+td {
+  text-align: left;
+  padding: var(--space-8) var(--space-12);
+  border-bottom: 1px solid var(--rule);
+  vertical-align: top;
+}
+
+th {
+  font-family: var(--font-body);
+  font-size: var(--text-caption);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+  border-bottom: 1px solid var(--rule-strong);
+}
+
+tbody tr:nth-child(even) {
+  background: var(--paper-sunken);
+}
+
+hr {
+  border: 0;
+  border-top: 1px solid var(--rule);
+  margin: var(--space-48) 0;
+}
+
+:focus-visible {
+  outline: 2px solid var(--link);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+::selection {
+  background: var(--accent-soft);
+  color: var(--ink);
+}
+
+.container {
+  width: 100%;
+  max-width: var(--container);
+  margin-inline: auto;
+  padding-inline: var(--space-24);
+}
+
+.container--wide {
+  max-width: var(--container-wide);
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: var(--space-16);
+  z-index: 100;
+  padding: var(--space-8) var(--space-16);
+  background: var(--ink);
+  color: var(--paper);
+  border-radius: var(--radius-md);
+}
+
+.skip-link:focus {
+  top: var(--space-16);
+}
+
+.caption {
+  font-size: var(--text-caption);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.lead {
+  font-size: var(--text-lead);
+  color: var(--ink-2);
+}
+
+.mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Rendered strips are the artwork; never style them (DESIGN.md §12). The
+   element owns its own layout; this only guarantees it gets the full width. */
+comic-strip {
+  display: block;
+  width: 100%;
+}

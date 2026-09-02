@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+Disallow: /_kitchen-sink
+Sitemap: https://toonstrip.danielkimdev.com/sitemap-index.xml

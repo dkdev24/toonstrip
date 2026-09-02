@@ -1,0 +1,29 @@
+{
+  "name": "toonstrip-site",
+  "private": true,
+  "version": "0.8.0",
+  "type": "module",
+  "description": "toonstrip.danielkimdev.com: intro, docs, changelog, and playground for toonstrip. Deployed by Cloudflare Pages on push (see SITE_DEV_PLAN.md section 9).",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "test": "node -e \"process.exit(0)\"",
+    "test:e2e": "playwright test"
+  },
+  "dependencies": {
+    "@astrojs/mdx": "^7.0.0",
+    "@astrojs/sitemap": "^3.7.3",
+    "@toonstrip/astro": "workspace:*",
+    "@toonstrip/core": "workspace:*",
+    "@toonstrip/element": "workspace:*",
+    "@toonstrip/pack-comic-chat": "workspace:*",
+    "@toonstrip/pack-example": "workspace:*",
+    "@toonstrip/schema": "workspace:*",
+    "astro": "^7.2.9"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.48.0"
+  }
+}

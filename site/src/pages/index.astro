@@ -1,0 +1,77 @@
+---
+import { ComicStrip } from "@toonstrip/astro";
+import Base from "../layouts/Base.astro";
+import hero from "../content/strips/hero.json";
+import { coreVersion } from "../lib/version";
+---
+
+<Base title="toonstrip" description="A framework-embeddable library that renders comic strips from caller-supplied data as live, responsive canvas widgets.">
+  <section class="hero">
+    <p class="caption">toonstrip <span class="mono">v{coreVersion}</span> · MIT</p>
+    <h1 class="hero__title">Comic strips from data, drawn live on your page.</h1>
+    <p class="lead">
+      Write panels, characters, and lines as JSON. toonstrip renders them on real canvases that
+      reflow with the page. No AI, no image exports to keep in sync.
+    </p>
+    <p class="hero__actions">
+      <a class="button button--primary" href="/playground/">Open the playground</a>
+      <a class="button button--secondary" href="/docs/">Read the docs</a>
+    </p>
+  </section>
+  <section class="hero-strip" aria-label="Example strip">
+    <ComicStrip document={hero} packs={["comic-chat"]} client:load />
+  </section>
+  <p class="caption" style="margin-top: var(--space-16)">
+    Site under construction (S0 scaffold). Sections per SITE_DEV_PLAN.md §4 land in S2.
+  </p>
+</Base>
+
+<style>
+  .hero {
+    padding-top: var(--space-32);
+    max-width: 44rem;
+  }
+  .hero__title {
+    font-size: var(--text-hero);
+    line-height: 1.05;
+    margin-bottom: var(--space-24);
+  }
+  .hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-12);
+    margin-top: var(--space-32);
+  }
+  .hero-strip {
+    margin-top: var(--space-48);
+    padding: var(--space-24);
+    background: var(--paper-sunken);
+    border-radius: var(--radius-lg);
+  }
+  .button {
+    display: inline-flex;
+    align-items: center;
+    height: 40px;
+    padding: 0 var(--space-16);
+    border-radius: var(--radius-md);
+    font-weight: 500;
+    text-decoration: none;
+    transition: filter var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease);
+  }
+  .button--primary {
+    background: var(--accent);
+    color: var(--accent-ink);
+  }
+  .button--primary:hover {
+    filter: brightness(0.94);
+    color: var(--accent-ink);
+  }
+  .button--secondary {
+    border: 1px solid var(--ink);
+    color: var(--ink);
+  }
+  .button--secondary:hover {
+    background: var(--paper-sunken);
+    color: var(--ink);
+  }
+</style>

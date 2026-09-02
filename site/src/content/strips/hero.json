@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "panels": [
+    {
+      "backdrop": "pastoral",
+      "camera": "establishing",
+      "bodies": [
+        { "character": "dan", "emotion": { "angle": 0, "intensity": 0.6 } },
+        { "character": "anna", "emotion": { "angle": 0, "intensity": 0.4 } }
+      ],
+      "speakers": [
+        { "speaker": "caption", "balloon": "caption", "text": "toonstrip draws comic strips from data." },
+        { "speaker": "dan", "balloon": "speech", "text": "You write the panels as JSON." }
+      ]
+    },
+    {
+      "backdrop": "pastoral",
+      "camera": "medium",
+      "bodies": [
+        { "character": "dan", "emotion": { "angle": 0, "intensity": 0.7 } },
+        { "character": "anna", "emotion": { "angle": 2.356194490192345, "intensity": 0.6 } }
+      ],
+      "speakers": [
+        { "speaker": "anna", "balloon": "speech", "text": "And it draws them right here, on a canvas?" },
+        { "speaker": "dan", "balloon": "speech", "text": "Live. Resize the page and watch it reflow." }
+      ]
+    },
+    {
+      "backdrop": "pastoral",
+      "camera": "reaction",
+      "bodies": [
+        { "character": "anna", "emotion": { "angle": 5.497787143782138, "intensity": 0.9 } }
+      ],
+      "speakers": [
+        { "speaker": "anna", "balloon": "thought", "text": "No build step for the art. No image files to keep in sync." }
+      ]
+    }
+  ]
+}

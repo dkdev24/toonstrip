@@ -1,0 +1,16 @@
+---
+import Base from "../layouts/Base.astro";
+import { packageVersions } from "../lib/version";
+---
+
+<Base title="Changelog" description="Release notes for the toonstrip packages.">
+  <div class="prose">
+    <h1>Changelog</h1>
+    <p class="lead">Coming in S5. Versions this site was built against:</p>
+    <ul>
+      {Object.entries(packageVersions).map(([name, version]) => (
+        <li><span class="mono">{name} {version}</span></li>
+      ))}
+    </ul>
+  </div>
+</Base>

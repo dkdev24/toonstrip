@@ -1,0 +1,65 @@
+---
+import { Font } from "astro:assets";
+import Header from "../components/site/Header.astro";
+import Footer from "../components/site/Footer.astro";
+import ThemeScript from "../components/site/ThemeScript.astro";
+import "../styles/global.css";
+
+interface Props {
+  title: string;
+  description: string;
+  /** Wide layout (docs, playground) vs the default reading container. */
+  wide?: boolean;
+  /** Playground: no footer, main fills the viewport. */
+  bare?: boolean;
+}
+
+const { title, description, wide = false, bare = false } = Astro.props;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const fullTitle = Astro.url.pathname === "/" ? "toonstrip — comic strips from data, drawn live on your page" : `${title} · toonstrip`;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <ThemeScript />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <link rel="alternate" type="application/atom+xml" title="toonstrip changelog" href="/changelog.xml" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="toonstrip" />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={new URL("/og.png", Astro.site)} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <Font cssVariable="--font-body" preload />
+    <Font cssVariable="--font-display" preload />
+    <Font cssVariable="--font-mono" />
+    <slot name="head" />
+  </head>
+  <body class:list={[{ "is-bare": bare }]}>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <Header />
+    <main id="main" class:list={[{ container: !bare, "container--wide": wide && !bare }]}>
+      <slot />
+    </main>
+    {!bare && <Footer />}
+  </body>
+</html>
+
+<style>
+  main.container {
+    padding-top: var(--space-48);
+  }
+  body.is-bare main {
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100dvh - var(--header-height));
+  }
+</style>

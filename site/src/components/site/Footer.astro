@@ -1,0 +1,38 @@
+---
+import { coreVersion } from "../../lib/version";
+---
+
+<footer class="site-footer">
+  <div class="container site-footer__inner">
+    <p>
+      <strong>toonstrip</strong> <span class="mono">v{coreVersion}</span> · MIT License ·
+      <a href="https://github.com/dkdev24/toonstrip">GitHub</a> ·
+      <a href="https://www.npmjs.com/org/toonstrip">npm</a> ·
+      <a href="https://danielkimdev.com">danielkimdev.com</a>
+    </p>
+    <p class="site-footer__notice">
+      The default asset pack includes Microsoft Comic Chat character and backdrop art,
+      redistributed under the MIT License. COMIC CHAT is a trademark of Microsoft
+      Corporation; toonstrip is independent and not affiliated with or endorsed by
+      Microsoft. See <a href="https://github.com/dkdev24/toonstrip/blob/main/NOTICE">NOTICE</a>.
+    </p>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    margin-top: var(--space-96);
+    border-top: 1px solid var(--rule);
+    padding: var(--space-32) 0;
+    font-size: var(--text-small);
+    color: var(--ink-2);
+  }
+  .site-footer__inner p {
+    margin: 0 0 var(--space-8);
+  }
+  .site-footer__notice {
+    font-size: var(--text-caption);
+    color: var(--ink-3);
+    max-width: 68ch;
+  }
+</style>

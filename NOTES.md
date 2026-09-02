@@ -299,3 +299,28 @@ resolved as items get addressed. Newest at bottom, grouped by milestone.
   established for `packages/element`'s `verify:demo` — neither is wired into `ci.yml`
   yet; that's still open (see the M3 note above about deciding on a Playwright-in-CI
   step before M6).
+
+## M7 S0
+
+- **Cloudflare Pages project must be created in the dashboard, not by me.** A
+  Git-connected Pages project can only be created through the dashboard's GitHub flow
+  (`wrangler pages project create` makes a direct-upload project that cannot be converted
+  later). Settings to enter, per `SITE_DEV_PLAN.md` §9: repo `dkdev24/toonstrip`,
+  production branch `main`, root directory `/`, build command `pnpm build`, output
+  directory `site/dist` (must match root `wrangler.toml`), and include-paths
+  `site/**`, `packages/**`, `CHANGELOG.md`, `pnpm-lock.yaml`. Node version is read from
+  `.node-version` (22) and pnpm from `packageManager` (11.1.1); if the Pages build image
+  rejects either, set `NODE_VERSION`/`PNPM_VERSION` env vars in the dashboard instead.
+  Until this is done, pushes to `main` deploy nothing.
+- **Playwright can't download browsers on this machine** (`SELF_SIGNED_CERT_IN_CHAIN`
+  from `cdn.playwright.dev`, corporate TLS interception). The already-present
+  `chromium-1217` build under `%LOCALAPPDATA%\ms-playwright` works when passed as
+  `executablePath`; `site/tests/e2e` (S4) should honour a `PLAYWRIGHT_CHROMIUM_PATH`
+  env var for this reason. In GitHub Actions the normal `playwright install` will work.
+- **First hero-panel caption sits tight against the speech balloon** (caption box +
+  one speech balloon in the same panel at establishing shot). Legible, not overlapping,
+  but if this pattern recurs in docs examples it may be worth a `packages/core` look at
+  caption-to-balloon spacing (goes through `UPSTREAM_SYNC.md` if changed).
+- **`@toonstrip/astro` build warnings** ("Module node:path has been externalized for
+  browser compatibility") appear on every site build, same as in `examples/astro-blog`
+  (NOTES.md M4). Harmless; not silenced.
