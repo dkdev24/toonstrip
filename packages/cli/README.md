@@ -53,6 +53,10 @@ MIT
 
 ## `toonstrip render`
 
+Hangul or other non-Latin dialogue: pass `--font <file>` (repeatable) with a font file
+such as Noto Sans KR so text does not fall back to whatever the OS has.
+
+
 Render a `ComicStripDocument` to a single PNG in Node, with the same layout policy and
 figure selection as the browser element. Useful for Open Graph images, RSS embeds, and a
 `<noscript>` fallback.

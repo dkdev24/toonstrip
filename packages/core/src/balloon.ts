@@ -35,7 +35,20 @@ export interface TailTarget {
  * native. See `WORKLOG.md` v0.7.11.
  */
 const BALLOON_FONT_SIZE = 13;
-const BALLOON_FONT_FAMILY = '"Comic Sans MS", "Comic Neue", ui-rounded, cursive';
+/**
+ * The family stack every piece of comic text (balloons, location titles) is
+ * set in. Latin glyphs come from Comic Sans / Comic Neue. Neither has Hangul,
+ * so the browser walks the rest of the list per glyph: Noto Sans KR when the
+ * page provides it (a webfont; `@toonstrip/element` waits for it before
+ * painting), then the platform Korean sans faces (macOS/iOS, Windows), then
+ * the generic. Without the named Korean faces, Hangul fell through to
+ * `cursive`, which Windows maps to Gungseo — a brush script — and other
+ * platforms to whatever they consider cursive. Order matters: the Korean
+ * faces sit after the comic faces so Latin text never changes.
+ */
+export const COMIC_FONT_FAMILY =
+  '"Comic Sans MS", "Comic Neue", "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans CJK KR", ui-rounded, cursive';
+const BALLOON_FONT_FAMILY = COMIC_FONT_FAMILY;
 export const BALLOON_FONT = `${BALLOON_FONT_SIZE}px ${BALLOON_FONT_FAMILY}`;
 
 /** The font string at `scale` — what the caller sets `ctx.font` to before measuring or drawing. */

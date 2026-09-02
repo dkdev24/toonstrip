@@ -66,6 +66,19 @@ export default defineConfig({
       display: "swap",
     },
     {
+      // Hangul for balloon text drawn by @toonstrip/core (its stack names
+      // "Noto Sans KR"); the element waits for it before painting. Declared,
+      // never preloaded: unicode-range subsets download only when Korean
+      // text is actually drawn.
+      provider: fontProviders.google(),
+      name: "Noto Sans KR",
+      cssVariable: "--font-korean",
+      weights: [400, 700],
+      subsets: ["korean"],
+      fallbacks: ["Apple SD Gothic Neo", "Malgun Gothic", "sans-serif"],
+      display: "swap",
+    },
+    {
       provider: fontProviders.google(),
       name: "JetBrains Mono",
       cssVariable: "--font-mono",

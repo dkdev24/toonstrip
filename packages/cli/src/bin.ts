@@ -7,7 +7,7 @@ function usage(): never {
   console.error(`Usage:
   toonstrip pack validate <dir>
   toonstrip render <doc.json> --out <strip.png> [--width 1200] [--scale 2]
-                   [--pack <dir>]... [--transparent] [--background #ffffff]`);
+                   [--pack <dir>]... [--font <file.ttf>]... [--transparent] [--background #ffffff]`);
   process.exit(1);
 }
 
@@ -44,6 +44,7 @@ if (command === "pack" && subcommand === "validate") {
     width: flag(argv, "width") ? Number(flag(argv, "width")) : undefined,
     scale: flag(argv, "scale") ? Number(flag(argv, "scale")) : undefined,
     packs: flags(argv, "pack"),
+    fonts: flags(argv, "font"),
     transparent: argv.includes("--transparent"),
     background: flag(argv, "background"),
   })

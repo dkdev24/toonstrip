@@ -9,7 +9,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { dirname, isAbsolute, join, resolve } from "node:path";
-import { createCanvas, loadImage, type Image } from "@napi-rs/canvas";
+import { createCanvas, GlobalFonts, loadImage, type Image } from "@napi-rs/canvas";
 import { layoutStrip, renderPanel, selectFigures, type Cast, type CastManifest, type PackedAvatar, type PackedBackdrop, type PoseCycle } from "@toonstrip/core";
 import { validateDocument, type ComicStripDocument } from "@toonstrip/schema";
 
@@ -24,6 +24,12 @@ export interface RenderOptions {
   packs?: string[];
   transparent?: boolean;
   background?: string;
+  /**
+   * Font files (TTF/OTF/WOFF2) to register before drawing, e.g. Noto Sans KR
+   * for Hangul dialogue. Without one, text falls back to the system's faces
+   * (see `COMIC_FONT_FAMILY` in `@toonstrip/core`).
+   */
+  fonts?: string[];
 }
 
 export interface RenderResult {
@@ -92,6 +98,11 @@ export async function renderDocument(input: unknown, options: RenderOptions = {}
   const doc: ComicStripDocument = validateDocument(input);
   const width = options.width ?? 1200;
   const scale = options.scale ?? 2;
+  for (const font of options.fonts ?? []) {
+    const path = isAbsolute(font) ? font : resolve(font);
+    if (!existsSync(path)) throw new Error(`font file not found: ${path}`);
+    GlobalFonts.registerFromPath(path);
+  }
   const packDirs = (options.packs?.length ? options.packs : [defaultPackDir()]).map((p) => (isAbsolute(p) ? p : resolve(p)));
 
   const characterIds = [...new Set(doc.panels.flatMap((p) => p.bodies.map((b) => b.character)))];

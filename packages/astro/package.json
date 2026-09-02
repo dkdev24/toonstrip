@@ -1,6 +1,6 @@
 {
   "name": "@toonstrip/astro",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "description": "Astro integration and <ComicStrip> component for embedding toonstrip comic strips.",
   "license": "MIT",
   "type": "module",

@@ -6,6 +6,26 @@ shipped. Written for users; the engineering history behind each entry is in `WOR
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.8.9 — 2026-09-02
+
+**Packages:** `@toonstrip/core` 0.1.7, `@toonstrip/element` 0.1.8, `@toonstrip/astro` 0.1.11,
+`@toonstrip/cli` 0.2.1 (unpublished until the next release)
+
+### Fixed
+
+- Korean balloon text rendered in a brush script on Windows (Gungseo) and in arbitrary
+  fallbacks elsewhere. The comic font stack now names Noto Sans KR, then the platform
+  Korean sans faces, ahead of the generic; Latin text is unchanged.
+- The element now waits for `document.fonts` before first paint and repaints when a
+  face finishes loading late, so a page-declared webfont reaches the canvas.
+
+### Added
+
+- `toonstrip render --font <file>` registers a font file (for example Noto Sans KR)
+  before drawing. `COMIC_FONT_FAMILY` and `TITLE_FONT` exported from `@toonstrip/core`.
+- The site declares Noto Sans KR (Korean subset, fetched only when drawn) and the
+  kitchen sink has a Korean strip check.
+
 ## 0.8.8 — 2026-09-02
 
 **Packages:** `@toonstrip/cli` 0.2.0 (published)

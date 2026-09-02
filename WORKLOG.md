@@ -4,6 +4,42 @@ Persistent project history. Append entries; do not edit past entries.
 
 ---
 
+## v0.8.9 — Korean text in balloons: Noto Sans KR font stack + font-ready element
+
+**Date:** 2026-09-02
+
+### Changes
+
+- **Root cause.** `packages/core/src/balloon.ts` (and the title font in `render.ts`) set
+  `"Comic Sans MS", "Comic Neue", ui-rounded, cursive`. Neither comic face has Hangul, so
+  each Hangul glyph fell through to the generic `cursive`, which Windows maps to Gungseo
+  (a brush script) and other platforms to their own cursive default. Noto Sans KR was
+  never named, and on macOS/Android it is not installed under that name anyway. On top
+  of that, `<comic-strip>` painted as soon as the pack images arrived; a canvas draws
+  with whatever is loaded at that instant and never repaints, so a page-declared webfont
+  could be missed even when present.
+- `COMIC_FONT_FAMILY` (core): comic faces first, then `"Noto Sans KR", "Apple SD Gothic
+  Neo", "Malgun Gothic", "Noto Sans CJK KR"`, then `ui-rounded, cursive`. Latin glyphs
+  still resolve to Comic Sans. `TITLE_FONT` exported alongside `BALLOON_FONT`.
+- Element: `ensureFonts()` awaits `document.fonts.load()` for both fonts with the
+  document's text (so unicode-range subsets fetch only what is drawn) before the first
+  paint; a `loadingdone` listener repaints painted panels. `#relayout` now delegates to
+  a shared `#repaint`.
+- CLI: `--font <file>` (repeatable) → `GlobalFonts.registerFromPath`.
+- Site: Noto Sans KR via the fonts API (`korean` subset, declared not preloaded);
+  `strips/korean.json` on the kitchen sink; FAQ entry.
+- Verified with system Chrome on Windows: Hangul in Noto Sans KR, Latin in Comic Sans,
+  `document.fonts.check('13px "Noto Sans KR"', '한글')` true on the kitchen sink.
+
+### Status
+
+Versions bumped (core 0.1.7, element 0.1.8, astro 0.1.11, cli 0.2.1), **not published**:
+the cascade (core → element → astro, then `danielkimdev-astro` bump) and the
+`grues-in-comic` port (same two font-stack lines, needs an ADR 0008 divergence note per
+`UPSTREAM_SYNC.md`) wait for Daniel's go.
+
+---
+
 ## v0.8.8 — M7 S8: launch
 
 **Date:** 2026-09-02

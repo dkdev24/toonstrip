@@ -10,6 +10,7 @@ import PackageManagerTabs from "../components/site/PackageManagerTabs.astro";
 import CodeAndStrip from "../components/demo/CodeAndStrip.astro";
 import WidthSlider from "../components/demo/WidthSlider.astro";
 import hero from "../content/strips/hero.json";
+import korean from "../content/strips/korean.json";
 import type { ComicStripDocument } from "@toonstrip/schema";
 
 const doc = hero as ComicStripDocument;
@@ -79,4 +80,8 @@ const doc = hero as ComicStripDocument;
 
   <h2>WidthSlider</h2>
   <WidthSlider doc={doc} load="load" />
+
+  <h2>Korean balloon text</h2>
+  <p>Hangul must render in Noto Sans KR (loaded by the page), never a brush script. Latin in the same balloon stays Comic Sans.</p>
+  <CodeAndStrip doc={korean as ComicStripDocument} title="Korean strip" layout="side" load="load" />
 </Base>

@@ -9,7 +9,7 @@
 import type { Body, CameraPreset, Line, Panel } from "@toonstrip/schema";
 import { drawFigure, figureFor, newCycle, type Cast, type Figure, type PoseCycle } from "./figure.js";
 import type { EmotionOption } from "./emotion.js";
-import { balloonFont, drawBalloon, measureBalloon, type BalloonBox } from "./balloon.js";
+import { balloonFont, COMIC_FONT_FAMILY, drawBalloon, measureBalloon, type BalloonBox } from "./balloon.js";
 import {
   canvasMetrics, layoutBalloons, type BalloonInput, type Rect,
 } from "./balloon-layout.js";
@@ -473,7 +473,9 @@ export const BALLOON_MARGIN = 10;
  */
 export const TITLE_HEIGHT = 22;
 const TITLE_FONT_SIZE = 12;
-const TITLE_FONT_FAMILY = '"Comic Sans MS", "Comic Neue", ui-rounded, cursive';
+const TITLE_FONT_FAMILY = COMIC_FONT_FAMILY;
+/** The location title's font at native scale — what `document.fonts.load` should be asked for. */
+export const TITLE_FONT = `bold ${TITLE_FONT_SIZE}px ${TITLE_FONT_FAMILY}`;
 const TITLE_PAD = 6;
 
 /** Draw the location title, clipped to the panel's width. */

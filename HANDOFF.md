@@ -6,8 +6,8 @@ Cross-session context memory. Update this file at the end of every session.
 
 ## Current Version
 
-**0.8.8** (M7 launched; npm: schema 0.1.3, core 0.1.6, element 0.1.7, astro 0.1.10,
-cli 0.2.0, packs 0.1.1)
+**0.8.9** (Korean font fix; npm still: schema 0.1.3, core 0.1.6, element 0.1.7,
+astro 0.1.10, cli 0.2.0, packs 0.1.1 — core 0.1.7/element 0.1.8/astro 0.1.11/cli 0.2.1 unpublished)
 
 ---
 
@@ -25,21 +25,21 @@ dir (`site/dist`); root `pnpm build` is the Pages build. No manual steps.
 
 ## Last Session
 
-2026-09-02, M7 S8 launch (v0.8.8). Daniel created the Pages project and attached the
-domain. Published `@toonstrip/cli@0.2.0`. Package READMEs link to the site, CHANGELOG
-0.8.8, WORKLOG entry. S0–S7 shipped earlier the same day.
+2026-09-02, launch (v0.8.8) then v0.8.9: Korean balloon text fell to Gungseo because the
+core font stack named no Korean face and the element painted before webfonts loaded.
+Fixed in core/element/cli, site declares Noto Sans KR; SITE_DEV_PLAN §13 (S9 KO locale).
 
 ---
 
 ## Next Actions
 
-1. **Daniel:** copy pass in his voice over
+1. **Publish cascade** core 0.1.7 → element 0.1.8 → astro 0.1.11 (+ cli 0.2.1), then
+   `danielkimdev-astro` bump and port the font stack to `grues-in-comic` (ADR note).
+2. **Daniel:** copy pass in his voice over
    `site/src/pages/index.astro` and `site/src/content/docs/*.mdx`. Link to the site from
    `danielkimdev.com`.
-2. **S9 Korean locale** per `SITE_DEV_PLAN.md` §13 (EN root, KO under `/ko/`, model copied
+3. **S9 Korean locale** per `SITE_DEV_PLAN.md` §13 (EN root, KO under `/ko/`, model copied
    from `danielkimdev-astro`). Start with config + `src/i18n` + wrappers, then docs, strips.
-3. `danielkimdev-astro` bump to `@toonstrip/astro@0.1.10`; `grues-in-comic` port of the
-   `packages/core` fixes (`UPSTREAM_SYNC.md`).
 4. Only if usage warrants: per-page OG images via `toonstrip render`, Pagefind, short-link
    Worker (`SITE_DEV_PLAN.md` §9).
 ---

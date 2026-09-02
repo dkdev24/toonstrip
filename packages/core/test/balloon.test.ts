@@ -75,3 +75,15 @@ describe("drawBalloon", () => {
     }
   });
 });
+
+describe("COMIC_FONT_FAMILY", () => {
+  it("keeps the comic faces first and names a Korean sans face for Hangul fallback", async () => {
+    const { COMIC_FONT_FAMILY, TITLE_FONT } = await import("../src/index.js");
+    const families = COMIC_FONT_FAMILY.split(",").map((f) => f.trim().replace(/"/g, ""));
+    expect(families[0]).toBe("Comic Sans MS");
+    expect(families.indexOf("Noto Sans KR")).toBeGreaterThan(families.indexOf("Comic Neue"));
+    expect(families.indexOf("Noto Sans KR")).toBeLessThan(families.indexOf("cursive"));
+    expect(BALLOON_FONT).toContain(COMIC_FONT_FAMILY);
+    expect(TITLE_FONT).toContain(COMIC_FONT_FAMILY);
+  });
+});

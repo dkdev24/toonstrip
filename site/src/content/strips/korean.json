@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "panels": [
+    {
+      "backdrop": "field",
+      "camera": "medium",
+      "roomTitle": "한국어 테스트",
+      "bodies": [
+        { "character": "anna", "emotion": { "angle": 0, "intensity": 0.7 } },
+        { "character": "dan", "emotion": { "angle": 2.356194490192345, "intensity": 0.5 } }
+      ],
+      "speakers": [
+        { "speaker": "anna", "balloon": "speech", "text": "말풍선 글자가 이제 고딕체로 나와요. 궁서체는 안녕." },
+        { "speaker": "dan", "balloon": "speech", "text": "Comic Sans and 한글 in one balloon, side by side." }
+      ]
+    }
+  ]
+}

@@ -6,7 +6,7 @@
  * machinery stripped out: a `ComicStripDocument` here is authored data handed
  * over whole, not a stream of panels a game emits (dev plan §0's non-goals).
  */
-import { type Cast, layoutStrip, type PoseCycle, renderPanel, selectFigures } from "@toonstrip/core";
+import { BALLOON_FONT, type Cast, layoutStrip, type PoseCycle, renderPanel, selectFigures, TITLE_FONT } from "@toonstrip/core";
 import { validateDocument, type ComicStripDocument, type Panel } from "@toonstrip/schema";
 import { describePanel } from "./describe.js";
 import { loadCastFromPacks } from "./load-pack.js";
@@ -25,6 +25,30 @@ function copyCycles(cycles: ReadonlyMap<string, PoseCycle>): Map<string, PoseCyc
 
 function characterIdsOf(doc: ComicStripDocument): string[] {
   return [...new Set(doc.panels.flatMap((panel) => panel.bodies.map((body) => body.character)))];
+}
+
+/** Every string the renderer will draw, so `document.fonts.load` fetches only the subsets it needs. */
+function textOf(doc: ComicStripDocument): string {
+  return doc.panels
+    .flatMap((panel) => [panel.roomTitle ?? "", ...panel.speakers.map((line) => line.text)])
+    .join(" ");
+}
+
+/**
+ * Wait for the comic fonts to be usable on a canvas. A canvas draws with
+ * whatever is loaded at that instant and never repaints on its own, so a
+ * webfont the page declares (Noto Sans KR for Hangul, say) would be missed
+ * on first paint. `fonts.load` resolves immediately for families the page
+ * does not declare, so this costs nothing on pages without webfonts.
+ */
+async function ensureFonts(text: string): Promise<void> {
+  const fonts = (document as Document & { fonts?: FontFaceSet }).fonts;
+  if (!fonts) return;
+  try {
+    await Promise.all([fonts.load(BALLOON_FONT, text), fonts.load(TITLE_FONT, text)]);
+  } catch {
+    // An undeclared or failing face is not fatal; the fallback stack draws.
+  }
 }
 
 function backdropIdsOf(doc: ComicStripDocument): string[] {
@@ -55,6 +79,7 @@ export class ComicStripElement extends HTMLElement {
   #size = { width: 400, height: 340 };
   #columns = 1;
   #buildToken = 0;
+  #onFontsLoaded = (): void => this.#repaint();
 
   constructor() {
     super();
@@ -65,6 +90,9 @@ export class ComicStripElement extends HTMLElement {
     this.#strip.className = "strip";
     this.#root.append(style, this.#strip);
     this.#resizeObserver = new ResizeObserver(() => this.#relayout());
+    // A face that finishes loading after first paint (declared late, or
+    // fetched by another element) repaints every painted panel.
+    (document as Document & { fonts?: FontFaceSet }).fonts?.addEventListener("loadingdone", this.#onFontsLoaded);
   }
 
   static get observedAttributes(): string[] {
@@ -141,6 +169,8 @@ export class ComicStripElement extends HTMLElement {
       return;
     }
     if (token !== this.#buildToken) return; // superseded by a later document/packs set
+    await ensureFonts(textOf(this.#doc));
+    if (token !== this.#buildToken) return;
     this.#cast = cast;
 
     // Body selection happens once, in document order, and is frozen per panel
@@ -225,8 +255,14 @@ export class ComicStripElement extends HTMLElement {
   #relayout(): void {
     if (!this.#cast) return;
     this.#size = this.#measure();
+    for (const slot of this.#slots) this.#resizeSlot(slot);
+    this.#repaint();
+  }
+
+  /** Repaint every panel that is currently painted, at the current size. */
+  #repaint(): void {
+    if (!this.#cast) return;
     for (const slot of this.#slots) {
-      this.#resizeSlot(slot);
       if (slot.painted) {
         slot.painted = false;
         this.#paint(slot);
