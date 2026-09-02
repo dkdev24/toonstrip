@@ -1,7 +1,7 @@
 import { createCanvas } from "@napi-rs/canvas";
 import { beforeAll, describe, expect, it } from "vitest";
 import {
-  BALLOON_FONT, drawBalloon, measureBalloon, splitHeight,
+  BALLOON_FONT, balloonFont, drawBalloon, measureBalloon, splitHeight,
 } from "../src/balloon.js";
 
 function ctx() {
@@ -29,6 +29,21 @@ describe("measureBalloon", () => {
     const speech = measureBalloon(c, { balloon: "speech", text: "Hmm." }, 300);
     const thought = measureBalloon(c, { balloon: "thought", text: "Hmm." }, 300);
     expect(thought.width).toBeGreaterThan(speech.width);
+  });
+
+  it("scales chrome and line height by the scale factor, not just font size", () => {
+    // Root cause of the real-embed fallback bug: every layout constant used
+    // to be a fixed CSS px regardless of panel size. A balloon measured at
+    // scale 0.5 with the matching half-size font should come out at roughly
+    // half the native height — not the native height minus only the font's
+    // own shrink, which is what a fixed LINE_HEIGHT/PADDING would produce.
+    const native = measureBalloon(ctx(), { balloon: "speech", text: "Hi there." }, 300);
+
+    const half = createCanvas(400, 400).getContext("2d") as unknown as CanvasRenderingContext2D;
+    half.font = balloonFont(0.5);
+    const scaled = measureBalloon(half, { balloon: "speech", text: "Hi there." }, 300, 0.5);
+
+    expect(scaled.height).toBeCloseTo(native.height * 0.5, 0);
   });
 });
 

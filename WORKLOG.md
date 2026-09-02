@@ -4,6 +4,194 @@ Persistent project history. Append entries; do not edit past entries.
 
 ---
 
+## v0.7.11 — Scale every layout constant to the actual panel size
+
+**Date:** 2026-09-02
+
+### Changes
+
+- Follow-up to v0.7.10, same session: user asked directly for the residual fix flagged
+  there — every balloon-layout constant (font size, line height, chrome/padding,
+  `MIN_HOOK_HEIGHT`, corridor floors, margins, tail geometry) was a fixed CSS px value,
+  computed once at native `UNIT` size (400×340) and applied unchanged no matter what size
+  `renderPanel` actually rendered at. Since a panel is only ever native size or *smaller*
+  (`layoutStrip` never stretches one up — see the session's earlier "why two sizes"
+  discussion), any real embed narrower than native read its own fixed-size text and chrome
+  as relatively *larger* than native did, which is what made v0.7.10's already-tight
+  vertical budget degrade further the smaller a real embed got.
+- Fixed by computing one scale factor, `uiScale = width / UNIT.width`, once in
+  `renderPanel` and threading it through every function that used one of these constants,
+  each of which now takes an optional `scale = 1` parameter (default keeps native/`UNIT`
+  behavior identical, so nothing that doesn't pass a scale changes):
+  - `balloon.ts`: added `balloonFont(scale)` alongside the existing native `BALLOON_FONT`;
+    `chromeFor`, `measureBalloon`, `measureAtWidth`, `splitHeight`, `goalWidth`, `drawBalloon`
+    all scale their padding/line-height/threshold constants, and the cosmetic tail/wave
+    geometry (`roundedSpeech`, `pushWaves`, `bubbleTrail`) scales too for visual consistency
+    — `cloud`'s scallop density needed no change, it already derives from the (already-
+    scaled) box dimensions rather than a fixed px constant.
+  - `balloon-layout.ts`: `canvasMetrics`, `layoutBalloons` and everything it calls
+    (`layoutBalloon`, `getCloudEstimate`, `getInterveningBBox`, `queryRouteRgn`,
+    `speakerCorridors`, `forceFitBalloon`) now scale `MIN_HOOK_HEIGHT`, `MIN_ROUTE_WIDTH`,
+    `WIDTH_FUDGE`, `TOP_BORDER`, and v0.7.10's `MIN_CORRIDOR_WIDTH`.
+  - `render.ts`: `drawBalloons` computes `ctx.font` from `balloonFont(scale)` instead of the
+    fixed `BALLOON_FONT`, and passes `scale` into `headGeometry`, `balloonRect`,
+    `drawLocationTitle`, `stackBalloons`, `speakerCorridor` (v0.7.9's fallback corridor), and
+    `clearOfFaces` — all of which now scale their own margin/gap/bulge constants.
+- Verified with a sweep script driving the real screenshot dialogue from v0.7.10 through
+  `renderPanel` (not just `layoutBalloons` directly, so the whole chain — font, driver,
+  fallback — is exercised) at widths from 400 down to 260 (65% of native): **4/4 panels fit
+  at every width in that range**, where before this fix the fit rate degraded the smaller
+  the panel got (v0.7.10 alone: 4/4 at native down to 3/4 at the real 363×309 embed).
+  Rendered and eyeballed 400/363/260px versions of the reported panel — text, chrome, and
+  tails all scale down together with no overlap at any size, including the 260px extreme.
+- Added two regression tests: `measureBalloon` at `scale = 0.5` comes out at half the
+  native height (`balloon.test.ts`), and the real 2-speaker panel from v0.7.10's test still
+  fits `layoutBalloons` at `scale = 0.65` (`balloon-layout.test.ts`).
+
+### Verify
+
+- `pnpm build` (whole workspace) / `pnpm test` — 30 tests (2 new), clean.
+- Sweep script (temporary, not committed): `renderPanel` at widths 400→260, 4/4 fit
+  uniformly across the whole range (previously degraded below native).
+- Rendered the reported panel at 400/363/260px and eyeballed each — proportional, no
+  overlap even at the extreme.
+- Existing `test/output/panel-*.png` fixtures (driver path, generated at `layoutStrip(1200)`
+  ≈ 0.983 scale, not exactly native) still render clean — confirms the near-native default
+  case is unaffected.
+
+### Status
+
+Published together with v0.7.9/v0.7.10 in one cascade: `@toonstrip/core@0.1.6` →
+`@toonstrip/element@0.1.7` → `@toonstrip/astro@0.1.10`, all live on npm. Port to
+`grues-in-comic` tracked separately — see its own `HANDOFF.md`/`WORKLOG.md`.
+
+---
+
+## v0.7.10 — Root-cause the fallback rate: pre-allocate speaker corridors in the driver
+
+**Date:** 2026-09-02
+
+### Changes
+
+- Follow-up to v0.7.9, same session: user asked to find *why* real panels kept landing on
+  `stackBalloons` (the fallback) instead of `layoutBalloons` (the driver) and fix that,
+  not just the fallback's own bugs. Measured it directly: a script drove `layoutBalloons`
+  with the screenshot's real 2-speaker dialogue at a sweep of widths. Result at the
+  renderer's own native `UNIT` size (400×340, `scale=1.0`) — no real-embed shrink involved
+  at all — the driver already refused **2 of 4** real panels. Below native it fell off a
+  cliff: **0 of 4** fit at every width from 393 down to 300, including the real 363×309
+  production embed.
+- Root cause, found by instrumenting `layoutBalloon`'s refusal points: `getCloudEstimate`
+  sizes the *first* balloon in draw order against the whole free rect, and its width roll
+  is deliberately skewed wide (v0.7.6, to stop a narrow balloon wrapping tall into its own
+  speaker's head). With two speakers, that wide first estimate leaves the second balloon no
+  room to sit beside it — `getInterveningBBox` can only push it entirely *below* — and two
+  stacked balloons blow through `BALLOON_HEADROOM`'s tight 44%-of-panel-height budget far
+  more easily than two side-by-side ones. The scale-down to real embed sizes then compounds
+  this on top of an already-marginal baseline, rather than being the sole cause: every
+  layout constant here (font, line height, chrome, `MIN_HOOK_HEIGHT`) is a fixed CSS px
+  value that doesn't shrink with the panel, so any real-embed width below native (routine,
+  per `layoutStrip`'s responsive column policy — panels never scale *up*) tips already-thin
+  margins straight to refusal.
+- Fixed the dominant cause (order-dependent width estimation) with `speakerCorridors`
+  (`balloon-layout.ts`): computed once per `layoutBalloons` call, it bounds every
+  non-caption speaker's balloon — even the first — to the horizontal room between its own
+  head and the midpoint to the nearest other speaker's, before `getCloudEstimate` ever
+  rolls a width. This is the driver-side counterpart to v0.7.9's `speakerCorridor` in
+  `stackBalloons`, now applied where it has the most leverage: it stops the greedy,
+  sequential squeeze from ever needing to fall back to vertical stacking in the common
+  two-speaker case, rather than trying to recover after the fact. Threaded the resulting
+  `bounds` through `getCloudEstimate` (replacing `freeRect` as the width ceiling and the
+  straddle-roll clamp) and through the post-wrap re-centring in `layoutBalloon`. A caption
+  or a bodiless speaker gets no corridor and lays out against the full free rect exactly as
+  before; a single-speaker panel likewise sees no behavior change (no "other" to bound
+  against). The existing squeeze machinery (`getInterveningBBox`/`queryRouteRgn`/
+  `adjustRouteRgns`) is untouched and still runs as a safety net.
+- Verified with the same sweep script: native `UNIT` size went from 2/4 to **4/4**; the
+  real 363×309 embed went from 0/4 to **3/4**. The remaining scale-sensitivity (component 2
+  above — fixed-px constants not scaling with panel size) is not addressed by this fix and
+  is now the dominant residual cause of any fallback below ~350px wide; left as a follow-up
+  (see `HANDOFF.md`) rather than folded in here, since it touches `balloon.ts`/`render.ts`
+  constants much more broadly and needs its own verification pass.
+- Added a regression test (`balloon-layout.test.ts`): the exact real dialogue that used to
+  force vertical stacking, asserted to now fit with both balloons side by side.
+
+### Verify
+
+- `pnpm build` / `pnpm test` — 28 tests (1 new), clean.
+- Sweep script (temporary, not committed) over widths 300–400 driving `layoutBalloons`
+  directly with the real screenshot dialogue: native 2/4→4/4, real embed 0/4→3/4, graceful
+  degradation below that instead of a hard 0% cliff.
+- Rendered the previously-refused panel at 363×309 with the real `pack-comic-chat` assets:
+  now takes the driver path (`stacked: false`), balloons side by side, no overlap.
+- `test/output/panel-1.png` (existing 2-speaker driver-path fixture) unchanged.
+
+### Status
+
+Published together with v0.7.9/v0.7.11 in one cascade: `@toonstrip/core@0.1.6` →
+`@toonstrip/element@0.1.7` → `@toonstrip/astro@0.1.10`, all live on npm. Port to
+`grues-in-comic` tracked separately — see its own `HANDOFF.md`/`WORKLOG.md`.
+
+---
+
+## v0.7.9 — Fix `stackBalloons` straddle overlapping a neighbour's head/tail
+
+**Date:** 2026-09-02
+
+### Changes
+
+- User reported (screenshot, real deployed strip) panel 1's second balloon still overlapping
+  a head — this time not the speaker's own (v0.7.6/v0.7.8's bug), but the *other* on-stage
+  character's. Reproduced locally: `dan`+`tiki`, two speakers, at the real 363×309 embed size
+  (`packages/core/examples/render-fixture.ts`-style script against `pack-comic-chat`) —
+  `layoutBalloons` refuses the panel (same as v0.7.8) and falls back to `stackBalloons`.
+- Root cause: in `stackBalloons` (`render.ts`), a straddling *speech* balloon's x is centred
+  on its own speaker's head with **no check against any other face box** — `clearOfFaces` was
+  only ever called from the *thought*-aside branch. `dan`'s balloon and `tiki`'s balloon don't
+  collide with each other (they're vertically separated), but `tiki`'s balloon, measured at the
+  full `cap = width - 20` and then centred on `tiki`'s head, was wide enough that its left edge
+  landed inside `dan`'s face box — confirmed via a geometry dump: balloon x-span
+  `[135.18, 353.0]` vs. `dan`'s face box `[88.15, 159.05]`, overlapping y `[135.96, 149]`. Since
+  the tail root already sits inside the overlap, the tail was effectively zero-length into the
+  wrong head instead of reaching its own.
+- Fixed by adding `speakerCorridor` (`render.ts`): for a straddling speech balloon, bounds its
+  horizontal room to the midpoint between its own head and the nearest *other* head on either
+  side (floored at `MIN_CORRIDOR_WIDTH = 80`px so two close heads still leave a balloon
+  buildable), and measures + clamps the balloon's x *inside* that corridor before it's ever
+  drawn — rather than measuring at the full panel width and only then trying to reposition.
+  This is the same corridor idea `layoutBalloons` already uses, sized down for this fallback's
+  strict-vertical-stack (no need for the driver's order-dependent squeeze, since corridors here
+  are static, derived from face positions alone). Confining each straddling balloon to its own
+  corridor structurally prevents both reported overlaps at once: it can't cover a neighbour's
+  head (bounded by the midpoint), and its tail can't cross a neighbour's tail (tail root stays
+  inside the same bounded span). Left the thought-aside and caption branches as they were —
+  already defended by `clearOfFaces`, and out of scope for the reported bug.
+- Verified against the real screenshot's exact dialogue (all 4 panels, EN) rendered through
+  `renderPanel` at 363×309 with the real `pack-comic-chat` `dan`/`tiki` assets, before and
+  after: panel 1 (the reported one, `thought`+`speech`) went from a visible overlap to clean;
+  panels 2–4 (`speech`+`speech`) had no overlap either way and are unaffected. The existing
+  `test/output/panel-*.png` fixture (driver path, `UNIT` 400×340) is pixel-identical — this fix
+  only touches the fallback branch.
+
+### Verify
+
+- `pnpm build` / `pnpm test` — 27 tests, clean, no assertions needed updating.
+- Geometry dump (temporary script, not committed) of `dan`/`tiki` face boxes and balloon boxes
+  before/after, at the real 363×309 size, confirming the overlap numerically and its absence
+  after the fix.
+- Rendered all 4 real-dialogue panels to PNG and eyeballed each — no head or tail overlap.
+- Confirmed the identical bug exists in `grues-in-comic`'s `web/src/comic/render.ts`
+  `stackBalloons` (same structure, same missing `clearOfFaces` call on the speech-straddle
+  branch) — not yet ported; see `HANDOFF.md` Next Actions.
+
+### Status
+
+Published together with v0.7.10/v0.7.11 in one cascade: `@toonstrip/core@0.1.6` →
+`@toonstrip/element@0.1.7` → `@toonstrip/astro@0.1.10`, all live on npm. Port to
+`grues-in-comic` tracked separately — see its own `HANDOFF.md`/`WORKLOG.md`.
+
+---
+
 ## v0.7.8 — v0.7.6's fix wasn't enough: widen the `stackBalloons` fallback too
 
 **Date:** 2026-09-01

@@ -6,44 +6,45 @@ Cross-session context memory. Update this file at the end of every session.
 
 ## Current Version
 
-**0.7.8** (published)
+**0.7.11** published (core 0.1.6, element 0.1.7, astro 0.1.10) — see Last Session
 
 ---
 
 ## Project Status
 
 `toonstrip`: framework-embeddable canvas widget rendering a comic strip from
-caller-supplied data. Extraction + generalization of `grues-in-comic`'s comic pane,
-stripped of Zork/game/AI-inference coupling. M0–M6 done: all 7 `@toonstrip/*` packages
-published to npm — `schema` 0.1.3, `astro` 0.1.9, `element` 0.1.6, `core` 0.1.5,
-`cli`/packs 0.1.1 (per-package, not lockstep). M7 (introduction site + playground,
-deployed to toonstrip.danielkimdev.com) added as a new milestone, not yet started. Full
-history in `WORKLOG.md`.
+caller-supplied data, extracted/generalized from `grues-in-comic`'s comic pane (Zork/game/
+AI-inference coupling stripped). M0–M6 done: all 7 `@toonstrip/*` packages published to npm
+— `schema` 0.1.3, `astro` 0.1.10, `element` 0.1.7, `core` 0.1.6, `cli`/packs 0.1.1 (not
+lockstep). M7 (intro/playground) not started. Full history in `WORKLOG.md`.
 
 ---
 
 ## Last Session
 
-v0.7.6's balloon-width fix didn't fully solve the user's report — real embed size is
-363×309, not the 400×340 `UNIT` test fixtures, where the driver refuses most panels and
-falls back to `stackBalloons`, untouched by that fix (and slightly worsened by it).
-Widened the fallback's own `cap`/`WIDTH_BIAS` (v0.7.8), verified against real content at
-real size, ported to `grues-in-comic` (its WORKLOG v0.33.6), republished
-`core`/`element`/`astro`. `danielkimdev-astro` not yet bumped — next action.
+Three balloon-layout fixes, same session, **published together** (core 0.1.6 → element
+0.1.7 → astro 0.1.10, cascade verified resolving). **v0.7.9**: `stackBalloons` fallback
+overlapped a straddling speech balloon with a *neighbour's* head/tail — fixed w/
+`speakerCorridor`. **v0.7.10** root-causes the fallback: driver refused 2/4 real 2-speaker
+panels even at native `UNIT` size — fixed w/ `speakerCorridors`. **v0.7.11**, user-directed:
+layout constants (font, line height, chrome, margins) were fixed CSS px regardless of panel
+size — scaled by `width/UNIT.width` throughout. Fit rate now **4/4 uniformly 400px→260px**,
+tests clean (30). `grues-in-comic` port started but **blocked on this machine**: its ADR
+0008/`PITFALLS.md` mandate `gate:accept`/`density:accept` run only on macOS (host-specific
+font rasterization) — this session is Windows.
 
 ---
 
 ## Next Actions
 
-1. In `danielkimdev-astro`: bump `@toonstrip/astro` to `0.1.9`, rebuild, verify the real
-   blog post at its real embed width (not just a wide preview window) before pushing.
-2. Start M7: intro/playground site (§10 in `TOONSTRIP_DEV_PLAN.md`), deploy to
-   toonstrip.danielkimdev.com.
+1. `danielkimdev-astro`: bump to `@toonstrip/astro@0.1.10`, rebuild, verify real embed
+   width before pushing.
+2. `grues-in-comic` port: code/ADR on any machine; `gate`/`density` accept needs macOS.
+3. Start M7 (§10, `TOONSTRIP_DEV_PLAN.md`).
 
 ---
 
 ## Open Issues
 
-- M7 not started; toonstrip.danielkimdev.com not yet deployed.
-- `toonstrip pack validate` doesn't check for a missing torso, only a missing NEUTRAL
-  face; Playwright verify scripts are manual-only (`NOTES.md` M1–M5).
+- `toonstrip pack validate` misses a missing torso (checks NEUTRAL only); Playwright verify
+  scripts are manual-only (`NOTES.md` M1–M5).

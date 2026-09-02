@@ -9,10 +9,11 @@
 import type { Body, CameraPreset, Line, Panel } from "@toonstrip/schema";
 import { drawFigure, figureFor, newCycle, type Cast, type Figure, type PoseCycle } from "./figure.js";
 import type { EmotionOption } from "./emotion.js";
-import { BALLOON_FONT, drawBalloon, measureBalloon, type BalloonBox } from "./balloon.js";
+import { balloonFont, drawBalloon, measureBalloon, type BalloonBox } from "./balloon.js";
 import {
   canvasMetrics, layoutBalloons, type BalloonInput, type Rect,
 } from "./balloon-layout.js";
+import { UNIT } from "./layout.js";
 
 /** The bodiless caption channel — a line with no speaking body. */
 export const CAPTION = "caption";
@@ -158,6 +159,14 @@ export function renderPanel(
 ): void {
   const shot = SHOTS[panel.camera ?? "medium"];
   const cycles = options.cycles ?? new Map<string, PoseCycle>();
+  // Every fixed-CSS-px layout constant (font size, line height, chrome,
+  // margins) is expressed at native `UNIT` size and multiplied out by this
+  // factor. Without it a panel rendered smaller than native — the common
+  // case, since `layoutStrip` only ever shrinks to fit a real container, see
+  // `layout.ts` — reads its own text and chrome as relatively *larger* than
+  // native did, which starves the balloon layout of room it would have had
+  // at native size. See `WORKLOG.md` v0.7.11.
+  const uiScale = width / UNIT.width;
   // A speech or thought balloon needs a column beside the head; a caption is
   // a top box and does not, so a caption-only panel never shrinks its figures.
   const hasColumnBalloon = panel.speakers.some((line) => line.balloon !== "caption");
@@ -202,9 +211,9 @@ export function renderPanel(
 
   // Metadata, over the figures and under nothing: it owns its band, so it
   // can never be covered by a balloon or a body.
-  if (panel.roomTitle !== undefined) drawLocationTitle(ctx, panel.roomTitle, width);
+  if (panel.roomTitle !== undefined) drawLocationTitle(ctx, panel.roomTitle, width, uiScale);
 
-  drawBalloons(ctx, panel, width, height, placed, options.trace);
+  drawBalloons(ctx, panel, width, height, placed, uiScale, options.trace);
 
   // The panel border last, so nothing overdraws it.
   ctx.strokeStyle = "#000";
@@ -401,11 +410,11 @@ function drawBackdrop(
  */
 function drawBalloons(
   ctx: CanvasRenderingContext2D, panel: Panel, width: number, height: number,
-  placed: ReadonlyArray<PlacedBody>, trace?: PanelTrace,
+  placed: ReadonlyArray<PlacedBody>, scale: number, trace?: PanelTrace,
 ): void {
-  ctx.font = BALLOON_FONT;
-  const heads = headGeometry(placed);
-  const free = balloonRect(width, height, panel.roomTitle !== undefined);
+  ctx.font = balloonFont(scale);
+  const heads = headGeometry(placed, scale);
+  const free = balloonRect(width, height, panel.roomTitle !== undefined, scale);
 
   const inputs: BalloonInput[] = panel.speakers.map((balloon) => ({
     speaker: balloon.speaker,
@@ -416,13 +425,13 @@ function drawBalloons(
       ? null
       : (heads.anchors.get(balloon.speaker)?.x ?? null),
     text: balloon.text,
-    metrics: canvasMetrics(ctx, balloon),
+    metrics: canvasMetrics(ctx, balloon, scale),
   }));
 
-  const laid = layoutBalloons(inputs, free);
+  const laid = layoutBalloons(inputs, free, undefined, scale);
   if (!laid.fits) {
     if (trace) trace.stacked = true;
-    stackBalloons(ctx, panel, width, heads);
+    stackBalloons(ctx, panel, width, heads, scale);
     return;
   }
 
@@ -434,7 +443,7 @@ function drawBalloons(
     const target = isSpeech && face
       ? headEdgeTip(item.box, face)
       : (heads.anchors.get(balloon.speaker) ?? null);
-    drawBalloon(ctx, balloon, item.box, item.lines, target);
+    drawBalloon(ctx, balloon, item.box, item.lines, target, scale);
     trace?.balloons.push({
       speaker: balloon.speaker, box: item.box, lines: item.lines.length,
       tail: target ? { x: target.x, y: target.y } : null,
@@ -443,45 +452,53 @@ function drawBalloons(
 }
 
 /** The band balloons may occupy, from the panel's top down to {@link BALLOON_HEADROOM}. */
-export function balloonRect(width: number, height: number, titled = false): Rect {
+export function balloonRect(width: number, height: number, titled = false, scale = 1): Rect {
+  const margin = BALLOON_MARGIN * scale;
   return {
-    left: BALLOON_MARGIN,
+    left: margin,
     // A location title is metadata drawn over the top-left corner, so the
     // band gives way to it rather than a balloon landing on it.
-    top: BALLOON_MARGIN + (titled ? TITLE_HEIGHT : 0),
-    right: width - BALLOON_MARGIN,
+    top: margin + (titled ? TITLE_HEIGHT * scale : 0),
+    right: width - margin,
     bottom: height * BALLOON_HEADROOM,
   };
 }
 
-/** The inset from the panel border. */
+/** The inset from the panel border, at native scale. */
 export const BALLOON_MARGIN = 10;
 
-/** The location title's height, and the type it is set in. Not a balloon: no tail, no draw order. */
+/**
+ * The location title's height at native scale, and the type it is set in.
+ * Not a balloon: no tail, no draw order.
+ */
 export const TITLE_HEIGHT = 22;
-const TITLE_FONT = 'bold 12px "Comic Sans MS", "Comic Neue", ui-rounded, cursive';
+const TITLE_FONT_SIZE = 12;
+const TITLE_FONT_FAMILY = '"Comic Sans MS", "Comic Neue", ui-rounded, cursive';
 const TITLE_PAD = 6;
 
 /** Draw the location title, clipped to the panel's width. */
 export function drawLocationTitle(
-  ctx: CanvasRenderingContext2D, title: string, width: number,
+  ctx: CanvasRenderingContext2D, title: string, width: number, scale = 1,
 ): void {
   ctx.save();
-  ctx.font = TITLE_FONT;
-  const text = ctx.measureText(title).width > width - BALLOON_MARGIN * 2 - TITLE_PAD * 2
-    ? ellipsize(ctx, title, width - BALLOON_MARGIN * 2 - TITLE_PAD * 2)
+  ctx.font = `bold ${TITLE_FONT_SIZE * scale}px ${TITLE_FONT_FAMILY}`;
+  const margin = BALLOON_MARGIN * scale;
+  const pad = TITLE_PAD * scale;
+  const titleHeight = TITLE_HEIGHT * scale;
+  const text = ctx.measureText(title).width > width - margin * 2 - pad * 2
+    ? ellipsize(ctx, title, width - margin * 2 - pad * 2)
     : title;
-  const boxWidth = ctx.measureText(text).width + TITLE_PAD * 2;
+  const boxWidth = ctx.measureText(text).width + pad * 2;
   ctx.fillStyle = "#fff";
   ctx.strokeStyle = "#000";
   ctx.lineWidth = 1.5;
   ctx.beginPath();
-  ctx.rect(BALLOON_MARGIN, BALLOON_MARGIN, boxWidth, TITLE_HEIGHT);
+  ctx.rect(margin, margin, boxWidth, titleHeight);
   ctx.fill();
   ctx.stroke();
   ctx.fillStyle = "#000";
   ctx.textBaseline = "middle";
-  ctx.fillText(text, BALLOON_MARGIN + TITLE_PAD, BALLOON_MARGIN + TITLE_HEIGHT / 2);
+  ctx.fillText(text, margin + pad, margin + titleHeight / 2);
   ctx.restore();
 }
 
@@ -500,7 +517,7 @@ interface HeadGeometry {
 }
 
 /** Each on-stage head as a tail anchor and a keep-out box, in panel space. */
-function headGeometry(placed: ReadonlyArray<PlacedBody>): HeadGeometry {
+function headGeometry(placed: ReadonlyArray<PlacedBody>, scale = 1): HeadGeometry {
   // A balloon over a face is the one thing comics never do, so balloons
   // route *around* these; a speech tail lands on the box's near edge.
   const anchors = new Map<string, { x: number; y: number }>();
@@ -517,7 +534,7 @@ function headGeometry(placed: ReadonlyArray<PlacedBody>): HeadGeometry {
       // The crown anchor, used by *thought* balloons. Depth is a capped
       // fraction of head height so the cap stays in the hairline at any
       // scale — a speech tail does not use this, it lands via {@link headEdgeTip}.
-      y: item.y + Math.min(headH * 0.2, 16),
+      y: item.y + Math.min(headH * 0.2, 16 * scale),
     });
     const halfW = headH * 0.44;
     const box = { left: ax - halfW, right: ax + halfW, top: item.y, bottom: item.y + headH };
@@ -527,23 +544,59 @@ function headGeometry(placed: ReadonlyArray<PlacedBody>): HeadGeometry {
   return { anchors, faceBox, faces };
 }
 
+/** The floor a corridor may not shrink past, even between two close heads, at native scale. */
+const MIN_CORRIDOR_WIDTH = 80;
+
+/**
+ * The horizontal room a balloon straddling `ownFace` may use: bounded by the
+ * panel margins and, on each side, the midpoint to the nearest *other* head
+ * still on stage. A balloon confined to this can never grow wide enough to
+ * cover a neighbour's head or route a tail across a neighbour's — the two
+ * ways {@link stackBalloons} let a straddling balloon collide with anyone but
+ * its own speaker. Floored at {@link MIN_CORRIDOR_WIDTH} so two heads placed
+ * close together still leave a balloon buildable, at the cost of letting it
+ * bleed a little into the neighbour's half.
+ */
+function speakerCorridor(
+  ax: number, ownFace: Face, faces: readonly Face[], width: number, scale = 1,
+): { left: number; right: number } {
+  const margin = BALLOON_MARGIN * scale;
+  const minWidth = MIN_CORRIDOR_WIDTH * scale;
+  let left = margin;
+  let right = width - margin;
+  for (const f of faces) {
+    if (f === ownFace) continue;
+    const mid = (ax + (f.left + f.right) / 2) / 2;
+    if (f.left + f.right < ax * 2) left = Math.max(left, mid);
+    else right = Math.min(right, mid);
+  }
+  if (right - left < minWidth) {
+    const centre = (left + right) / 2;
+    left = Math.max(margin, centre - minWidth / 2);
+    right = Math.min(width - margin, left + minWidth);
+  }
+  return { left, right };
+}
+
 /**
  * The pre-driver vertical stack, kept as {@link drawBalloons}'s fallback for
  * a panel the layout driver refuses. Not the driver's algorithm — nothing
  * but the fallback path calls it.
  */
 function stackBalloons(
-  ctx: CanvasRenderingContext2D, panel: Panel, width: number, heads: HeadGeometry,
+  ctx: CanvasRenderingContext2D, panel: Panel, width: number, heads: HeadGeometry, scale = 1,
 ): void {
   const { anchors, faceBox, faces } = heads;
   const faceCentre = (f?: { left: number; right: number }) =>
     f ? (f.left + f.right) / 2 : null;
+  const margin = BALLOON_MARGIN * scale;
 
   // Empty margins, still used to float a *thought* aside off in open space;
   // a *speech* balloon straddles its speaker.
   const faceLeft = faces.length > 0 ? Math.min(...faces.map((f) => f.left)) : width;
   const faceRight = faces.length > 0 ? Math.max(...faces.map((f) => f.right)) : 0;
-  const asideSide: "left" | "right" = width - 10 - faceRight >= faceLeft - 10 ? "right" : "left";
+  const asideSide: "left" | "right" =
+    width - margin - faceRight >= faceLeft - margin ? "right" : "left";
 
   // The panel's balloons in draw order, each bound to its speaker's head:
   // the caption and any bodiless speaker route with no anchor, the rest straddle.
@@ -553,29 +606,44 @@ function stackBalloons(
     return { balloon, anchor, face, headX: faceCentre(face) };
   });
 
-  // Every balloon here gets the same cap regardless of how many share the
-  // panel: balloons are laid out in a strict vertical sequence (`y` only
-  // grows below), so unlike the driver's side-by-side corridors, there is no
-  // horizontal collision a narrower cap would prevent. An earlier version
-  // narrowed this to `width * 0.66` once a panel had more than one balloon,
-  // which bought nothing structurally and just made a wrapped balloon taller
-  // than it needed to be — tall enough, at real embed sizes, to overlap its
-  // own speaker's head (found on a live strip smaller than this renderer's
-  // own UNIT test fixtures; see UPSTREAM_SYNC.md).
-  const cap = width - 20;
+  // The general-purpose cap: balloons are laid out in a strict vertical
+  // sequence (`y` only grows below), so nothing here needs a narrower cap to
+  // avoid *balloon-vs-balloon* collision. A straddling speech balloon is
+  // different: it is deliberately centred over its own speaker's head, and a
+  // panel with two or more bodies on stage can put that head close enough to
+  // a neighbour's that a full-width balloon spills across the gap and covers
+  // the *other* head, or drops a tail that crosses the other balloon's — the
+  // one thing comics never do. An earlier version narrowed the shared cap to
+  // `width * 0.66` for that case, which bought nothing (it only guarded
+  // against balloon-vs-balloon, not balloon-vs-head) and just made a wrapped
+  // balloon taller, so it was widened back; the actual fix is
+  // {@link speakerCorridor}, capping each *straddling* balloon to the room
+  // around its own head instead of narrowing every balloon regardless of
+  // shape. See UPSTREAM_SYNC.md.
+  const cap = width - margin * 2;
   // The tail is capped, not stretched: a balloon docks near its head with a
   // short tail. We pin balloons to the panel top while figures stand at the
   // bottom, so `TAIL_MAX` drops a tailed balloon toward its head until the
   // tail is no longer than this, leaving the empty space above it.
-  const TAIL_MAX = 70;
+  const TAIL_MAX = 70 * scale;
+  const gap = 8 * scale;
 
-  let y = 8;
+  let y = gap;
   for (const item of queue) {
     const balloon = item.balloon;
     const isSpeech = balloon.balloon === "speech";
     // A thought balloon's scallops bulge outward; keep that bulge clear too.
-    const bulge = balloon.balloon === "thought" ? 14 : 0;
-    const measured = measureBalloon(ctx, balloon, cap);
+    const bulge = balloon.balloon === "thought" ? 14 * scale : 0;
+    // A straddling speech balloon is confined to the corridor around its own
+    // head before it is even measured, so its wrap can never grow wide
+    // enough to reach a neighbour's head or tail; every other kind keeps the
+    // full-width cap.
+    const corridor = isSpeech && item.headX !== null && item.face
+      ? speakerCorridor(item.headX, item.face, faces, width, scale)
+      : null;
+    const measured = measureBalloon(
+      ctx, balloon, corridor ? Math.min(cap, corridor.right - corridor.left) : cap, scale,
+    );
     // Drop a tailed balloon toward its speaker so the tail stays short. The
     // head top is the face box's top for speech, the crown anchor for a thought.
     const headTopY = item.face ? item.face.top : (item.anchor ? item.anchor.y : null);
@@ -583,25 +651,27 @@ function stackBalloons(
       y = Math.max(y, headTopY - TAIL_MAX - measured.height);
     }
     let x: number;
-    if (isSpeech && item.headX !== null) {
+    if (corridor && item.headX !== null) {
       // Straddle the speaker: the head's x sits inside the balloon's span,
       // so the bottom tail drops straight to it. The symmetric midpoint of
-      // the legal range is taken deterministically rather than rolled.
-      x = Math.max(10, Math.min(item.headX - measured.width / 2, width - measured.width - 10));
+      // the legal range is taken deterministically rather than rolled, and
+      // clamped to the corridor rather than the whole panel so it can't
+      // cross into a neighbouring head's territory.
+      x = Math.max(corridor.left, Math.min(item.headX - measured.width / 2, corridor.right - measured.width));
     } else if (balloon.balloon === "caption") {
-      x = 10; // a caption is a top box, pinned left, spoken by nobody.
+      x = margin; // a caption is a top box, pinned left, spoken by nobody.
     } else {
       // A thought aside floats in the roomier margin, clear of every face.
-      x = asideSide === "right" ? width - measured.width - 10 : 10;
-      x = clearOfFaces(x, y, measured.width, measured.height, bulge, faces, width);
+      x = asideSide === "right" ? width - measured.width - margin : margin;
+      x = clearOfFaces(x, y, measured.width, measured.height, bulge, faces, width, scale);
     }
     const box: BalloonBox = { x, y, width: measured.width, height: measured.height };
     // A speech tail lands on the head's silhouette nearest the balloon (its
     // crown, since the balloon straddles from above); a thought aside keeps
     // the crown anchor.
     const target = isSpeech && item.face ? headEdgeTip(box, item.face) : item.anchor;
-    drawBalloon(ctx, balloon, box, measured.lines, target);
-    y += measured.height + 8;
+    drawBalloon(ctx, balloon, box, measured.lines, target, scale);
+    y += measured.height + gap;
   }
 }
 
@@ -631,21 +701,24 @@ function headEdgeTip(box: BalloonBox, face: Face): { x: number; y: number } {
 export function clearOfFaces(
   x: number, y: number, w: number, h: number, bulge: number,
   faces: ReadonlyArray<{ left: number; right: number; top: number; bottom: number }>,
-  width: number,
+  width: number, scale = 1,
 ): number {
+  const margin = BALLOON_MARGIN * scale;
+  const tailReach = 24 * scale;
+  const gap = 6 * scale;
   for (const f of faces) {
     const top = y - bulge;
-    const bottom = y + h + bulge + 24; // the tail can reach below the box
+    const bottom = y + h + bulge + tailReach; // the tail can reach below the box
     if (bottom <= f.top || top >= f.bottom) continue; // clears vertically
     const left = x - bulge;
     const right = x + w + bulge;
     if (right <= f.left || left >= f.right) continue; // already clears horizontally
-    const toRight = f.right + bulge + 6 - left; // x delta to sit right of the head
-    const toLeft = f.left - bulge - 6 - right; // (negative) to sit left of it
-    const canRight = x + toRight + w + 10 <= width;
-    const canLeft = x + toLeft >= 10;
+    const toRight = f.right + bulge + gap - left; // x delta to sit right of the head
+    const toLeft = f.left - bulge - gap - right; // (negative) to sit left of it
+    const canRight = x + toRight + w + margin <= width;
+    const canLeft = x + toLeft >= margin;
     if (canRight && (!canLeft || toRight <= -toLeft)) x += toRight;
     else if (canLeft) x += toLeft;
   }
-  return Math.max(10, Math.min(x, width - w - 10));
+  return Math.max(margin, Math.min(x, width - w - margin));
 }

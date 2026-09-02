@@ -1,6 +1,6 @@
 {
   "name": "@toonstrip/element",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "<comic-strip>, a zero-framework-deps custom element for embedding toonstrip comic strips.",
   "license": "MIT",
   "type": "module",
