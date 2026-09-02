@@ -11,6 +11,9 @@ emotion as data (by hand, by script, by calling an LLM yourself); toonstrip
 only renders it. See `TOONSTRIP_DEV_PLAN.md` §0 for the full list of
 non-goals.
 
+**Site:** [toonstrip.danielkimdev.com](https://toonstrip.danielkimdev.com) — intro,
+docs, playground, changelog. Source in `site/`.
+
 ## Packages
 
 | Package | What it is |
@@ -21,8 +24,9 @@ non-goals.
 | `packages/astro` | An Astro integration + `<ComicStrip>` component wrapping `element` |
 | `packages/pack-comic-chat` | The default asset pack: the original 15-character Comic Chat roster + 3 backdrops (MIT, see its `NOTICE`) |
 | `packages/pack-example` | A second, small, wholly original pack proving the pack contract isn't coupled to `pack-comic-chat` |
-| `packages/cli` | The `toonstrip` CLI (`pack validate`, and later the static-PNG fallback) |
+| `packages/cli` | The `toonstrip` CLI (`pack validate`, `render` to PNG) |
 | `examples/astro-blog` | A minimal Astro site embedding a live strip in a blog post |
+| `site` | toonstrip.danielkimdev.com (Astro; deployed by Cloudflare Pages on push) |
 
 Dependency direction is one-way: `schema → core → element → astro`. Asset
 packs depend on `schema` only.
