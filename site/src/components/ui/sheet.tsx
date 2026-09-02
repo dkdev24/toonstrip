@@ -7,7 +7,7 @@ export const Sheet = SheetPrimitive.Root as any;
 export const SheetTrigger = SheetPrimitive.Trigger as any;
 export const SheetClose = SheetPrimitive.Close as any;
 
-export function SheetContent({ className, children, side = "bottom", title, ...props }: any) {
+export function SheetContent({ className, class: cls, children, side = "bottom", title, ...props }: any) {
   return (
     <SheetPrimitive.Portal>
       <SheetPrimitive.Overlay className="fixed inset-0 z-50 bg-black/40" />
@@ -19,6 +19,7 @@ export function SheetContent({ className, children, side = "bottom", title, ...p
           side === "right" && "inset-y-0 right-0 w-3/4 max-w-sm border-l border-border",
           side === "left" && "inset-y-0 left-0 w-3/4 max-w-sm border-r border-border",
           className,
+        cls,
         )}
         {...props}
       >

@@ -2,23 +2,24 @@
 import * as TabsPrimitive from "@radix-ui/react-tabs";
 import { cn } from "../../lib/utils";
 
-export function Tabs({ className, ...props }: any) {
-  return <TabsPrimitive.Root className={cn("flex flex-col gap-2", className)} {...props} />;
+export function Tabs({ className, class: cls, ...props }: any) {
+  return <TabsPrimitive.Root className={cn("flex flex-col gap-2", className, cls)} {...props} />;
 }
 
-export function TabsList({ className, ...props }: any) {
+export function TabsList({ className, class: cls, ...props }: any) {
   return (
     <TabsPrimitive.List
       className={cn(
         "inline-flex h-9 w-fit items-center justify-center gap-1 rounded-md bg-muted p-1 text-muted-foreground",
         className,
+      cls,
       )}
       {...props}
     />
   );
 }
 
-export function TabsTrigger({ className, ...props }: any) {
+export function TabsTrigger({ className, class: cls, ...props }: any) {
   return (
     <TabsPrimitive.Trigger
       className={cn(
@@ -26,12 +27,13 @@ export function TabsTrigger({ className, ...props }: any) {
         "hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50",
         "data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-md [&_svg]:size-4",
         className,
+      cls,
       )}
       {...props}
     />
   );
 }
 
-export function TabsContent({ className, ...props }: any) {
-  return <TabsPrimitive.Content className={cn("flex-1 outline-none", className)} {...props} />;
+export function TabsContent({ className, class: cls, ...props }: any) {
+  return <TabsPrimitive.Content className={cn("flex-1 outline-none", className, cls)} {...props} />;
 }

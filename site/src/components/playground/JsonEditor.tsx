@@ -1,4 +1,5 @@
 /** CodeMirror 6 JSON editor bound to the shared document (SITE_DEV_PLAN.md §6.2, DESIGN.md §6.3). */
+import type { ComponentChildren } from "preact";
 import { useEffect, useRef } from "preact/hooks";
 import { useSignalEffect } from "@preact/signals";
 import { EditorView, keymap, lineNumbers, highlightActiveLine } from "@codemirror/view";
@@ -18,7 +19,7 @@ const highlight = HighlightStyle.define([
 import { lintGutter, setDiagnostics, type Diagnostic } from "@codemirror/lint";
 import { jsonText, jsonProblems, lastSource, applyJson, doc, pretty, setDoc } from "../../lib/playground/state";
 
-export function JsonEditor() {
+export function JsonEditor({ actions }: { actions?: ComponentChildren }) {
   const host = useRef<HTMLDivElement>(null);
   const view = useRef<EditorView | null>(null);
   const timer = useRef<number | undefined>(undefined);
@@ -93,6 +94,7 @@ export function JsonEditor() {
           >
             Copy
           </button>
+          {actions}
         </span>
       </div>
       <div class="pg-editor__host" ref={host} />

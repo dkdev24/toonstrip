@@ -5,83 +5,7 @@
   color: var(--ink-2);
 }
 
-.pg {
-  flex: 1;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  grid-template-rows: auto minmax(0, 1fr);
-  min-height: 0;
-  position: relative;
-}
-
-@media (min-width: 900px) {
-  .pg {
-    grid-template-columns: minmax(22rem, 2fr) minmax(0, 3fr);
-    grid-template-rows: minmax(0, 1fr);
-    height: calc(100dvh - var(--header-height));
-  }
-}
-
-/* Tabs (narrow only) */
-.pg-tabs {
-  display: flex;
-  gap: var(--space-8);
-  align-items: center;
-  padding: var(--space-8) var(--space-16);
-  border-bottom: 1px solid var(--rule);
-  background: var(--paper);
-  position: sticky;
-  top: var(--header-height);
-  z-index: 20;
-}
-.pg-tabs__list {
-  display: flex;
-  gap: var(--space-8);
-}
-.pg-tabs__peek {
-  margin-left: auto;
-}
-@media (min-width: 900px) {
-  .pg-tabs {
-    display: none;
-  }
-}
-
-.pg-left {
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-  border-right: 1px solid var(--rule);
-}
-
-.pg-pane {
-  display: none;
-  min-height: 0;
-  flex-direction: column;
-}
-.pg-pane.is-active {
-  display: flex;
-}
-@media (min-width: 900px) {
-  .pg-pane {
-    display: flex;
-  }
-  .pg-pane--form {
-    flex: 1 1 60%;
-  }
-  .pg-pane--json {
-    flex: 1 1 40%;
-    border-top: 1px solid var(--rule);
-  }
-  .pg-pane--json.is-collapsed {
-    flex: 0 0 auto;
-  }
-}
-.pg-pane__scroll {
-  overflow: auto;
-  min-height: 0;
-  padding: var(--space-16);
-}
+/* Pane header bar (JsonEditor; the shell's bars are Tailwind in Playground.tsx) */
 .pg-pane__bar {
   display: flex;
   align-items: center;
@@ -95,53 +19,6 @@
   margin-left: auto;
   display: flex;
   gap: var(--space-4);
-}
-.pg-pane__toggle {
-  display: none;
-  border: 0;
-  background: var(--paper-sunken);
-  color: var(--link);
-  font: inherit;
-  font-size: var(--text-caption);
-  font-weight: 500;
-  padding: var(--space-8) var(--space-16);
-  text-align: left;
-  cursor: pointer;
-}
-@media (min-width: 900px) {
-  .pg-pane__toggle {
-    display: block;
-  }
-}
-
-/* Bottom sheet on narrow screens */
-.pg-pane--preview.is-sheet {
-  display: flex;
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 55dvh;
-  z-index: 40;
-  background: var(--paper);
-  border-top: 1px solid var(--rule);
-  box-shadow: var(--shadow);
-  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-}
-.pg-sheet__close {
-  align-self: flex-end;
-  margin: var(--space-8) var(--space-8) 0;
-}
-@media (min-width: 900px) {
-  .pg-pane--preview.is-sheet {
-    position: static;
-    height: auto;
-    box-shadow: none;
-    border-radius: 0;
-  }
-  .pg-sheet__close {
-    display: none;
-  }
 }
 
 /* Form */
@@ -491,7 +368,7 @@
 }
 .pg-editor__host {
   flex: 1;
-  min-height: 12rem;
+  min-height: 0;
   overflow: auto;
 }
 .pg-editor .cm-editor {

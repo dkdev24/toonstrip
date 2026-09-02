@@ -2,16 +2,16 @@
 import * as ToggleGroupPrimitive from "@radix-ui/react-toggle-group";
 import { cn } from "../../lib/utils";
 
-export function ToggleGroup({ className, ...props }: any) {
+export function ToggleGroup({ className, class: cls, ...props }: any) {
   return (
     <ToggleGroupPrimitive.Root
-      className={cn("inline-flex w-fit items-center rounded-md border border-border bg-card p-0.5", className)}
+      className={cn("inline-flex w-fit items-center rounded-md border border-border bg-card p-0.5", className, cls)}
       {...props}
     />
   );
 }
 
-export function ToggleGroupItem({ className, ...props }: any) {
+export function ToggleGroupItem({ className, class: cls, ...props }: any) {
   return (
     <ToggleGroupPrimitive.Item
       className={cn(
@@ -19,6 +19,7 @@ export function ToggleGroupItem({ className, ...props }: any) {
         "hover:text-foreground focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50",
         "data-[state=on]:bg-primary data-[state=on]:text-primary-foreground [&_svg]:pointer-events-none [&_svg]:size-4",
         className,
+      cls,
       )}
       {...props}
     />

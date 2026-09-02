@@ -131,7 +131,7 @@ Configure or JSON. This is the current mobile behaviour on new primitives.
 | # | Work | Gate | Estimate |
 |---|---|---|---|
 | 1 | **Done.** Spike: `compat: true`, Tailwind v4 scoped, all eleven ui components on the `kitchen-sink` page. | Passed, see §2.1. | Half a day. Decided: shadcn on compat, with Slider and Resizable replaced. |
-| 2 | New shell: `Playground.tsx` becomes the two-level `ResizablePanelGroup` with pane headers; mobile `Tabs` and `Sheet`. Delete the old grid rules from `playground.css`. | No page scroll at 1280×720, 1440×900, 390×844. Split ratios survive reload. | 1 day |
+| 2 | **Done.** New shell: `Playground.tsx` is the two-level `ResizablePanelGroup` with pane headers; mobile `Tabs` and `Sheet`; JSON collapses to a 36 px bar. Old grid rules removed from `playground.css`. | Passed: e2e "shell:" test covers the three viewports, split drag persistence, and collapse. Shell clips with `overflow-hidden`: the form's scroll container alone still let the document grow. | 1 day |
 | 3 | Configure pane: per-panel `Tabs`, Strip tab, panel footer actions; preview click activates the tab. | Existing e2e passes unchanged; add a test for tab ↔ preview selection sync. | 1 day |
 | 4 | Swap remaining controls (pickers, camera, pose, speaker, balloon, presets, Export menu) onto the ui components; remove dead CSS. | `axe` clean; `playground.spec.ts` green; keyboard-only 2-panel authoring still passes. | 1 day |
 | 5 | Docs: rewrite `DESIGN.md` §6.1 and `SITE_DEV_PLAN.md` §6.1 to this layout; add the `ui/` folder to §3 of the site plan; `WORKLOG.md` entry; bump site to 0.9.0. | `HANDOFF.md` under 50 lines. | 1 hour |

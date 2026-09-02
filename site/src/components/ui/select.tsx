@@ -7,13 +7,14 @@ export const Select = SelectPrimitive.Root as any;
 export const SelectGroup = SelectPrimitive.Group as any;
 export const SelectValue = SelectPrimitive.Value as any;
 
-export function SelectTrigger({ className, children, ...props }: any) {
+export function SelectTrigger({ className, class: cls, children, ...props }: any) {
   return (
     <SelectPrimitive.Trigger
       className={cn(
         "flex h-9 w-full items-center justify-between gap-2 rounded-md border border-input bg-card px-3 text-sm whitespace-nowrap text-foreground outline-none",
         "focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 data-[placeholder]:text-muted-foreground [&>span]:truncate",
         className,
+      cls,
       )}
       {...props}
     >
@@ -25,7 +26,7 @@ export function SelectTrigger({ className, children, ...props }: any) {
   );
 }
 
-export function SelectContent({ className, children, position = "popper", ...props }: any) {
+export function SelectContent({ className, class: cls, children, position = "popper", ...props }: any) {
   return (
     <SelectPrimitive.Portal>
       <SelectPrimitive.Content
@@ -34,6 +35,7 @@ export function SelectContent({ className, children, position = "popper", ...pro
           "relative z-50 max-h-(--radix-select-content-available-height) min-w-32 overflow-hidden rounded-md border border-border bg-popover text-popover-foreground shadow-md",
           position === "popper" && "data-[side=bottom]:translate-y-1 data-[side=top]:-translate-y-1 w-full min-w-(--radix-select-trigger-width)",
           className,
+        cls,
         )}
         {...props}
       >
@@ -49,17 +51,18 @@ export function SelectContent({ className, children, position = "popper", ...pro
   );
 }
 
-export function SelectLabel({ className, ...props }: any) {
-  return <SelectPrimitive.Label className={cn("px-2 py-1.5 text-xs text-muted-foreground", className)} {...props} />;
+export function SelectLabel({ className, class: cls, ...props }: any) {
+  return <SelectPrimitive.Label className={cn("px-2 py-1.5 text-xs text-muted-foreground", className, cls)} {...props} />;
 }
 
-export function SelectItem({ className, children, ...props }: any) {
+export function SelectItem({ className, class: cls, children, ...props }: any) {
   return (
     <SelectPrimitive.Item
       className={cn(
         "relative flex w-full cursor-default items-center gap-2 rounded-sm py-1.5 pr-8 pl-2 text-sm outline-none select-none",
         "focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
         className,
+      cls,
       )}
       {...props}
     >
@@ -73,6 +76,6 @@ export function SelectItem({ className, children, ...props }: any) {
   );
 }
 
-export function SelectSeparator({ className, ...props }: any) {
-  return <SelectPrimitive.Separator className={cn("-mx-1 my-1 h-px bg-border", className)} {...props} />;
+export function SelectSeparator({ className, class: cls, ...props }: any) {
+  return <SelectPrimitive.Separator className={cn("-mx-1 my-1 h-px bg-border", className, cls)} {...props} />;
 }

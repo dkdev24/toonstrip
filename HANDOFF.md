@@ -19,16 +19,16 @@ integration. Push to `main` deploys production; other branches get a preview URL
 
 ## Last Session
 
-2026-09-03: wrote `PLAYGROUND_UI_PLAN.md` (preview full-width bottom, Configure left /
-JSON right, per-panel tabs, shadcn/ui on preact/compat) and finished its step 1 spike:
+2026-09-03: `PLAYGROUND_UI_PLAN.md` written; steps 1 and 2 done. Step 1: shadcn/ui on
 `preact({ compat: true })`, Tailwind v4 scoped to the island, eleven `site/src/components/ui/`
-components checked on the kitchen sink. Radix Slider and react-resizable-panels do not
-work on compat and were replaced (plan §2.1). Playground budget 134.5 KB of 450 KB.
+components (Radix Slider and react-resizable-panels replaced, plan §2.1). Step 2: new shell
+in `Playground.tsx`: Configure | JSON over a full-width Preview with draggable, persisted
+splits; tabs + sheet under 900 px; JSON collapses to a bar. e2e "shell:" test added.
 
 ## Next Actions
 
-1. Playground UI renewal, `PLAYGROUND_UI_PLAN.md` steps 2-5 (shell, per-panel tabs,
-   control swap, docs). Step 1 is done; §2.1 lists the compat rules to follow.
+1. Playground UI renewal, `PLAYGROUND_UI_PLAN.md` steps 3-5 (per-panel tabs in the
+   Configure pane, control swap onto `ui/`, docs). §2.1 lists the compat rules.
 2. M8-M13 per `TOONSTRIP_DEV_PLAN.md` §13: vanilla-HTML/SSG docs + agent skill first
    (no dependencies), then React/Vue wrappers, then Next.js, then general SSR.
 3. **S9 Korean locale** per `SITE_DEV_PLAN.md` §13, after 1 and 2 land.

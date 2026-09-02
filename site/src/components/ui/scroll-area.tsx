@@ -2,9 +2,9 @@
 import * as ScrollAreaPrimitive from "@radix-ui/react-scroll-area";
 import { cn } from "../../lib/utils";
 
-export function ScrollArea({ className, children, ...props }: any) {
+export function ScrollArea({ className, class: cls, children, ...props }: any) {
   return (
-    <ScrollAreaPrimitive.Root className={cn("relative min-h-0 overflow-hidden", className)} {...props}>
+    <ScrollAreaPrimitive.Root className={cn("relative min-h-0 overflow-hidden", className, cls)} {...props}>
       <ScrollAreaPrimitive.Viewport className="size-full rounded-[inherit] outline-none focus-visible:ring-2 focus-visible:ring-ring [&>div]:!block">
         {children}
       </ScrollAreaPrimitive.Viewport>
@@ -14,7 +14,7 @@ export function ScrollArea({ className, children, ...props }: any) {
   );
 }
 
-export function ScrollBar({ className, orientation = "vertical", ...props }: any) {
+export function ScrollBar({ className, class: cls, orientation = "vertical", ...props }: any) {
   return (
     <ScrollAreaPrimitive.ScrollAreaScrollbar
       orientation={orientation}
@@ -23,6 +23,7 @@ export function ScrollBar({ className, orientation = "vertical", ...props }: any
         orientation === "vertical" && "h-full w-2.5 border-l border-l-transparent",
         orientation === "horizontal" && "h-2.5 flex-col border-t border-t-transparent",
         className,
+      cls,
       )}
       {...props}
     >

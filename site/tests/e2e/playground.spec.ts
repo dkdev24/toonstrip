@@ -121,3 +121,37 @@ test("PNG export produces a non-blank image", async ({ page }) => {
   const { statSync } = await import("node:fs");
   expect(statSync(path!).size).toBeGreaterThan(20_000);
 });
+
+test("shell: no page scroll at three viewports; split ratio and JSON collapse survive reload", async ({ page }) => {
+  for (const [width, height] of [[1280, 720], [1440, 900], [390, 844]] as const) {
+    await page.setViewportSize({ width, height });
+    await page.goto("/playground/");
+    await expect(strip(page).first().or(page.getByRole("tab", { name: "Configure" }))).toBeVisible();
+    const scroll = await page.evaluate(() => {
+      window.scrollTo(0, 99999);
+      return { y: scrollY, doc: document.documentElement.scrollHeight, inner: innerHeight };
+    });
+    expect(scroll.y, `${width}x${height}`).toBe(0);
+    expect(scroll.doc, `${width}x${height}`).toBeLessThanOrEqual(scroll.inner);
+  }
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await page.goto("/playground/");
+  const configure = page.locator("section[aria-label=Configure]");
+  const before = (await configure.boundingBox())!.width;
+  const handle = page.getByRole("separator", { name: "Resize Configure and JSON" });
+  const hb = (await handle.boundingBox())!;
+  await page.mouse.move(hb.x, hb.y + 100);
+  await page.mouse.down();
+  await page.mouse.move(hb.x + 150, hb.y + 100, { steps: 5 });
+  await page.mouse.up();
+  await expect.poll(async () => Math.round((await configure.boundingBox())!.width - before)).toBe(150);
+  await page.getByRole("button", { name: "Collapse JSON" }).click();
+  await expect(page.locator("section[aria-label=JSON]")).toHaveCount(0);
+  // beforeEach clears localStorage on every navigation, so assert what the shell
+  // stores instead of reloading: the split ratio and the collapsed flag.
+  const stored = await page.evaluate(() => ({ h: JSON.parse(localStorage.getItem("pg-split-h") ?? "null"), open: localStorage.getItem("pg-json-open") }));
+  expect(stored.open).toBe("false");
+  expect(stored.h?.[0]).toBeGreaterThan(50);
+  await page.getByRole("button", { name: "Expand JSON" }).click();
+  await expect.poll(async () => Math.round((await configure.boundingBox())!.width - before)).toBe(150);
+});
