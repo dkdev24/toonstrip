@@ -37,9 +37,11 @@ domain. Published `@toonstrip/cli@0.2.0`. Package READMEs link to the site, CHAN
 1. **Daniel:** copy pass in his voice over
    `site/src/pages/index.astro` and `site/src/content/docs/*.mdx`. Link to the site from
    `danielkimdev.com`.
-2. `danielkimdev-astro` bump to `@toonstrip/astro@0.1.10`; `grues-in-comic` port of the
+2. **S9 Korean locale** per `SITE_DEV_PLAN.md` §13 (EN root, KO under `/ko/`, model copied
+   from `danielkimdev-astro`). Start with config + `src/i18n` + wrappers, then docs, strips.
+3. `danielkimdev-astro` bump to `@toonstrip/astro@0.1.10`; `grues-in-comic` port of the
    `packages/core` fixes (`UPSTREAM_SYNC.md`).
-3. Only if usage warrants: per-page OG images via `toonstrip render`, Pagefind, short-link
+4. Only if usage warrants: per-page OG images via `toonstrip render`, Pagefind, short-link
    Worker (`SITE_DEV_PLAN.md` §9).
 ---
 

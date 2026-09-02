@@ -73,8 +73,9 @@ Rules:
 | `--font-mono` | JetBrains Mono (Google) | `ui-monospace, Menlo, monospace` | Code, JSON editor, version badge, numeric fields |
 
 Loaded through Astro's `fonts` API, self-hosted at build; preload display and body only.
-Weights: display 500/700; body 400/500/700; mono 400/500. No italic display. If Korean
-pages are ever added, use Pretendard as on the parent site.
+Weights: display 500/700; body 400/500/700; mono 400/500. No italic display. Korean pages
+(`SITE_DEV_PLAN.md` §13, S9) add Pretendard as `--font-body-ko`, preloaded only on `/ko/`
+routes, with `:lang(ko)` line-height 1.7 and `word-break: keep-all`.
 
 ### 3.1 Scale (fluid, `clamp()`)
 

@@ -99,7 +99,7 @@ site/
       demo/       CodeAndStrip.astro   # docs' "JSON on the left, live strip on the right"
       playground/                      # the island (§6): editor, form, preview, share
     content/
-      docs/       *.mdx                # content collection, ordered by frontmatter `order`
+      docs/       *.mdx                # content collection, ordered by frontmatter `order`; S9: docs/{en,ko}/ (§13.3)
       strips/     *.json               # every strip shown in docs/landing; single source
     data/         changelog.ts         # build-time loader for ../../CHANGELOG.md
     lib/          share.ts             # URL-hash encode/decode, shared by docs + playground
@@ -126,6 +126,7 @@ wrangler.toml     # at the REPO ROOT: name = "toonstrip", pages_build_output_dir
 | Fonts | Astro `fonts` API (Google provider), families per `DESIGN.md` §3 | Same mechanism as the sibling site; self-hosted at build. |
 | Analytics | Cloudflare Web Analytics beacon, cookie-less | Matches the platform; no consent banner needed. |
 | Hosting | Cloudflare Pages via GitHub integration (push to `main` deploys, other branches preview), custom domain `toonstrip.danielkimdev.com` | Identical to how `danielkimdev.com` and `grues.danielkimdev.com` deploy. §9. |
+| i18n | Astro native i18n, EN at root, KO under `/ko/`, `src/i18n` dictionaries copied from `danielkimdev-astro` (§13) | Same model as the parent site so one visitor sees one behaviour across subdomains. Added post-launch as S9. |
 
 ## 4. Intro page (`/`)
 
@@ -329,6 +330,8 @@ Preact; the rest of the site ships no framework JS.
 - **Robustness**: root `pnpm build` on a clean checkout builds the packages and then
   the site, which is exactly what the Pages build runs; CI proves it on every push.
 - **Privacy**: no cookies, no third-party scripts beyond the Cloudflare beacon.
+- **Locales**: English at the root, Korean under `/ko/` (§13, S9). Every component that
+  renders a display string reads it from `src/i18n` once S9 lands.
 
 ## 9. Deployment (Cloudflare Pages)
 
@@ -396,11 +399,12 @@ Each phase ends with the site building, deploying to the `pages.dev` preview, an
 | S6 | Polish: a11y audit across pages, reduced motion, performance budgets enforced by a size-check script in CI, static OG image, sitemap/robots, Pagefind if warranted, final copy pass in the author's voice. | Budgets pass in CI; axe reports zero violations; copy reviewed by the author. |
 | S7 (optional) | `toonstrip render` in `@toonstrip/cli` (dev plan §8) via `@napi-rs/canvas`; per-page OG images built from each page's first strip; `<noscript>` fallback image in `CodeAndStrip`. | `toonstrip render doc.json --out strip.png` works; OG images generated at build. Skip if it threatens S8; it is not on the launch path. |
 | S8 | Launch: attach `toonstrip.danielkimdev.com`, enable analytics, README and npm READMEs link to the site, `danielkimdev.com` links across, `HANDOFF.md` records the URL and deploy procedure. | The dev plan's M7 exit criterion verbatim: subdomain live, presents the project, a visitor can try the component in the playground without installing anything. |
+| S9 (post-launch) | Korean locale (§13): Astro i18n config, `src/i18n`, KO page wrappers, docs `{en,ko}` folders with fallback, KO strips, playground strings, language toggle, hreflang, Pretendard. | §13.6 exit criteria. |
 
 Sequence S0→S1→S2 strictly. S3 and S4 can proceed in parallel after S1; they share only
 the hash format in `src/lib/share.ts`, which S1 fixes so both sides build against it. S5
 is independent and small. S6 follows S2–S5. S7 is optional and may run any time after S1.
-S8 is last.
+S8 is last of the launch sequence; S9 follows launch and depends only on S8.
 
 ## 11. Testing
 
@@ -430,6 +434,109 @@ S8 is last.
 - **Docs prose ownership**: the author writes final copy; agents draft. Budget the
   author's review time in S2 and S6 explicitly.
 - **Short links** (§9): decide after launch from real sharing behaviour.
+- **KO strips double the strip count** (§13.3). Translated dialogue can run longer than
+  English and trip the balloon-overflow path; the parity script checks structure, and
+  Daniel reviews each KO strip rendered at 360 px before it ships.
+- **Generated `aria-label` is English** on KO pages until `@toonstrip/element` grows a
+  locale option (§13.5). Documented, not blocking.
 - **`workspace:*` vs published versions**: the site dogfoods `main` and the version
   badge is honest about it. If a docs example ever depends on an unpublished fix, hold
   the site deploy until the publish rather than pinning the site to npm.
+
+## 13. Internationalization (EN root, KO under `/ko/`) — post-launch, S9
+
+Added 2026-09-02 after launch. The site was built English-only; this section specifies
+the Korean locale as its own phase (S9 in §10). The model is a straight copy of
+`danielkimdev-astro` (its PRD §7 and `src/i18n/`), so the two sites behave the same for
+the same visitor.
+
+### 13.1 Routing and config
+
+- Astro native i18n: `i18n: { defaultLocale: "en", locales: ["en", "ko"], routing: {
+  prefixDefaultLocale: false } }`. English is served at the root exactly as today; Korean
+  under `/ko/…`. No existing URL changes; `/ko/`, `/ko/docs/…`, `/ko/playground/`,
+  `/ko/changelog/` are new.
+- No blocking redirect on `/`. The parent site does not auto-redirect either; the header
+  language link is the way across. Remember the last choice in `localStorage` (`lang`,
+  the parent's key) so the toggle can point straight at the counterpart.
+- `sitemap({ i18n: { defaultLocale: "en", locales: { en: "en", ko: "ko" } } })` so the
+  sitemap carries `xhtml:link` alternates, as the parent does.
+- Pages: every EN route gets a thin KO wrapper under `src/pages/ko/` that passes
+  `lang="ko"` to a shared page component (the parent's `HomePage.astro` +
+  `pages/ko/index.astro` pattern). `index.astro` becomes `components/pages/IntroPage.astro`
+  with a `lang` prop; likewise the docs index, `changelog.astro`, `playground.astro`, and
+  `404.astro`. Feeds, `llms*.txt`, `kitchen-sink`, and the OG image stay EN-only and
+  unprefixed.
+
+### 13.2 UI strings
+
+- `src/i18n/{en.json,ko.json}` + `src/i18n/utils.ts` copied from the parent: nested dot-path
+  keys, `useTranslations(lang)`, `getLangFromUrl`, `getLocalizedPath`, and `ko satisfies
+  typeof en` so key parity is a compile error. No display string is hardcoded in a
+  component once S9 lands; a grep in CI fails on a bare English string in `Header`,
+  `Footer`, `Docs`, `CodeAndStrip`, `WidthSlider`.
+- The docs sidebar section names (`Start`, `Authoring`, `Integrate`, `Reference`) stay
+  the enum in `content.config.ts` and gain a label map in the dictionaries.
+- **Playground island**: the Preact components take a `strings` prop, the dictionary
+  slice for the playground, passed from the page so the island bundle carries only one
+  language. About 40 strings across `PanelForm`, `Preview`, `EmotionWheel`, `Playground`.
+  Emotion names in the wheel come from `@toonstrip/core` in English; KO shows a
+  translated label with the English id in mono beside it, because the id is what goes
+  into the JSON.
+
+### 13.3 Content
+
+- **Docs** move to `src/content/docs/{en,ko}/*.mdx` with the same file names; the
+  collection gains `lang` (derived from the folder) and the KO route is
+  `src/pages/ko/docs/[...slug].astro`. A KO page that does not exist yet falls back: the
+  KO route renders the EN entry with a "not translated yet" callout, so the language
+  link never 404s (parent PRD §7.3). `docs-nav` filters by `lang`.
+- **Strips** are content, not chrome. Each `src/content/strips/<name>.json` may have a
+  `src/content/strips/ko/<name>.json` counterpart with translated dialogue and the same
+  panel structure; `CodeAndStrip`, the intro page, and the playground presets pick the
+  KO file when it exists and the EN file otherwise. Translated strips keep the same
+  `bodies` order (first speaker on the left) and roughly the same text length per
+  balloon; `validate-strips.mjs` checks structure parity (panel count, bodies, speakers)
+  between each pair.
+- **Intro page** copy, use-case blurbs, and the "why not an image" table become
+  dictionary strings; the strips embedded there follow the strips rule above.
+- **Changelog** stays a single English `CHANGELOG.md`. `/ko/changelog/` renders the same
+  entries under KO chrome with a one-line note that release notes are English-only.
+- **Schema reference** is generated from `schema.json` descriptions, which are English
+  and are also what ajv reports in the playground. `/ko/docs/schema-reference/` shows the
+  English descriptions unchanged; no translated sidecar.
+- `llms.txt` / `llms-full.txt` index the EN docs only.
+
+### 13.4 Language toggle, SEO, fonts
+
+- `LanguageToggle.astro` copied from the parent: a real `<a>` with `hreflang`/`lang`, in
+  the header and footer, pointing at the mirrored path (or the section index when no
+  counterpart exists). Its label is pinned to a system Korean stack so EN pages never
+  fetch Pretendard for one word (parent's Stage 20 note).
+- `Base.astro` takes `lang` and emits `<html lang>`, `og:locale`, and `hreflang`
+  alternates (`en` + `x-default` to the root URL, `ko` to `/ko/…`) only when both pages
+  exist.
+- Fonts: add Pretendard (`--font-body-ko`) via the fonts API as on the parent; preload
+  DM Sans on EN pages and Pretendard on KO pages, never both. `:lang(ko)` raises body
+  line-height to 1.7 and sets `word-break: keep-all` (`DESIGN.md` §3).
+  Balloon text inside strips is drawn by `@toonstrip/core` with its own stack
+  (`Comic Sans MS, Comic Neue, ui-rounded, cursive`); Korean glyphs fall through to the
+  OS font, which the parent's KO post already verified renders cleanly.
+
+### 13.5 Out of scope for S9 (library changes, tracked in `TOONSTRIP_DEV_PLAN.md`)
+
+- `describePanel` (the element's generated `aria-label`) is English ("medium shot; anna
+  says …"). A KO page therefore has Korean dialogue read inside an English frame. The
+  proper fix is a `lang`/`describe` option on `@toonstrip/element` and the Astro
+  component, cascading through `UPSTREAM_SYNC.md`. S9 ships without it and says so on
+  the KO accessibility page.
+- `validateDocument` error messages (ajv) are English in the playground's JSON lint
+  gutter. Acceptable; they quote field paths, not prose.
+
+### 13.6 Exit criteria
+
+Every route in the sitemap has a `/ko/` counterpart or an explicit fallback; axe clean
+on all KO routes in both themes; JS budgets unchanged (the island carries one language);
+`hreflang` pairs validate; Lighthouse mobile ≥ 95 on `/ko/`; the strip-parity check
+passes; Daniel has reviewed all KO copy (the `daniel-writing-style` skill drafts, he
+signs off).
