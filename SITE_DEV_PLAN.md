@@ -98,6 +98,7 @@ site/
       site/       Header, Footer, ThemeToggle, VersionBadge, Callout, CodeBlock, WidthSlider
       demo/       CodeAndStrip.astro   # docs' "JSON on the left, live strip on the right"
       playground/                      # the island (§6): editor, form, preview, share
+      ui/                              # shadcn/ui components on preact/compat (PLAYGROUND_UI_PLAN.md §2)
     content/
       docs/       *.mdx                # content collection, ordered by frontmatter `order`; S9: docs/{en,ko}/ (§13.3)
       strips/     *.json               # every strip shown in docs/landing; single source
@@ -119,7 +120,7 @@ wrangler.toml     # at the REPO ROOT: name = "toonstrip", pages_build_output_dir
 | Docs system | Hand-built layout + MDX content collection | Starlight considered and rejected: it brings its own theme and shell that `DESIGN.md` would have to fight, and the site has ~12 doc pages. Sidebar, prev/next, and ToC are a day's work. Revisit only if docs exceed ~25 pages. |
 | Search | Pagefind (build-time index), S6, only if warranted | Zero runtime cost, no service. Not needed at launch. |
 | Code highlighting | Astro's built-in Shiki, dual `github-light`/`github-dark` themes, the same `data-language` transformer as `danielkimdev-astro` | Proven in the sibling repo; no runtime JS. |
-| Playground UI | One Preact island (`client:load`, `/playground` only) with `@preact/signals` | Real interactive state (three views of one document). Preact is ~4 KB with an official Astro integration; signals make "one document, three views" trivial. Vanilla rejected as too much hand-wiring for form ↔ JSON sync; React rejected on size for a single page. |
+| Playground UI | One Preact island (`client:load`, `/playground` only) with `@preact/signals` | Real interactive state (three views of one document). Preact is ~4 KB with an official Astro integration; signals make "one document, three views" trivial. Vanilla rejected as too much hand-wiring for form ↔ JSON sync; React rejected on size for a single page. Since 0.9.0 the island's controls are shadcn/ui components run on `preact/compat` with Tailwind v4 scoped to the island (`PLAYGROUND_UI_PLAN.md` §2); the site outside the island still ships no framework JS and no Tailwind. |
 | Code editor | CodeMirror 6 (`@codemirror/lang-json`, lint gutter) | Monaco rejected: web-worker setup, ~2 MB, poor on mobile. CodeMirror is ~300 KB, mobile-usable, and its lint API takes `validateDocument`'s ajv issues directly (they carry instance paths). |
 | Preview | The real `<comic-strip>` element with `document`/`packs` set as properties | The playground proves the shipping component; it must not use a private renderer path. |
 | Share links | Document compressed into the URL hash (`lz-string` `compressToEncodedURIComponent`) | No backend, works on any host, nothing stored. Short links are the *only* reason to add a Pages Function (§9), and they are optional. |
@@ -214,10 +215,13 @@ embed a strip in a new Astro project and author a two-speaker document from
 
 ### 6.1 Layout
 
-Three panes, one document. Desktop: a left column split vertically into **Form** (top)
-and **JSON** (bottom, collapsible), and a right column holding **Preview** with a
-toolbar. Below ~900 px: tabs *Form / JSON / Preview*, with the preview available as a
-bottom sheet while editing. `DESIGN.md` §6 has the visual spec.
+Three panes, one document, no page scroll. Desktop: **Configure** (left) and **JSON**
+(right) on top, **Preview** full width below, both splits draggable and remembered;
+JSON collapses to a bar. The Configure pane is a Strip tab plus one tab per panel.
+Below ~900 px: tabs *Configure / JSON / Preview*, with the preview available as a
+bottom sheet while editing. `DESIGN.md` §6 has the visual spec; `PLAYGROUND_UI_PLAN.md`
+records the 2026-09 renewal and the preact/compat rules for the shadcn/ui components in
+`site/src/components/ui/`.
 
 ### 6.2 State model
 

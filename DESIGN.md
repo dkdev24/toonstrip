@@ -204,21 +204,34 @@ fallbacks only.
 
 ### 6.1 Structure
 
-Full-bleed under the header. Desktop (`≥ md`): a 2-column grid `minmax(22rem, 2fr)
-minmax(0, 3fr)` with a 1 px `--rule` divider. Left column: **Form** (top, scrolls) and
-**JSON** (bottom, resizable via a drag handle, collapsible to a 36 px bar). Right
-column: **Preview** with a 44 px toolbar pinned top. Below `md`: a segmented tab bar
-*Form / JSON / Preview* under the header; from Form or JSON a persistent "Preview"
-button opens the preview as a bottom sheet at 55 % height with `--shadow`.
+Full-bleed under the header, exactly one viewport tall, never a page scroll: every pane
+scrolls itself. Desktop (`≥ md`): a vertical split. Top row: **Configure** (left) and
+**JSON** (right), side by side so a form edit is seen landing in the JSON. Bottom row:
+**Preview**, full width, with a 44 px toolbar pinned top and the stage below. Both splits
+are 1 px `--rule` handles with a grip, draggable and keyboard-operable (arrow keys, Home,
+End), defaults 60/40 vertical and 50/50 horizontal, remembered in `localStorage`. JSON
+collapses to a 36 px vertical bar at the right edge; nothing collapses to zero. Below
+`md`: a segmented tab bar *Configure / JSON / Preview* under the header, one pane at a
+time; from Configure or JSON a "Preview" button opens the preview as a bottom sheet at
+55 % height with `--shadow`.
+
+Controls are shadcn/ui components (`site/src/components/ui/`, on preact/compat with
+Tailwind v4 scoped to the island) themed from the tokens in §2 to §4; the emotion wheel
+and the CodeMirror theme stay bespoke. Pane header bars are 36 px, `--paper-sunken`,
+`--text-caption` title left and actions right.
 
 ### 6.2 Form
 
 Dense but readable: label `--text-caption` above control, control height 36 px,
-vertical rhythm `--space-12`. Panels are cards in a vertical list; the selected panel
-has a 2 px `--ink` border (mirrored by an outline on the corresponding canvas in the
-preview), others 1 px `--rule`. Inside a panel card, three groups with headings
-*Scene* (backdrop, camera, title, dark), *Characters*, *Lines*. Add buttons are ghost
-with a plus icon and a full-width dashed border so empty groups have an obvious target.
+vertical rhythm `--space-12`. A sticky tab strip heads the pane: **Strip** first
+(asset packs, preset picker, reset, a summary of the document), then one tab per panel
+labelled by its number, then a ghost "+ Add panel". The active tab is the selected
+panel, outlined by the preview on the matching canvas; clicking a canvas activates its
+tab. Tab overflow scrolls horizontally. A panel tab shows three cards with captions
+*Scene* (backdrop, camera, title, dark), *Characters*, *Lines*, then a footer row with
+move left/right, Duplicate and a destructive Remove that confirms in a popover (never
+`window.confirm`). Add buttons are ghost with a plus icon and a full-width dashed border
+so empty groups have an obvious target.
 
 - **Backdrop picker**: a row of 64 × 54 thumbnails (real backdrop PNGs, `object-fit:
   cover`), selected one outlined in `--accent`.

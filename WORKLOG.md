@@ -1312,3 +1312,58 @@ v0.7.2 is now live on npm. `danielkimdev-astro` still needs to bump its own
 
 Site content and docs only; no `@toonstrip/*` package versions bumped, nothing
 published to npm.
+
+## v0.9.0 — Playground UI Renewal: shadcn/ui on preact/compat, New Three-Pane Shell
+
+**Date:** 2026-09-03
+
+### Changes
+
+- Wrote `PLAYGROUND_UI_PLAN.md` from Daniel's brief (preview full width at the bottom,
+  visual configuration left / JSON right above it, per-section scroll with no page
+  scroll, tabbed configuration, shadcn/ui) and executed its five steps in one session.
+- Step 1, spike: `@astrojs/preact` with `compat: true`; Tailwind v4 through
+  `@tailwindcss/vite`, scoped to the island by `@source` rules in
+  `site/src/styles/playground-ui.css`, theme names mapped onto `tokens.css`, dark mode
+  keyed to `[data-theme="dark"]`. Eleven components under `site/src/components/ui/`
+  checked on `/kitchen-sink` (`UiSpike.tsx`, kept as the ui design check). Findings:
+  Radix Tabs, Select, ToggleGroup, Popover, DropdownMenu, Tooltip, Dialog, ScrollArea
+  and Slot work on compat (Radix moves focus in a `setTimeout`, so tests settle after
+  arrow keys). Radix Slider does not: its thumb index is memoised before Preact's
+  passive effects register the collection, so the thumb stays `display:none`; replaced
+  by a native range input. react-resizable-panels v4 reported wrong sizes and ignored
+  drag and keyboard on compat; replaced by a 150-line two-pane split with the same
+  component names. Any `asChild` child must be a `forwardRef` component under Preact
+  (a plain function component receives the trigger ref as its instance). `tslib` is an
+  optional peer of react-remove-scroll that pnpm never links; aliased to its ESM build.
+  Radix packages go in `noExternal` for the prerender environment so the react alias
+  applies during SSR too. Playground JS 134.5 KB gzipped after the spike, 191.5 KB after
+  step 4, budget 450 KB.
+- Step 2, shell: `Playground.tsx` is a vertical `ResizablePanelGroup` (Configure | JSON
+  over Preview), ratios and the JSON-collapsed flag persisted to `localStorage`; tabs
+  plus a bottom `Sheet` under 900 px. The shell clips with `overflow-hidden`: the form's
+  own scroll container was not enough to stop the document growing. ui wrappers accept
+  Preact's `class` prop as well as `className`.
+- Step 3, Configure tabs: Strip tab (packs, preset `Select`, reset, summary) plus one tab
+  per panel; footer with move/duplicate and a `Popover`-confirmed Remove; `stripTab`
+  signal in `state.ts`; `removePanel` clamps the selection; a preview canvas click
+  selects that panel. The old `.pg-panels/.pg-panel` list CSS had hidden all but one
+  tab until the class names were dropped.
+- Step 4, controls: backdrop grid, camera and pose `ToggleGroup`, character `Popover`
+  grid, speaker/balloon `Select`, `Input`/`Textarea`/`Checkbox`, width `Slider` with a
+  preset `ToggleGroup`, Undo/Redo with `Tooltip`, Presets and Export `DropdownMenu`.
+  `playground.css` cut from 675 to 176 lines (CodeMirror theme, stage, emotion wheel,
+  toast). Tailwind utilities are emitted unlayered because the site's unlayered element
+  rules would otherwise beat every layered utility; a scoped base reset stands in for
+  preflight (range and checkbox inputs excluded from `appearance: none`).
+- e2e: two tests added ("shell:" three viewports, split drag, collapse; "configure
+  tabs:" tab ↔ preview sync, add/remove, preset load). The two tests that had failed
+  before this work used `Control+A` in CodeMirror; `ControlOrMeta+A` fixes them on
+  macOS. 8/8 green. axe reports only CodeMirror's `.cm-scroller` (pre-existing).
+- Docs: `DESIGN.md` §6.1 and §6.2, `SITE_DEV_PLAN.md` §3 and §6.1 rewritten to the new
+  layout; `CHANGELOG.md` 0.9.0.
+
+### Status
+
+Site 0.9.0, npm packages unchanged. Next: `PLAYGROUND_UI_PLAN.md` is complete; M8-M13
+per `TOONSTRIP_DEV_PLAN.md` §13, then S9 Korean on the new markup.

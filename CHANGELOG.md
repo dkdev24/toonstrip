@@ -6,6 +6,26 @@ shipped. Written for users; the engineering history behind each entry is in `WOR
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.9.0 — 2026-09-03
+
+**Packages:** unchanged (`@toonstrip/schema` 0.1.3, `@toonstrip/core` 0.1.7,
+`@toonstrip/element` 0.1.8, `@toonstrip/astro` 0.1.11, `@toonstrip/cli` 0.2.1). Site only.
+
+### Changed
+
+- Playground layout: Configure and JSON side by side on top, the live preview full width
+  below, with draggable splits that are remembered between visits. Nothing on the page
+  scrolls except the panes themselves. The JSON pane collapses to a slim bar.
+- The Configure pane is now tabbed: a Strip tab (asset packs, presets, a summary) and
+  one tab per panel. Clicking a panel in the preview opens its tab.
+- Every playground control moved to shadcn/ui components (tabs, selects, toggle groups,
+  popovers, menus, tooltips, a bottom sheet on phones), themed from the site tokens in
+  both light and dark mode.
+
+### Fixed
+
+- The keyboard-only and JSON-edit end-to-end tests now pass on macOS as well.
+
 ## 0.8.9 — 2026-09-02
 
 **Packages:** `@toonstrip/core` 0.1.7, `@toonstrip/element` 0.1.8, `@toonstrip/astro` 0.1.11,
