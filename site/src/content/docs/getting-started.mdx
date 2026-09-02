@@ -1,0 +1,77 @@
+---
+title: Getting started
+description: Install two packages, register the Astro integration, and render your first strip.
+order: 1
+section: Start
+---
+import CodeAndStrip from "../../components/demo/CodeAndStrip.astro";
+import PackageManagerTabs from "../../components/site/PackageManagerTabs.astro";
+import Callout from "../../components/site/Callout.astro";
+import firstStrip from "../strips/first-strip.json";
+
+toonstrip renders a comic strip from data you supply. There is nothing to generate and no
+image pipeline: you write a small JSON document, the page draws it on canvases. This page
+gets you from an empty Astro project to a rendered panel.
+
+## 1. Install
+
+You need the Astro integration and at least one asset pack. The default pack is the
+fifteen-character Comic Chat roster with three backdrops.
+
+<PackageManagerTabs packages={["@toonstrip/astro", "@toonstrip/pack-comic-chat"]} />
+
+Requires Astro 5 or later (tested on Astro 7) and Node 20 or later.
+
+## 2. Register the integration
+
+The integration does two things: it registers a renderer for the `<ComicStrip>` component,
+and it copies each pack you list into `public/_toonstrip/<pack-name>/` so the browser can
+fetch sprites. Packs are listed by **npm specifier** here.
+
+```js
+// astro.config.mjs
+import { defineConfig } from "astro/config";
+import { toonstrip } from "@toonstrip/astro";
+
+export default defineConfig({
+  integrations: [toonstrip({ packs: ["@toonstrip/pack-comic-chat"] })],
+});
+```
+
+<Callout kind="tip" title="No auto-discovery">
+A pack a page uses must be listed here, or its files will not exist in the built site and the
+strip will fail to load with a clear error naming the missing id.
+</Callout>
+
+## 3. Render a strip
+
+Put a document next to your page (or inline it) and pass it to the component. The `packs`
+prop takes the pack **name** from its `pack.json`, which is `comic-chat` for the default
+pack, not the npm specifier.
+
+```astro
+---
+// src/pages/index.astro
+import { ComicStrip } from "@toonstrip/astro";
+import doc from "../content/first-strip.json";
+---
+<ComicStrip document={doc} packs={["comic-chat"]} client:visible />
+```
+
+<CodeAndStrip doc={firstStrip} title="src/content/first-strip.json" layout="side" />
+
+That is the whole embed: a document, a pack name, and a client directive.
+
+## What `client:visible` does here
+
+The component's server-side render emits only an inert `<comic-strip>` tag. The element's
+JavaScript, the pack fetch, and the canvas drawing all happen client-side, and Astro's
+`client:visible` directive delays all of it until the strip scrolls into view. A strip below
+the fold costs nothing until the reader gets there. Any Astro client directive works; use
+`client:load` for a strip that is above the fold.
+
+## Next
+
+[Write a strip](/docs/writing-a-strip/) walks through the document format with live
+examples. If you are not on Astro, [plain HTML](/docs/plain-html/) shows the custom element
+on its own.

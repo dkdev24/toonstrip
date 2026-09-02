@@ -4,6 +4,42 @@ Persistent project history. Append entries; do not edit past entries.
 
 ---
 
+## v0.8.3 — M7 S3: docs
+
+**Date:** 2026-09-02
+
+### Changes
+
+- Content collection `docs` (`src/content.config.ts`, glob loader over MDX; frontmatter
+  `title`/`description`/`order`/`section`), `lib/docs-nav.ts` (sorted + grouped),
+  `layouts/Docs.astro` (sidebar | article | ToC; prev/next; "Edit this page"; ToC
+  highlight via IntersectionObserver; sidebar is a `<details>` that a media-query script
+  opens on wide layouts because a closed `<details>` renders no children even with
+  `display: contents`), `pages/docs/[...slug].astro`, `/docs/` index.
+- 12 pages per `SITE_DEV_PLAN.md` §5.1: getting-started, writing-a-strip,
+  emotions-and-poses, cameras-and-panels, balloons, responsive-layout, asset-packs,
+  plain-html, astro-reference, schema-reference, accessibility, faq. Every example is a
+  `CodeAndStrip` over a JSON file in `content/strips/` (11 new strips: emotion wheel ×9,
+  intensity ×3, poses ×3, cameras ×6, balloons, long text, panel options, pip, mixed
+  packs, first strip, two speakers), all passing `validate-strips.mjs`.
+- `lib/schema-ref.ts` + `SchemaReference.astro`: field tables generated from
+  `packages/schema/src/schema.json` (types/required from the schema; one-line
+  descriptions maintained in the site; a new schema field appears with an empty cell).
+- `/llms.txt` (index) and `/llms-full.txt` (all docs as Markdown, imports/JSX stripped).
+- Shiki themes changed to `github-light-default` / `github-dark-default`: the non-default
+  variants' orange (`#e36209`) and comment grey fail AA at code size on the site's
+  surfaces. Schema tables wrapped in a focusable scroll region (axe
+  `scrollable-region-focusable`). Docs asides labelled (axe `landmark-unique`).
+- Docs article widened to 58rem so galleries get two strip columns; prose stays at 68ch.
+
+### Status
+
+18 routes build. axe sweep: zero violations on every route, light desktop and dark
+390 px. Next: S4 playground (needs element paint-all/export API, NOTES "M7 S1"), S5
+changelog.
+
+---
+
 ## v0.8.2 — M7 S2: intro page
 
 **Date:** 2026-09-02

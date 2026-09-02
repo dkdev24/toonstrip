@@ -1,0 +1,52 @@
+---
+title: Balloons
+description: Speech, thought, and caption balloons; how they wrap, stack, and find space beside a head.
+order: 5
+section: Authoring
+---
+import CodeAndStrip from "../../components/demo/CodeAndStrip.astro";
+import Callout from "../../components/site/Callout.astro";
+import balloons from "../strips/balloons.json";
+import balloonsLong from "../strips/balloons-long.json";
+
+Every entry in a panel's `speakers` becomes one balloon. The `balloon` field picks the
+shape; the `speaker` field decides where its tail points.
+
+## Three kinds
+
+<CodeAndStrip doc={balloons} title="speech, thought, caption" collapse />
+
+- `speech`: a rounded balloon with a tail to the speaker's head.
+- `thought`: a cloud with a trail of bubbles.
+- `caption`: a box at the top of the panel, no tail. Its speaker must be `"caption"`.
+
+## Order and placement
+
+Balloons draw in `speakers` order: the caption first (it takes the top), then each speaking
+body. The layout tries to put each speech balloon beside its speaker's head in a column
+that does not cross another speaker's head, and only when nothing fits does it stack
+balloons across the panel. Two speakers in one panel is comfortable; three is possible at
+wide cameras; more than that is a strip, not a panel.
+
+## Long lines
+
+Text wraps to the balloon's width, and a balloon grows downward before it grows wider. The
+panel does not grow, so a very long line squeezes the figures. Short lines read better and
+lay out better.
+
+<CodeAndStrip doc={balloonsLong} title="Long text still fits, but keep it short" collapse />
+
+<Callout kind="warning" title="When a balloon cannot fit">
+Layout never fails. If a balloon truly cannot be placed beside its speaker it stacks in a
+corridor the layout reserves per speaker, and at the narrowest panel sizes the text scales
+with the panel. From v0.7.11 every layout constant scales with panel width, so the same
+document lays out the same way from 400 px panels down to 260 px.
+</Callout>
+
+## Writing for the balloon
+
+- One idea per line. Split a long thought into two lines from the same speaker.
+- Put the caption first in `speakers`; it is drawn first anyway.
+- A `reaction` camera has no room for a balloon; give that panel a caption or no line.
+- Avoid text that depends on the tail's exact position. The tail always finds the head;
+  the balloon's side is the layout's choice.

@@ -1,15 +1,62 @@
 ---
 import Base from "../../layouts/Base.astro";
+import { docsNav, docHref } from "../../lib/docs-nav";
+
+const { sections } = await docsNav();
 ---
 
-<Base title="Docs" description="Install toonstrip, embed a strip in Astro, and write a ComicStripDocument." wide>
+<Base title="Docs" description="Install toonstrip, embed a strip in Astro or plain HTML, write a Comic Strip Document, and build asset packs.">
   <div class="prose">
+    <p class="caption">Documentation</p>
     <h1>Docs</h1>
-    <p class="lead">Coming in S3. Until then, the Markdown docs on GitHub are current:</p>
-    <ul>
-      <li><a href="https://github.com/dkdev24/toonstrip/blob/main/docs/astro.md">Embedding in Astro</a></li>
-      <li><a href="https://github.com/dkdev24/toonstrip/blob/main/docs/schema.md">The Comic Strip Document</a></li>
-      <li><a href="https://github.com/dkdev24/toonstrip/blob/main/docs/packs.md">Asset packs</a></li>
-    </ul>
+    <p class="lead">Start with the install, then write a strip. Everything is shown as code next to the strip it produces.</p>
+  </div>
+  <div class="docs-index">
+    {sections.map((s) => (
+      <section class="docs-index__section">
+        <h2>{s.name}</h2>
+        <ul>
+          {s.entries.map((e) => (
+            <li>
+              <a href={docHref(e)}>{e.data.title}</a>
+              <p>{e.data.description}</p>
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))}
   </div>
 </Base>
+
+<style>
+  .docs-index {
+    display: grid;
+    gap: var(--space-32);
+    margin-top: var(--space-32);
+  }
+  @media (min-width: 900px) {
+    .docs-index {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  .docs-index__section h2 {
+    font-size: var(--text-h3);
+  }
+  .docs-index ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .docs-index li {
+    padding: var(--space-12) 0;
+    border-top: 1px solid var(--rule);
+  }
+  .docs-index li a {
+    font-weight: 500;
+  }
+  .docs-index li p {
+    margin: var(--space-4) 0 0;
+    font-size: var(--text-small);
+    color: var(--ink-2);
+  }
+</style>

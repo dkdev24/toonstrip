@@ -6,7 +6,7 @@ Cross-session context memory. Update this file at the end of every session.
 
 ## Current Version
 
-**0.8.2** (site intro page; npm unchanged: core 0.1.6, element 0.1.7, astro 0.1.10)
+**0.8.3** (site docs; npm unchanged: core 0.1.6, element 0.1.7, astro 0.1.10)
 
 ---
 
@@ -16,7 +16,7 @@ Cross-session context memory. Update this file at the end of every session.
 caller-supplied data, extracted/generalized from `grues-in-comic`'s comic pane (Zork/game/
 AI-inference coupling stripped). M0–M6 done: all 7 `@toonstrip/*` packages published to npm
 — `schema` 0.1.3, `astro` 0.1.10, `element` 0.1.7, `core` 0.1.6, `cli`/packs 0.1.1 (not
-lockstep). M7 (site) in progress: S0–S2 done. Full history in `WORKLOG.md`.
+lockstep). M7 (site) in progress: S0–S3 done. Full history in `WORKLOG.md`.
 
 ---
 
@@ -29,8 +29,9 @@ layout, header/footer/theme toggle, placeholder pages, hero strip rendering live
 `wrangler.toml` → `site/dist`; `.node-version` 22; `packageManager` pnpm 11.1.1. Then
 **S1 as v0.8.1**: shared component CSS, `CodeBlock`, `PackageManagerTabs`, `Callout`,
 `CodeAndStrip`, `WidthSlider`, `lib/share.ts`, `/kitchen-sink`, `scripts/check-page.mjs`
-(axe + screenshots). **S2 as v0.8.2**: full intro page, 7 hand-written strips,
-`validate-strips.mjs`, roster thumbnails. axe clean. See WORKLOG v0.8.0–v0.8.2.
+(axe + screenshots). **S2 v0.8.2** intro page + 7 strips. **S3 v0.8.3** docs: collection, layout,
+12 MDX pages, 11 more strips, generated schema reference, llms.txt. axe clean on all 18
+routes both themes. See WORKLOG v0.8.0–v0.8.3.
 
 ---
 
@@ -38,7 +39,7 @@ layout, header/footer/theme toggle, placeholder pages, hero strip rendering live
 
 1. **Daniel:** create the Cloudflare Pages project via the GitHub flow (settings in
    NOTES.md "M7 S0"); nothing deploys until then.
-2. S3 docs (`SITE_DEV_PLAN.md` §5), S4 playground (§6). S4 needs a
+2. S4 playground (`SITE_DEV_PLAN.md` §6), S5 changelog (§7), S6 polish. S4 needs a
    force-paint/export API on the element (NOTES.md "M7 S1").
 3. Later: `danielkimdev-astro` bump to `@toonstrip/astro@0.1.10`; `grues-in-comic` port
    (accept gates need macOS).

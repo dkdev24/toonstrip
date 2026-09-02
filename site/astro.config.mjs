@@ -27,7 +27,7 @@ export default defineConfig({
   // transformer stamps <pre data-language> so CodeBlock can label it.
   markdown: {
     shikiConfig: {
-      themes: { light: "github-light", dark: "github-dark-default" },
+      themes: { light: "github-light-default", dark: "github-dark-default" },
       wrap: true,
       transformers: [
         {

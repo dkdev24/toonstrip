@@ -1,0 +1,67 @@
+---
+title: Emotions and poses
+description: The emotion wheel, rendered face by face, and the three gestures that claim the torso.
+order: 3
+section: Authoring
+---
+import CodeAndStrip from "../../components/demo/CodeAndStrip.astro";
+import Callout from "../../components/site/Callout.astro";
+import emotions from "../strips/emotions.json";
+import intensity from "../strips/intensity.json";
+import poses from "../strips/poses.json";
+
+A body's `emotion` is a point on a wheel: `angle` in radians, `intensity` from 0 to 1. The
+renderer finds the nearest face the character's pack declares and draws that. Because it is
+nearest-neighbour, any angle is valid; the names below are the eight points the default
+pack draws distinctly.
+
+## The wheel
+
+Nine close-ups of the same character: NEUTRAL, then the eight named angles at intensity 0.8.
+
+<CodeAndStrip doc={emotions} title="anna around the wheel" collapse />
+
+| Name | angle | radians |
+|---|---|---|
+| HAPPY | 0 | `0` |
+| COY | π/4 | `0.785` |
+| BORED | π/2 | `1.571` |
+| SCARED | 3π/4 | `2.356` |
+| SAD | π | `3.142` |
+| ANGRY | 5π/4 | `3.927` |
+| SHOUT | 3π/2 | `4.712` |
+| LAUGH | 7π/4 | `5.498` |
+
+## Intensity
+
+Intensity picks between faces at the same angle when a pack has several, and at 0 it
+means NEUTRAL regardless of angle. The default pack has two or three faces per emotion for
+most characters, so a low and a high intensity often look different.
+
+<CodeAndStrip doc={intensity} title="SAD at three intensities" collapse />
+
+<Callout>
+NEUTRAL shares HAPPY's angle. `{ angle: 0, intensity: 0 }` and `{ angle: 3.142, intensity: 0 }`
+are the same face. Think of intensity 0 as the centre of the wheel.
+</Callout>
+
+## Poses
+
+`pose` is a separate channel from emotion. It claims the **torso** with a gesture while
+`emotion` still picks the **face**, so a character can wave while looking sad. Three
+gestures exist: `wave`, `point`, `shrug`. A pack supports a gesture by declaring a torso
+for it; the default pack supports all three for every character.
+
+<CodeAndStrip doc={poses} title="The three gestures" collapse />
+
+## How selection works
+
+Each character has faces and torsos as separate sprites. Per panel, the renderer:
+
+1. Picks the nearest face to the body's emotion point.
+2. Picks a torso: the pose's gesture torso if a pose is set, otherwise the torso nearest
+   the emotion.
+3. Cycles through equally good candidates across panels, so a character repeated in three
+   panels does not show the identical drawing three times.
+
+The cycle is frozen per panel when the strip loads, so a resize redraws the same figures.

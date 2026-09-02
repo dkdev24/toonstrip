@@ -1,0 +1,67 @@
+---
+title: FAQ
+description: No AI, no game engine, the licence and the trademark, browser support, and server rendering.
+order: 12
+section: Reference
+---
+
+## Does toonstrip generate the comic for me?
+
+No, and it never will. toonstrip renders a document you give it. Writing the dialogue,
+choosing emotions and cameras, deciding what is funny: that is the author's job, or a
+script's, or a language model's if you choose to call one. Whatever produces the JSON, it
+lives outside this library. The playground on this site is an editor, not a generator.
+
+## Is there text-to-emotion inference?
+
+No. Comic Chat guessed a mood from the words you typed; toonstrip does not read your text.
+You set `emotion` per body. If you want inference, build it in front of toonstrip and
+write the result into the document.
+
+## Is this a game engine or a chat client?
+
+No. There is no session, no turn, no event stream. A panel is authored data. toonstrip
+was extracted from a project that did have a game behind it, and the game stayed there.
+
+## What is the licence, and can I use the characters commercially?
+
+The code is MIT. The default pack's art is Microsoft Comic Chat art redistributed under
+MIT with Microsoft's copyright notice preserved; see the repository's `NOTICE`. MIT permits
+commercial use. COMIC CHAT is a Microsoft trademark and this project is not affiliated
+with Microsoft, so do not name your product after it. Your own packs carry whatever
+licence you put in their `pack.json`.
+
+## Which browsers?
+
+Anything with Canvas 2D, custom elements, `ResizeObserver`, and `IntersectionObserver`:
+every current browser. No polyfills are shipped.
+
+## Does it render on the server?
+
+Not yet in the Astro component: the server emits an inert tag and the browser draws. The
+core renderer is canvas-agnostic and runs in Node with `@napi-rs/canvas`, which is how the
+repository's tests produce PNGs. A CLI command for build-time PNGs (Open Graph images,
+`<noscript>` fallbacks) is planned.
+
+## Can I use it outside Astro?
+
+Yes. The custom element has no framework dependency; see [plain HTML](/docs/plain-html/).
+Astro is the first-class wrapper because it is what the author uses. Other wrappers would
+be a few lines each.
+
+## How big is it?
+
+The element plus core plus the precompiled validator is a few tens of kilobytes gzipped.
+Sprite sheets are fetched per character actually used in a document, so a three-character
+strip loads three sheets and one backdrop, not the whole pack.
+
+## Why is the art black and white?
+
+Because the original Comic Chat art is. A pack can be in colour; nothing in the renderer
+assumes monochrome.
+
+## Where do I report a bug or contribute a character?
+
+[GitHub issues](https://github.com/dkdev24/toonstrip/issues). For a character, read
+[asset packs](/docs/asset-packs/) and open a pull request against `pack-example` or your
+own pack repository.

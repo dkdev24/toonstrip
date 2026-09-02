@@ -1,0 +1,65 @@
+{
+  "version": 1,
+  "panels": [
+    {
+      "backdrop": "field",
+      "camera": "close-up",
+      "bodies": [
+        {
+          "character": "dan",
+          "emotion": {
+            "angle": 3.141593,
+            "intensity": 0.2
+          }
+        }
+      ],
+      "speakers": [
+        {
+          "speaker": "caption",
+          "balloon": "caption",
+          "text": "SAD at intensity 0.2"
+        }
+      ]
+    },
+    {
+      "backdrop": "field",
+      "camera": "close-up",
+      "bodies": [
+        {
+          "character": "dan",
+          "emotion": {
+            "angle": 3.141593,
+            "intensity": 0.5
+          }
+        }
+      ],
+      "speakers": [
+        {
+          "speaker": "caption",
+          "balloon": "caption",
+          "text": "SAD at intensity 0.5"
+        }
+      ]
+    },
+    {
+      "backdrop": "field",
+      "camera": "close-up",
+      "bodies": [
+        {
+          "character": "dan",
+          "emotion": {
+            "angle": 3.141593,
+            "intensity": 0.9
+          }
+        }
+      ],
+      "speakers": [
+        {
+          "speaker": "caption",
+          "balloon": "caption",
+          "text": "SAD at intensity 0.9"
+        }
+      ]
+    }
+  ]
+}

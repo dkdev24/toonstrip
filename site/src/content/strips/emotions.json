@@ -1,0 +1,185 @@
+{
+  "version": 1,
+  "panels": [
+    {
+      "backdrop": "field",
+      "camera": "close-up",
+      "bodies": [
+        {
+          "character": "anna",
+          "emotion": {
+            "angle": 0,
+            "intensity": 0
+          }
+        }
+      ],
+      "speakers": [
+        {
+          "speaker": "caption",
+          "balloon": "caption",
+          "text": "NEUTRAL: intensity 0"
+        }
+      ]
+    },
+    {
+      "backdrop": "field",
+      "camera": "close-up",
+      "bodies": [
+        {
+          "character": "anna",
+          "emotion": {
+            "angle": 0.0,
+            "intensity": 0.8
+          }
+        }
+      ],
+      "speakers": [
+        {
+          "speaker": "caption",
+          "balloon": "caption",
+          "text": "HAPPY: angle 0\u03c0/4, intensity 0.8"
+        }
+      ]
+    },
+    {
+      "backdrop": "field",
+      "camera": "close-up",
+      "bodies": [
+        {
+          "character": "anna",
+          "emotion": {
+            "angle": 0.785398,
+            "intensity": 0.8
+          }
+        }
+      ],
+      "speakers": [
+        {
+          "speaker": "caption",
+          "balloon": "caption",
+          "text": "COY: angle 1\u03c0/4, intensity 0.8"
+        }
+      ]
+    },
+    {
+      "backdrop": "field",
+      "camera": "close-up",
+      "bodies": [
+        {
+          "character": "anna",
+          "emotion": {
+            "angle": 1.570796,
+            "intensity": 0.8
+          }
+        }
+      ],
+      "speakers": [
+        {
+          "speaker": "caption",
+          "balloon": "caption",
+          "text": "BORED: angle 2\u03c0/4, intensity 0.8"
+        }
+      ]
+    },
+    {
+      "backdrop": "field",
+      "camera": "close-up",
+      "bodies": [
+        {
+          "character": "anna",
+          "emotion": {
+            "angle": 2.356194,
+            "intensity": 0.8
+          }
+        }
+      ],
+      "speakers": [
+        {
+          "speaker": "caption",
+          "balloon": "caption",
+          "text": "SCARED: angle 3\u03c0/4, intensity 0.8"
+        }
+      ]
+    },
+    {
+      "backdrop": "field",
+      "camera": "close-up",
+      "bodies": [
+        {
+          "character": "anna",
+          "emotion": {
+            "angle": 3.141593,
+            "intensity": 0.8
+          }
+        }
+      ],
+      "speakers": [
+        {
+          "speaker": "caption",
+          "balloon": "caption",
+          "text": "SAD: angle 4\u03c0/4, intensity 0.8"
+        }
+      ]
+    },
+    {
+      "backdrop": "field",
+      "camera": "close-up",
+      "bodies": [
+        {
+          "character": "anna",
+          "emotion": {
+            "angle": 3.926991,
+            "intensity": 0.8
+          }
+        }
+      ],
+      "speakers": [
+        {
+          "speaker": "caption",
+          "balloon": "caption",
+          "text": "ANGRY: angle 5\u03c0/4, intensity 0.8"
+        }
+      ]
+    },
+    {
+      "backdrop": "field",
+      "camera": "close-up",
+      "bodies": [
+        {
+          "character": "anna",
+          "emotion": {
+            "angle": 4.712389,
+            "intensity": 0.8
+          }
+        }
+      ],
+      "speakers": [
+        {
+          "speaker": "caption",
+          "balloon": "caption",
+          "text": "SHOUT: angle 6\u03c0/4, intensity 0.8"
+        }
+      ]
+    },
+    {
+      "backdrop": "field",
+      "camera": "close-up",
+      "bodies": [
+        {
+          "character": "anna",
+          "emotion": {
+            "angle": 5.497787,
+            "intensity": 0.8
+          }
+        }
+      ],
+      "speakers": [
+        {
+          "speaker": "caption",
+          "balloon": "caption",
+          "text": "LAUGH: angle 7\u03c0/4, intensity 0.8"
+        }
+      ]
+    }
+  ]
+}

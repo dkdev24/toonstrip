@@ -1,0 +1,58 @@
+---
+title: Astro reference
+description: Every option of the integration and the component, and the current limitations.
+order: 9
+section: Integrate
+---
+import Callout from "../../components/site/Callout.astro";
+
+## `toonstrip(options)`
+
+The integration, added to `integrations` in `astro.config.mjs`.
+
+| Option | Type | Meaning |
+|---|---|---|
+| `packs` | `string[]` | npm specifiers of asset packs to serve. Each is resolved, and its `pack.json`, `characters/`, and `backdrops/` are copied to `public/_toonstrip/<pack name>/` during `astro:config:setup`. Default: none. |
+
+The integration also registers a renderer for `<ComicStrip>`. The server half emits an
+inert `<comic-strip>` tag; the client half imports `@toonstrip/element` and sets the
+properties. Nothing else touches your Vite config.
+
+## `<ComicStrip>`
+
+```astro
+---
+import { ComicStrip } from "@toonstrip/astro";
+---
+<ComicStrip document={doc} packs={["comic-chat"]} client:visible />
+```
+
+| Prop | Type | Meaning |
+|---|---|---|
+| `document` | `ComicStripDocument` | The strip. Any object of the right shape; usually an imported JSON file. |
+| `packs` | `string[]` | Pack **names** (the `name` field of each `pack.json`), resolved to `/_toonstrip/<name>/`. Default `[]`, which renders nothing useful, so always pass at least one. |
+
+Any Astro client directive works. `client:visible` is the documented default; use
+`client:load` above the fold and `client:idle` for a strip near the top that is not the
+first thing the reader needs.
+
+## What renders on the server
+
+Only the tag. There is no server-side canvas, so there is no static fallback image today
+and no content without JavaScript beyond the element's `aria-label`s, which are generated
+client-side too. A build-time PNG renderer for `<noscript>` and Open Graph images is planned
+in the CLI.
+
+## Limitations
+
+- Tested against Astro 7. Astro 5 and 6 should work (nothing version-specific is used) but
+  are not in the test matrix.
+- The renderer is hand-written, not `@astrojs/lit`, because the element is a plain
+  `HTMLElement` with no framework dependency. This is deliberate.
+- `packs` in the integration and `packs` in the component take different things
+  (specifiers vs names). The names come from each pack's `pack.json`.
+
+<Callout kind="tip">
+The `public/_toonstrip/` directory is generated on every build and dev start. Add it to
+`.gitignore`.
+</Callout>

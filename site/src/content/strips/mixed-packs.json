@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "panels": [
+    {
+      "backdrop": "meadow",
+      "camera": "medium",
+      "bodies": [
+        {
+          "character": "pip",
+          "emotion": {
+            "angle": 0,
+            "intensity": 0.6
+          },
+          "pose": "wave"
+        },
+        {
+          "character": "anna",
+          "emotion": {
+            "angle": 0,
+            "intensity": 0.6
+          }
+        }
+      ],
+      "speakers": [
+        {
+          "speaker": "pip",
+          "balloon": "speech",
+          "text": "Two packs, one panel."
+        },
+        {
+          "speaker": "anna",
+          "balloon": "speech",
+          "text": "Ids just have to be unique across them."
+        }
+      ]
+    }
+  ]
+}

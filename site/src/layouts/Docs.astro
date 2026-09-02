@@ -1,0 +1,253 @@
+---
+/**
+ * Docs layout (DESIGN.md §4, §5.7): sidebar | article | table of contents.
+ * Sidebar and prev/next derive from the collection's frontmatter; nothing is
+ * listed twice by hand.
+ */
+import type { MarkdownHeading } from "astro";
+import Base from "./Base.astro";
+import { docsNav, docHref, type DocEntry } from "../lib/docs-nav";
+
+interface Props {
+  entry: DocEntry;
+  headings: MarkdownHeading[];
+}
+const { entry, headings } = Astro.props;
+const { sorted, sections } = await docsNav();
+const index = sorted.findIndex((e) => e.id === entry.id);
+const prev = index > 0 ? sorted[index - 1] : null;
+const next = index < sorted.length - 1 ? sorted[index + 1] : null;
+const toc = headings.filter((h) => h.depth === 2 || h.depth === 3);
+const editUrl = `https://github.com/dkdev24/toonstrip/edit/main/site/src/content/docs/${entry.id}.mdx`;
+---
+
+<Base title={entry.data.title} description={entry.data.description} wide>
+  <div class="docs">
+    <aside class="docs__sidebar" aria-label="Docs navigation">
+      <details class="docs__nav-disclosure" open>
+        <summary>Docs menu</summary>
+        <nav aria-label="Docs">
+          {sections.map((s) => (
+            <div class="docs__section">
+              <p class="caption">{s.name}</p>
+              <ul>
+                {s.entries.map((e) => (
+                  <li><a href={docHref(e)} aria-current={e.id === entry.id ? "page" : undefined}>{e.data.title}</a></li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </nav>
+      </details>
+    </aside>
+
+    <article class="docs__article prose">
+      <p class="caption">{entry.data.section}</p>
+      <h1>{entry.data.title}</h1>
+      <p class="lead">{entry.data.description}</p>
+      <slot />
+      <footer class="docs__footer">
+        <p class="docs__edit"><a href={editUrl}>Edit this page on GitHub</a></p>
+        <nav class="docs__pager" aria-label="Previous and next">
+          {prev ? <a class="docs__pager-link" href={docHref(prev)}><span class="caption">Previous</span><span>{prev.data.title}</span></a> : <span />}
+          {next ? <a class="docs__pager-link docs__pager-link--next" href={docHref(next)}><span class="caption">Next</span><span>{next.data.title}</span></a> : <span />}
+        </nav>
+      </footer>
+    </article>
+
+    {toc.length > 1 && (
+      <aside class="docs__toc" aria-label="Table of contents">
+        <nav aria-label="On this page" data-toc>
+          <p class="caption">On this page</p>
+          <ul>
+            {toc.map((h) => (
+              <li class:list={[`toc-depth-${h.depth}`]}><a href={`#${h.slug}`}>{h.text}</a></li>
+            ))}
+          </ul>
+        </nav>
+      </aside>
+    )}
+  </div>
+</Base>
+
+<script>
+  // The sidebar is a <details> so it collapses on narrow screens; a closed
+  // <details> renders no children, so open it whenever the layout is wide.
+  const disclosure = document.querySelector<HTMLDetailsElement>(".docs__nav-disclosure");
+  const wide = window.matchMedia("(min-width: 900px)");
+  const syncDisclosure = () => {
+    if (disclosure) disclosure.open = wide.matches;
+  };
+  syncDisclosure();
+  wide.addEventListener("change", syncDisclosure);
+
+  // Highlight the heading currently in view.
+  const toc = document.querySelector("[data-toc]");
+  if (toc) {
+    const links = new Map<string, HTMLAnchorElement>();
+    toc.querySelectorAll<HTMLAnchorElement>("a[href^='#']").forEach((a) => links.set(a.getAttribute("href")!.slice(1), a));
+    const headings = [...links.keys()].map((id) => document.getElementById(id)).filter(Boolean) as HTMLElement[];
+    let current: HTMLAnchorElement | null = null;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries.filter((e) => e.isIntersecting).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+        if (!visible.length) return;
+        const link = links.get(visible[0].target.id);
+        if (!link || link === current) return;
+        current?.removeAttribute("aria-current");
+        link.setAttribute("aria-current", "location");
+        current = link;
+      },
+      { rootMargin: "-64px 0px -70% 0px" },
+    );
+    headings.forEach((h) => observer.observe(h));
+  }
+</script>
+
+<style>
+  .docs {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-32);
+    align-items: start;
+  }
+  @media (min-width: 900px) {
+    .docs {
+      grid-template-columns: 15rem minmax(0, 1fr);
+    }
+  }
+  @media (min-width: 1200px) {
+    .docs {
+      grid-template-columns: 15rem minmax(0, 1fr) 14rem;
+    }
+  }
+
+  .docs__sidebar {
+    position: sticky;
+    top: calc(var(--header-height) + var(--space-24));
+  }
+  .docs__nav-disclosure summary {
+    cursor: pointer;
+    font-weight: 500;
+    font-size: var(--text-small);
+    padding: var(--space-8) 0;
+  }
+  @media (min-width: 900px) {
+    .docs__nav-disclosure summary {
+      display: none;
+    }
+    .docs__nav-disclosure {
+      display: contents;
+    }
+  }
+  .docs__section {
+    margin-bottom: var(--space-24);
+  }
+  .docs__section .caption {
+    margin-bottom: var(--space-8);
+  }
+  .docs__section ul,
+  .docs__toc ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .docs__section a {
+    display: block;
+    padding: var(--space-4) var(--space-12);
+    border-left: 2px solid transparent;
+    color: var(--ink-2);
+    font-size: var(--text-small);
+    text-decoration: none;
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  }
+  .docs__section a:hover {
+    color: var(--ink);
+    background: var(--paper-sunken);
+  }
+  .docs__section a[aria-current="page"] {
+    color: var(--ink);
+    background: var(--accent-soft);
+    border-left-color: var(--accent);
+    font-weight: 500;
+  }
+
+  /* Wide enough for two strip columns; prose keeps its own measure. */
+  .docs__article {
+    max-width: 58rem;
+    min-width: 0;
+  }
+  .docs__article :global(p),
+  .docs__article :global(ul),
+  .docs__article :global(ol),
+  .docs__article :global(.callout) {
+    max-width: 68ch;
+  }
+  .docs__article :global(h2) {
+    scroll-margin-top: calc(var(--header-height) + var(--space-16));
+  }
+  .docs__article :global(h3) {
+    scroll-margin-top: calc(var(--header-height) + var(--space-16));
+  }
+  .docs__footer {
+    margin-top: var(--space-64);
+    padding-top: var(--space-24);
+    border-top: 1px solid var(--rule);
+  }
+  .docs__edit {
+    font-size: var(--text-small);
+  }
+  .docs__pager {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-16);
+  }
+  .docs__pager-link {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    padding: var(--space-12) var(--space-16);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-md);
+    color: var(--ink);
+    font-weight: 500;
+    text-decoration: none;
+  }
+  .docs__pager-link:hover {
+    border-color: var(--rule-strong);
+    color: var(--ink);
+  }
+  .docs__pager-link--next {
+    text-align: right;
+    align-items: flex-end;
+  }
+
+  .docs__toc {
+    display: none;
+    position: sticky;
+    top: calc(var(--header-height) + var(--space-24));
+  }
+  @media (min-width: 1200px) {
+    .docs__toc {
+      display: block;
+    }
+  }
+  .docs__toc a {
+    display: block;
+    padding: var(--space-4) var(--space-12);
+    border-left: 2px solid var(--rule);
+    color: var(--ink-2);
+    font-size: var(--text-small);
+    text-decoration: none;
+  }
+  .docs__toc .toc-depth-3 a {
+    padding-left: var(--space-24);
+  }
+  .docs__toc a:hover {
+    color: var(--ink);
+  }
+  .docs__toc a[aria-current="location"] {
+    color: var(--ink);
+    border-left-color: var(--ink);
+  }
+</style>

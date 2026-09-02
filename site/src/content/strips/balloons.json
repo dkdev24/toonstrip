@@ -1,0 +1,65 @@
+{
+  "version": 1,
+  "panels": [
+    {
+      "backdrop": "room8bs",
+      "camera": "medium",
+      "bodies": [
+        {
+          "character": "lynnea",
+          "emotion": {
+            "angle": 0,
+            "intensity": 0.5
+          }
+        }
+      ],
+      "speakers": [
+        {
+          "speaker": "lynnea",
+          "balloon": "speech",
+          "text": "A speech balloon."
+        }
+      ]
+    },
+    {
+      "backdrop": "room8bs",
+      "camera": "medium",
+      "bodies": [
+        {
+          "character": "lynnea",
+          "emotion": {
+            "angle": 1.570796,
+            "intensity": 0.5
+          }
+        }
+      ],
+      "speakers": [
+        {
+          "speaker": "lynnea",
+          "balloon": "thought",
+          "text": "A thought balloon."
+        }
+      ]
+    },
+    {
+      "backdrop": "room8bs",
+      "camera": "medium",
+      "bodies": [
+        {
+          "character": "lynnea",
+          "emotion": {
+            "angle": 0,
+            "intensity": 0.3
+          }
+        }
+      ],
+      "speakers": [
+        {
+          "speaker": "caption",
+          "balloon": "caption",
+          "text": "A caption. No speaker on stage needs to say it."
+        }
+      ]
+    }
+  ]
+}

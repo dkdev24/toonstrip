@@ -1,0 +1,89 @@
+{
+  "version": 1,
+  "panels": [
+    {
+      "backdrop": "room8bs",
+      "camera": "wide",
+      "bodies": [
+        {
+          "character": "scotty",
+          "emotion": {
+            "angle": 0,
+            "intensity": 0.5
+          }
+        },
+        {
+          "character": "tiki",
+          "emotion": {
+            "angle": 0,
+            "intensity": 0.4
+          }
+        }
+      ],
+      "speakers": [
+        {
+          "speaker": "scotty",
+          "balloon": "speech",
+          "text": "roomTitle labels the place."
+        }
+      ],
+      "roomTitle": "The workshop"
+    },
+    {
+      "backdrop": "room8bs",
+      "camera": "medium",
+      "bodies": [
+        {
+          "character": "scotty",
+          "emotion": {
+            "angle": 2.356194,
+            "intensity": 0.7
+          }
+        },
+        {
+          "character": "tiki",
+          "emotion": {
+            "angle": 2.356194,
+            "intensity": 0.7
+          }
+        }
+      ],
+      "speakers": [
+        {
+          "speaker": "scotty",
+          "balloon": "speech",
+          "text": "dark: true. The lights are out; the balloons stay."
+        }
+      ],
+      "dark": true
+    },
+    {
+      "backdrop": "room8bs",
+      "camera": "medium",
+      "bodies": [
+        {
+          "character": "scotty",
+          "emotion": {
+            "angle": 0,
+            "intensity": 0.5
+          }
+        },
+        {
+          "character": "tiki",
+          "emotion": {
+            "angle": 1.570796,
+            "intensity": 0.4
+          },
+          "requested": true
+        }
+      ],
+      "speakers": [
+        {
+          "speaker": "scotty",
+          "balloon": "speech",
+          "text": "tiki has no line here, but requested: true keeps her on stage."
+        }
+      ]
+    }
+  ]
+}

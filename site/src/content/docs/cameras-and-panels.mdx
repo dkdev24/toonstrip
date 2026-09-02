@@ -1,0 +1,52 @@
+---
+title: Cameras and panels
+description: The six framing presets on one scene, plus room titles, dark panels, and silent bodies.
+order: 4
+section: Authoring
+---
+import CodeAndStrip from "../../components/demo/CodeAndStrip.astro";
+import Callout from "../../components/site/Callout.astro";
+import cameras from "../strips/cameras.json";
+import panelOptions from "../strips/panel-options.json";
+
+A panel's `camera` sets how much of the figures and the backdrop you see. The presets are
+the six rungs Comic Chat used, and alternating between them is most of what makes a
+strip read like a comic rather than a row of identical portraits.
+
+## The six presets
+
+Same two characters, same backdrop, six cameras.
+
+<CodeAndStrip doc={cameras} title="One scene, six cameras" collapse />
+
+| Preset | Use it for |
+|---|---|
+| `establishing` | A new location. Figures small, backdrop fully visible. |
+| `wide` | A location already seen. Both figures, backdrop incidental. |
+| `medium` | The default. Waist-up, room for balloons. |
+| `over-shoulder` | One speaker addressing another; the listener is close and partly cropped. |
+| `close-up` | One face, most of the frame, backdrop faint. |
+| `reaction` | Tight on the head, no balloon expected. A beat panel. |
+
+<Callout kind="tip">
+A three-panel strip that goes establishing → medium → reaction reads naturally: set the
+scene, have the conversation, land the beat.
+</Callout>
+
+## Room title
+
+`roomTitle` draws a small banner in the panel's top-left. Use it for a place or a channel
+name.
+
+## Dark panels
+
+`dark: true` paints the panel black and omits the figures; balloons still draw. Useful for
+"the lights go out" beats and for a caption-only panel that should not show a location.
+
+## Silent bodies
+
+A body with no line in a panel is dropped from the stage by default, so a two-character
+strip can spend a panel on one of them without editing `bodies`. Set `requested: true` to
+keep a silent body on stage.
+
+<CodeAndStrip doc={panelOptions} title="roomTitle, dark, requested" collapse />

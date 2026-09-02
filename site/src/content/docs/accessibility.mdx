@@ -1,0 +1,51 @@
+---
+title: Accessibility
+description: What the element emits for assistive technology, and how to write lines that read well aloud.
+order: 11
+section: Reference
+---
+
+A canvas is a bitmap; on its own it says nothing to a screen reader. The element fixes
+that per panel, from the document itself, so the same data that draws the strip describes
+it.
+
+## What the element emits
+
+Every panel's `<canvas>` carries `role="img"` and an `aria-label` generated from the panel:
+the camera shot, the room title if any, then each line in order with its speaker and
+balloon kind. The three panels on the home page read as:
+
+```
+establishing shot; caption: toonstrip draws comic strips from data.; dan says "You write the panels as JSON."
+medium shot; anna says "And it draws them right here, on a canvas?"; dan says "Live. Resize the page and watch it reflow."
+reaction shot; anna thinks "No build step for the art. No image files to keep in sync."
+```
+
+Thought balloons read as "thinks", speech as "says", captions as "caption:". A dark panel
+is announced as such.
+
+The generator is `describePanel` in `@toonstrip/element`, exported so a site can reuse it
+for a visible transcript or a `<figcaption>`.
+
+## Writing lines that read well
+
+- Use the character's display name in the text when it matters; the label uses the id
+  (`dan`), which is what the document has.
+- Put the beat in words. A `reaction` panel with no line is announced only as "reaction
+  shot"; a caption gives it content.
+- Keep punctuation conventional. Screen readers pause on periods and commas, not on
+  ellipses or dashes.
+- Do not encode meaning in emotion alone. `SAD` changes the face, not the label.
+
+## Around the element
+
+- Wrap a strip in `<figure>` with a `<figcaption>` when it illustrates surrounding text.
+- Do not rely on colour in captions or titles; the art is monochrome anyway.
+- Motion: the element animates nothing. Resizes repaint instantly.
+
+## Known gaps
+
+- There is no visible-text fallback when JavaScript is off, because the labels are
+  generated client-side. A build-time renderer that also emits a transcript is planned.
+- Focus: canvases are not focusable and there is nothing to operate, so the strip is
+  skipped in the tab order, which is correct for an image.

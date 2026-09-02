@@ -1,0 +1,98 @@
+---
+title: Writing a strip
+description: The Comic Strip Document, built up from one panel to a two-speaker scene.
+order: 2
+section: Start
+---
+import CodeAndStrip from "../../components/demo/CodeAndStrip.astro";
+import Callout from "../../components/site/Callout.astro";
+import firstStrip from "../strips/first-strip.json";
+import twoSpeakers from "../strips/two-speakers.json";
+import hero from "../strips/hero.json";
+
+A strip is a JSON document: a version number and a list of panels. Each panel names a
+backdrop, puts some bodies on stage, and gives some of them lines. That is the entire
+format. You can write it by hand, generate it from any language, or store it in a CMS field.
+
+## One panel, one speaker
+
+<CodeAndStrip doc={firstStrip} title="The smallest useful document" layout="side" />
+
+- `backdrop` is an id from a registered pack. The default pack has `field`, `pastoral`,
+  and `room8bs`.
+- `bodies` lists who is on stage, left to right. Each body names a `character` id and an
+  `emotion`.
+- `speakers` lists the balloons. A line's `speaker` must be a body in this panel, or
+  `"caption"`.
+
+## Emotion is a point, not a word
+
+`emotion` is `{ angle, intensity }` on a wheel. Angle 0 is HAPPY and each named emotion sits
+π/4 further round; intensity runs 0 to 1, and 0 means NEUTRAL whatever the angle. The
+renderer picks the nearest face the pack has, so you never get an error for an angle
+between two names. [Emotions and poses](/docs/emotions-and-poses/) shows the whole wheel.
+
+| Feeling | angle | intensity |
+|---|---|---|
+| Neutral | `0` | `0` |
+| Happy | `0` | `0.4`–`1` |
+| Coy | `0.785` (π/4) | `0.4`–`1` |
+| Bored | `1.571` (π/2) | `0.4`–`1` |
+| Scared | `2.356` (3π/4) | `0.4`–`1` |
+| Sad | `3.142` (π) | `0.4`–`1` |
+| Angry | `3.927` (5π/4) | `0.4`–`1` |
+| Shout | `4.712` (3π/2) | `0.4`–`1` |
+| Laugh | `5.498` (7π/4) | `0.4`–`1` |
+
+## Two speakers
+
+Add a second body and a second line. Balloons draw in `speakers` order and the layout
+places each one beside its speaker's head.
+
+<CodeAndStrip doc={twoSpeakers} title="Two bodies, two lines" layout="side" />
+
+## A three-panel strip
+
+Panels are independent: each one names its own backdrop, camera, and cast. Characters keep
+their identity across panels, and their pose cycles so the same face is not repeated
+panel after panel.
+
+<CodeAndStrip doc={hero} title="The strip from the home page" collapse />
+
+## Validating
+
+`@toonstrip/schema` ships the JSON Schema and a validator. The element and the Astro
+component validate at the boundary, but validating in your build catches mistakes earlier
+and with a path to the field.
+
+```ts
+import { validateDocument, ComicStripValidationError } from "@toonstrip/schema";
+
+try {
+  const doc = validateDocument(JSON.parse(raw));
+} catch (err) {
+  if (err instanceof ComicStripValidationError) console.error(err.message);
+}
+```
+
+A validation error names the path and the problem:
+
+```
+Invalid ComicStripDocument:
+  /panels/0/camera must be equal to one of the allowed values
+  /panels/0 must NOT have additional properties
+```
+
+<Callout>
+Unknown keys are rejected, not ignored. `emotions` instead of `emotion` is an error, which
+is what you want from a format that other tools will write.
+</Callout>
+
+The validator checks structure only. Whether a `character` or `backdrop` id exists is
+checked when the strip loads against the registered packs, and an unknown id there is a
+hard error, never a silent fallback.
+
+## Next
+
+[Emotions and poses](/docs/emotions-and-poses/), then [cameras and panels](/docs/cameras-and-panels/).
+Or skip to the [playground](/playground/) and edit any of these strips.

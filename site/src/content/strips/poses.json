@@ -1,0 +1,68 @@
+{
+  "version": 1,
+  "panels": [
+    {
+      "backdrop": "field",
+      "camera": "medium",
+      "bodies": [
+        {
+          "character": "kevin",
+          "emotion": {
+            "angle": 0,
+            "intensity": 0.5
+          },
+          "pose": "wave"
+        }
+      ],
+      "speakers": [
+        {
+          "speaker": "kevin",
+          "balloon": "speech",
+          "text": "\"pose\": \"wave\""
+        }
+      ]
+    },
+    {
+      "backdrop": "field",
+      "camera": "medium",
+      "bodies": [
+        {
+          "character": "kevin",
+          "emotion": {
+            "angle": 0,
+            "intensity": 0.5
+          },
+          "pose": "point"
+        }
+      ],
+      "speakers": [
+        {
+          "speaker": "kevin",
+          "balloon": "speech",
+          "text": "\"pose\": \"point\""
+        }
+      ]
+    },
+    {
+      "backdrop": "field",
+      "camera": "medium",
+      "bodies": [
+        {
+          "character": "kevin",
+          "emotion": {
+            "angle": 0,
+            "intensity": 0.5
+          },
+          "pose": "shrug"
+        }
+      ],
+      "speakers": [
+        {
+          "speaker": "kevin",
+          "balloon": "speech",
+          "text": "\"pose\": \"shrug\""
+        }
+      ]
+    }
+  ]
+}

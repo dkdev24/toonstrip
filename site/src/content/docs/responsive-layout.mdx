@@ -1,0 +1,57 @@
+---
+title: Responsive layout
+description: How the strip decides on one, two, or three columns, and what happens to panel size.
+order: 6
+section: Integrate
+---
+import WidthSlider from "../../components/demo/WidthSlider.astro";
+import hero from "../strips/hero.json";
+
+A strip is a grid of canvases, one per panel, and the column count is computed from the
+container's width every time it changes. Nothing is stored; a `ResizeObserver` on the
+element re-runs the layout and repaints the affected panels.
+
+## Try it
+
+<WidthSlider doc={hero} initial={900} />
+
+## The policy
+
+The native panel is 400 × 340 CSS pixels and the maximum is three columns. For a container
+`w` pixels wide with a 10 px gutter:
+
+1. Count how many panels of at least 85 % native width fit across `w`, capped at 3.
+2. Divide `w` between that many columns.
+3. Never stretch a panel past native size. If the share is wider than 400 px, the panel
+   stays 400 px and the row is centred.
+4. If even one column is narrower than native, the lone panel shrinks to fit.
+
+So a blog column around 700 px gets two columns of ~345 px panels; a full-width section
+above ~1060 px gets three native panels; a phone gets one column, scaled down.
+
+| Container width | Columns | Panel width |
+|---|---|---|
+| 360 px | 1 | 360 px |
+| 700 px | 2 | 345 px |
+| 900 px | 2 | 400 px (centred) |
+| 1100 px | 3 | 360 px |
+| 1300 px | 3 | 400 px (centred) |
+
+## Sharpness
+
+Each canvas has a backing store sized `width × devicePixelRatio`, so a 2× display gets a
+2× bitmap. Zooming the page re-lays out and repaints; nothing is a scaled bitmap.
+
+## Off-screen panels
+
+Panels are painted only when they are within one viewport of the visible area, and their
+bitmaps are released when they scroll far away. A strip with fifty panels costs as much
+memory as the handful near the reader. The consequence for tooling: a full-page screenshot
+shows unpainted panels as dark boxes. Scroll them into view first.
+
+## Embedding advice
+
+- Give the element the full width of its column. It is `display: block` and measures its
+  own box.
+- Do not set a height. The height follows from the column count.
+- Do not style the canvases. Put spacing, borders, or a background on a wrapper.

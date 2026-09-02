@@ -40,7 +40,7 @@ await page.waitForTimeout(800);
 const canvases = await page.locator("comic-strip canvas").count();
 const labels = await page.locator("comic-strip [role=img]").evaluateAll((els) => els.map((e) => e.getAttribute("aria-label")));
 const axe = await new AxeBuilder({ page }).analyze();
-const violations = axe.violations.map((v) => ({ id: v.id, impact: v.impact, nodes: v.nodes.length, sample: v.nodes[0]?.target?.[0] }));
+const violations = axe.violations.map((v) => ({ id: v.id, impact: v.impact, nodes: v.nodes.length, sample: v.nodes[0]?.target?.[0], detail: args.includes("--verbose") ? v.nodes[0]?.any?.[0]?.message : undefined }));
 if (shot && at) {
   await page.locator(at).first().scrollIntoViewIfNeeded();
   await page.waitForTimeout(600);

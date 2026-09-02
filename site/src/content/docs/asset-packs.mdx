@@ -1,0 +1,138 @@
+---
+title: Asset packs
+description: Using the two shipped packs, registering more than one, and adding a character of your own.
+order: 7
+section: Integrate
+---
+import CodeAndStrip from "../../components/demo/CodeAndStrip.astro";
+import Callout from "../../components/site/Callout.astro";
+import pip from "../strips/pip.json";
+import mixedPacks from "../strips/mixed-packs.json";
+
+An asset pack supplies the art a document refers to by id: character sprite sheets with a
+pose table, and backdrop images. The renderer never ships art of its own.
+
+## The two shipped packs
+
+| Pack | npm | name | Contents |
+|---|---|---|---|
+| Comic Chat | `@toonstrip/pack-comic-chat` | `comic-chat` | 15 characters, 3 backdrops. The original Microsoft Comic Chat art, MIT. |
+| Example | `@toonstrip/pack-example` | `example` | 1 character (`pip`), 1 backdrop (`meadow`). Original, tiny, and the template for your own. |
+
+<CodeAndStrip doc={pip} packs={["example"]} title="The example pack" layout="side" />
+
+## Registering more than one
+
+List every pack in the integration and name the ones a strip needs in the component. Ids
+resolve across all registered packs; a character or backdrop id declared by two packs is a
+load-time error, not a silent first-match.
+
+```js
+// astro.config.mjs
+toonstrip({ packs: ["@toonstrip/pack-comic-chat", "@toonstrip/pack-example"] })
+```
+
+```astro
+<ComicStrip document={doc} packs={["comic-chat", "example"]} client:visible />
+```
+
+<CodeAndStrip doc={mixedPacks} packs={["comic-chat", "example"]} title="Two packs in one panel" layout="side" />
+
+## Pack layout
+
+```
+my-pack/
+  pack.json                      # name, version, license, characters[], backdrops[]
+  characters/<id>/sheet.png      # one sprite sheet per character
+  characters/<id>/<id>.json      # that character's parts: faces, torsos, rects, sockets
+  backdrops/<id>.png
+  NOTICE                         # required if any art is not wholly yours
+```
+
+`pack.json`:
+
+```json
+{
+  "name": "my-pack",
+  "version": "0.1.0",
+  "license": "MIT",
+  "characters": [
+    { "id": "pip", "name": "Pip", "manifest": "characters/pip/pip.json", "sheet": "characters/pip/sheet.png" }
+  ],
+  "backdrops": [
+    { "id": "meadow", "file": "backdrops/meadow.png", "width": 240, "height": 240 }
+  ]
+}
+```
+
+`name` is what strips reference, not the npm package name. `license` is required on every
+pack.
+
+## A character manifest
+
+A character is parts, not finished drawings: faces and torsos as rectangles in the sheet,
+each tagged with an emotion point, plus the neck socket so a face sits on any torso.
+
+```ts
+interface PackedAvatar {
+  name: string;
+  type: string;
+  torsoFirst: boolean;     // torso draws over the collar, or under it
+  sheet: string;           // path relative to this manifest
+  sheetWidth: number;
+  sheetHeight: number;
+  faces: PackedPart[];
+  torsos: PackedPart[];
+  bodies: PackedPart[];    // unused today; leave empty
+}
+
+interface PackedPart {
+  kind: "face" | "torso" | "body";
+  index: number;
+  emotion: string;         // "NEUTRAL", "HAPPY", … or a gesture name
+  angle: number;           // wheel angle, or 1001 wave / 1002 point / 1005 shrug
+  intensity: number;
+  cx: number; cy: number;  // neck socket
+  cxDelta: number; cyDelta: number;
+  x: number;               // where a balloon tail attaches
+  figure: { x: number; y: number; width: number; height: number };
+  aura: { x: number; y: number; width: number; height: number } | null;
+}
+```
+
+Minimum: one face with `emotion: "NEUTRAL"` and one torso. Gestures are torsos at the
+sentinel angles (`1001` wave, `1002` point, `1005` shrug); support the ones you draw.
+
+## Validate
+
+```
+npx toonstrip pack validate ./my-pack
+```
+
+Checks `pack.json`, every declared file, the NEUTRAL face, and that each backdrop's real
+pixel size matches what `pack.json` claims. It lists every problem, not just the first.
+
+<Callout kind="warning">
+A character with faces but no torsos validates today and then renders nothing. Always
+declare at least one torso.
+</Callout>
+
+## Adding a character, step by step
+
+1. Draw the parts on one sheet (any editor, or a script). At minimum a NEUTRAL face and a
+   torso, each a clean rectangle.
+2. Write the manifest: copy `pip.json` from the example pack and replace the rectangles
+   and sockets with yours.
+3. Add the character to `pack.json`.
+4. Run `pack validate`.
+5. Render one panel with it in the [playground](/playground/) by serving your pack
+   locally, or in a Node script through `@toonstrip/core`'s `renderPanel`.
+
+The example pack's sheet is drawn by a 60-line script with `@napi-rs/canvas`; it is the
+smallest complete pack and the one to copy.
+
+## Licensing
+
+Say what the art is. If any of it is not wholly yours, ship a `NOTICE` crediting the
+source and its licence. The default pack's `NOTICE` (Microsoft Comic Chat art, MIT, with a
+trademark disclaimer) is the worked example.

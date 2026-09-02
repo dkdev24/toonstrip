@@ -1,0 +1,74 @@
+---
+title: Plain HTML
+description: The comic-strip custom element without Astro, in any page or framework.
+order: 8
+section: Integrate
+---
+import Callout from "../../components/site/Callout.astro";
+
+`@toonstrip/element` is a custom element with no framework dependency. The Astro component
+is a thin wrapper around it; everything it does, the element does on its own.
+
+## Install
+
+```
+npm install @toonstrip/element @toonstrip/pack-comic-chat
+```
+
+Serve the pack's files somewhere the browser can fetch them. The pack package contains
+`pack.json`, `characters/`, and `backdrops/`; copy that directory to your static assets, for
+example `public/packs/comic-chat/`.
+
+## Use
+
+```html
+<comic-strip id="strip"></comic-strip>
+
+<script type="module">
+  import "@toonstrip/element";
+
+  const strip = document.getElementById("strip");
+  strip.packs = ["/packs/comic-chat/"];
+  strip.document = {
+    version: 1,
+    panels: [
+      {
+        backdrop: "pastoral",
+        camera: "establishing",
+        bodies: [{ character: "dan", emotion: { angle: 0, intensity: 0.6 } }],
+        speakers: [{ speaker: "caption", balloon: "caption", text: "A field outside town." }],
+      },
+    ],
+  };
+</script>
+```
+
+## API
+
+| Member | Type | Meaning |
+|---|---|---|
+| `packs` | `string[]` property | Base URLs of asset packs, each serving `pack.json` and its files. Searched in order; duplicate ids across packs throw. |
+| `document` | `ComicStripDocument` property | The strip. Validated on set. Setting it again re-renders. |
+| `src` | attribute | URL of a JSON document to fetch instead of setting `document`. |
+| `columns` | `number` getter | Column count from the last layout pass. |
+
+Setting `document` before `packs` is fine; the element rebuilds on either change and the
+last set wins.
+
+<Callout>
+Validation errors and unknown ids are reported by replacing the strip with a short red
+notice and logging to the console. Nothing throws out of a property setter.
+</Callout>
+
+## From a framework
+
+React, Vue, Svelte, and the rest can all render a custom element and set properties on it.
+The one thing to remember is that `packs` and `document` are **properties**, not
+attributes: set them from a ref after mount, or use your framework's property-binding
+syntax (`.document={doc}` in Lit, `prop:document={doc}` in Solid, `:document.prop` in Vue).
+
+## Bundling
+
+The element imports `@toonstrip/core` and `@toonstrip/schema`; any ESM bundler handles it.
+The schema validator is precompiled at build time, so there is no `eval` and a strict
+Content Security Policy does not need `unsafe-eval`.
