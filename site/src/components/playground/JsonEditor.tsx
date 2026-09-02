@@ -18,6 +18,7 @@ const highlight = HighlightStyle.define([
 ]);
 import { lintGutter, setDiagnostics, type Diagnostic } from "@codemirror/lint";
 import { jsonText, jsonProblems, lastSource, applyJson, doc, pretty, setDoc } from "../../lib/playground/state";
+import { Button } from "../ui/button";
 
 export function JsonEditor({ actions }: { actions?: ComponentChildren }) {
   const host = useRef<HTMLDivElement>(null);
@@ -76,16 +77,16 @@ export function JsonEditor({ actions }: { actions?: ComponentChildren }) {
   const problems = jsonProblems.value;
   return (
     <div class="pg-editor">
-      <div class="pg-pane__bar">
+      <div class="flex h-9 shrink-0 items-center gap-3 border-b border-border bg-muted pr-2 pl-4">
         <span class="caption">JSON</span>
         <span class={`pg-status ${problems.length ? "is-invalid" : "is-valid"}`} role="status">
           {problems.length ? `${problems.length} problem${problems.length === 1 ? "" : "s"}` : "Valid"}
         </span>
-        <span class="pg-pane__actions">
-          <button type="button" class="button button--ghost button--dense" onClick={() => setDoc(doc.value, "form")}>Format</button>
-          <button
-            type="button"
-            class="button button--ghost button--dense"
+        <span class="ml-auto flex items-center gap-1">
+          <Button variant="ghost" size="sm" onClick={() => setDoc(doc.value, "form")}>Format</Button>
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={async () => {
               try {
                 await navigator.clipboard.writeText(pretty(doc.value));
@@ -93,7 +94,7 @@ export function JsonEditor({ actions }: { actions?: ComponentChildren }) {
             }}
           >
             Copy
-          </button>
+          </Button>
           {actions}
         </span>
       </div>

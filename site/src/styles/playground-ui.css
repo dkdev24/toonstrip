@@ -5,13 +5,43 @@
  * shadcn theme names map onto tokens.css so the ui components recolour with the
  * site's [data-theme] toggle.
  */
-@layer theme, base, components, utilities;
+@layer theme, base, components;
 @import "tailwindcss/theme.css" layer(theme) source(none);
-@import "tailwindcss/utilities.css" layer(utilities) source(none);
+/* Utilities stay unlayered on purpose: the site's global.css/components.css element
+   rules (button, input, …) are unlayered too, and an unlayered rule always beats a
+   layered one. Unlayered, a utility class outranks them by specificity as intended. */
+@import "tailwindcss/utilities.css" source(none);
 @source "../components/playground";
 @source "../components/ui";
 
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/* Minimal form-control reset in place of preflight, scoped to the playground page
+   (.is-bare) and to Radix portals, which render under <body>. Layered, so every
+   utility class still wins. */
+@layer base {
+  :is(.is-bare, [data-spike], [data-radix-popper-content-wrapper], [role="dialog"]) :is(button, input:not([type="checkbox"], [type="radio"]), select, textarea) {
+    font: inherit;
+    color: inherit;
+    background: none;
+    border: 0;
+    margin: 0;
+    padding: 0;
+    border-radius: 0;
+    appearance: none;
+  }
+  :is(.is-bare, [data-spike], [data-radix-popper-content-wrapper], [role="dialog"]) button:not(:disabled) {
+    cursor: pointer;
+  }
+  :is(.is-bare, [data-spike]) :is(fieldset, ul, ol, dl, p) {
+    margin: 0;
+    padding: 0;
+  }
+  :is(.is-bare, [data-spike]) fieldset {
+    border: 0;
+    min-inline-size: 0;
+  }
+}
 
 @theme inline {
   --color-background: var(--paper);

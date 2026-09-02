@@ -32,7 +32,7 @@ test("JSON edit updates the form and preview; invalid JSON keeps the last valid 
   await expect(strip(page)).toHaveCount(3);
   const editor = jsonPane(page);
   await editor.click();
-  await page.keyboard.press("Control+A");
+  await page.keyboard.press("ControlOrMeta+A");
   const doc = {
     version: 1,
     panels: [{ backdrop: "field", bodies: [{ character: "dan", emotion: { angle: 0, intensity: 0.5 } }], speakers: [{ speaker: "dan", balloon: "speech", text: "From the editor." }] }],
@@ -66,7 +66,7 @@ test("keyboard-only: build a two-panel, two-character strip with a caption and a
   await expect(strip(page)).toHaveCount(3);
   // Reset to a one-panel document via the editor, then drive the form by keyboard.
   await jsonPane(page).click();
-  await page.keyboard.press("Control+A");
+  await page.keyboard.press("ControlOrMeta+A");
   await page.keyboard.insertText(JSON.stringify({ version: 1, panels: [{ backdrop: "field", bodies: [], speakers: [] }] }));
   await expect(strip(page)).toHaveCount(1);
 
@@ -96,8 +96,8 @@ test("keyboard-only: build a two-panel, two-character strip with a caption and a
   await page.locator(".pg-line textarea").last().fill("A caption.");
   await page.getByRole("button", { name: "+ Add line" }).focus();
   await page.keyboard.press("Enter");
-  const balloon = page.locator(".pg-line select").last();
-  await balloon.selectOption("thought");
+  await page.locator(".pg-line").last().getByRole("combobox", { name: "Balloon" }).click();
+  await page.getByRole("option", { name: "thought" }).click();
   await page.locator(".pg-line textarea").last().fill("A thought.");
 
   await page.getByRole("button", { name: "Duplicate" }).focus();

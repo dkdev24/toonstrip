@@ -1,9 +1,16 @@
-/** Live preview + toolbar (SITE_DEV_PLAN.md §6.4, DESIGN.md §6.4). */
+/** Live preview + toolbar (SITE_DEV_PLAN.md §6.4, DESIGN.md §6.4) on shadcn/ui controls. */
+import type { ComponentChildren } from "preact";
 import { useEffect, useRef, useState } from "preact/hooks";
 import { useSignalEffect } from "@preact/signals";
 import { layoutStrip } from "@toonstrip/core";
+import { ChevronDown, Download, Moon, Redo2, Share2, Sun, Undo2 } from "lucide-preact";
 import { doc, packs, packUrls, selectedPanel, stripTab, shareHash, presets, loadPreset, showToast, undo, redo, canUndo, canRedo } from "../../lib/playground/state";
 import { renderStripPng, downloadBlob, astroSnippet, htmlSnippet } from "../../lib/playground/export";
+import { Button } from "../ui/button";
+import { Slider } from "../ui/slider";
+import { ToggleGroup, ToggleGroupItem } from "../ui/toggle-group";
+import { Tooltip, TooltipTrigger, TooltipContent } from "../ui/tooltip";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuCheckboxItem, DropdownMenuSeparator, DropdownMenuLabel } from "../ui/dropdown-menu";
 
 const GUTTER = 10;
 const PRESET_WIDTHS = [
@@ -19,6 +26,19 @@ interface StripEl extends HTMLElement {
   packs: string[];
 }
 
+function IconButton({ label, onClick, disabled, children }: { label: string; onClick: () => void; disabled?: boolean; children: ComponentChildren }) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button variant="ghost" size="icon" aria-label={label} disabled={disabled} onClick={onClick}>
+          {children}
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>{label}</TooltipContent>
+    </Tooltip>
+  );
+}
+
 export function Preview() {
   const stripRef = useRef<StripEl>(null);
   const stageRef = useRef<HTMLDivElement>(null);
@@ -27,7 +47,6 @@ export function Preview() {
   const [dark, setDark] = useState(false);
   const [transparent, setTransparent] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [menu, setMenu] = useState<"export" | "presets" | null>(null);
   // Render <comic-strip> only after its class is defined: setting `document`
   // on an un-upgraded element creates an own property that shadows the
   // accessor once the upgrade happens, and nothing ever renders.
@@ -78,6 +97,8 @@ export function Preview() {
 
   const effective = width === 0 ? stageWidth : Math.min(width, stageWidth);
   const columns = effective > 0 ? Math.min(layoutStrip(effective, { gutter: GUTTER }).columns, Math.max(1, doc.value.panels.length)) : 1;
+  const sliderMax = Math.max(260, Math.min(1240, stageWidth || 1240));
+  const presetValue = PRESET_WIDTHS.find((p) => p.width === width)?.label ?? "";
 
   async function exportPng() {
     setBusy(true);
@@ -89,7 +110,6 @@ export function Preview() {
       showToast(`Export failed: ${(err as Error).message}`);
     } finally {
       setBusy(false);
-      setMenu(null);
     }
   }
 
@@ -100,7 +120,6 @@ export function Preview() {
     } catch {
       showToast("Clipboard blocked; select the JSON pane and copy manually");
     }
-    setMenu(null);
   }
 
   async function share() {
@@ -114,70 +133,60 @@ export function Preview() {
     }
   }
 
+  const panelCount = doc.value.panels.length;
+
   return (
-    <div class="pg-preview">
-      <div class="pg-toolbar" role="toolbar" aria-label="Preview">
-        <label class="pg-toolbar__width">
-          <span class="visually-hidden">Container width</span>
-          <input type="range" min={260} max={1240} step={10} value={width || stageWidth} onInput={(e) => setWidth(Number((e.currentTarget as HTMLInputElement).value))} />
-        </label>
-        <output class="mono pg-toolbar__readout" aria-live="polite">
+    <div class="pg-preview flex min-h-0 flex-1 flex-col">
+      <div class="flex min-h-11 shrink-0 flex-wrap items-center gap-2 border-b border-border bg-background px-4 py-1.5" role="toolbar" aria-label="Preview">
+        <div class="flex min-w-32 flex-1 basis-40 items-center gap-2">
+          <Slider min={260} max={sliderMax} step={10} value={[width || Math.min(stageWidth, sliderMax) || 260]} onValueChange={([v]) => setWidth(v)} aria-label="Container width" />
+        </div>
+        <output class="mono shrink-0 text-xs text-muted-foreground" aria-live="polite">
           {Math.round(effective)} px · {columns} col
         </output>
-        <span class="pg-toolbar__presets">
+        <ToggleGroup type="single" value={presetValue} onValueChange={(label: string) => { const p = PRESET_WIDTHS.find((x) => x.label === label); if (p) setWidth(p.width); }} aria-label="Width presets">
           {PRESET_WIDTHS.map((p) => (
-            <button key={p.label} type="button" class="chip" aria-pressed={width === p.width} onClick={() => setWidth(p.width)}>
-              {p.label}
-            </button>
+            <ToggleGroupItem key={p.label} value={p.label}>{p.label}</ToggleGroupItem>
           ))}
-        </span>
-        <button type="button" class="chip" aria-pressed={dark} onClick={() => setDark(!dark)}>
-          Dark surface
-        </button>
-        <span class="pg-toolbar__spacer" />
-        <button type="button" class="button button--ghost button--dense" disabled={!canUndo.value} onClick={undo} aria-label="Undo">
-          Undo
-        </button>
-        <button type="button" class="button button--ghost button--dense" disabled={!canRedo.value} onClick={redo} aria-label="Redo">
-          Redo
-        </button>
-        <span class="pg-menu">
-          <button type="button" class="button button--secondary button--dense" aria-haspopup="menu" aria-expanded={menu === "presets"} onClick={() => setMenu(menu === "presets" ? null : "presets")}>
-            Presets
-          </button>
-          {menu === "presets" && (
-            <ul class="pg-menu__list" role="menu">
-              {presets.value.map((p) => (
-                <li key={p.name} role="none">
-                  <button type="button" role="menuitem" onClick={() => { loadPreset(p); setMenu(null); }}>
-                    {p.name}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
-        </span>
-        <button type="button" class="button button--secondary button--dense" onClick={share}>
-          Share
-        </button>
-        <span class="pg-menu">
-          <button type="button" class="button button--primary button--dense" aria-haspopup="menu" aria-expanded={menu === "export"} onClick={() => setMenu(menu === "export" ? null : "export")}>
-            Export
-          </button>
-          {menu === "export" && (
-            <ul class="pg-menu__list" role="menu">
-              <li role="none"><button type="button" role="menuitem" disabled={busy} onClick={exportPng}>{busy ? "Rendering…" : "Download PNG"}</button></li>
-              <li role="none">
-                <label class="pg-menu__check">
-                  <input type="checkbox" checked={transparent} onChange={(e) => setTransparent((e.currentTarget as HTMLInputElement).checked)} /> Transparent background
-                </label>
-              </li>
-              <li role="none"><button type="button" role="menuitem" onClick={() => copy(JSON.stringify(doc.value, null, 2), "JSON")}>Copy JSON</button></li>
-              <li role="none"><button type="button" role="menuitem" onClick={() => copy(astroSnippet(doc.value, packs.value), "Astro snippet")}>Copy Astro snippet</button></li>
-              <li role="none"><button type="button" role="menuitem" onClick={() => copy(htmlSnippet(doc.value, packs.value), "HTML snippet")}>Copy HTML snippet</button></li>
-            </ul>
-          )}
-        </span>
+        </ToggleGroup>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant={dark ? "primary" : "secondary"} size="icon" aria-label="Dark surface" aria-pressed={dark} onClick={() => setDark(!dark)}>
+              {dark ? <Sun /> : <Moon />}
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Dark surface: check the strip against a dark page</TooltipContent>
+        </Tooltip>
+        <span class="flex-1" />
+        <IconButton label="Undo" disabled={!canUndo.value} onClick={undo}><Undo2 /></IconButton>
+        <IconButton label="Redo" disabled={!canRedo.value} onClick={redo}><Redo2 /></IconButton>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button>Presets <ChevronDown /></Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent class="max-h-80 overflow-auto">
+            <DropdownMenuLabel>Load a preset (replaces the strip)</DropdownMenuLabel>
+            {presets.value.map((p) => (
+              <DropdownMenuItem key={p.name} onSelect={() => { loadPreset(p); stripTab.value = false; }}>{p.name}</DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+        <Button onClick={share}><Share2 /> Share</Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="primary"><Download /> Export <ChevronDown /></Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent class="w-56">
+            <DropdownMenuItem disabled={busy} onSelect={exportPng}>{busy ? "Rendering…" : "Download PNG"}</DropdownMenuItem>
+            <DropdownMenuCheckboxItem checked={transparent} onCheckedChange={(v: boolean) => setTransparent(v)} onSelect={(e: Event) => e.preventDefault()}>
+              Transparent background
+            </DropdownMenuCheckboxItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onSelect={() => copy(JSON.stringify(doc.value, null, 2), "JSON")}>Copy JSON</DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => copy(astroSnippet(doc.value, packs.value), "Astro snippet")}>Copy Astro snippet</DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => copy(htmlSnippet(doc.value, packs.value), "HTML snippet")}>Copy HTML snippet</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
       <div ref={stageRef} class={`pg-stage${dark ? " pg-stage--dark" : ""}`}>
         <div class="pg-stage__container" style={width === 0 ? "width:100%" : `width:${Math.min(width, stageWidth || width)}px`}>
@@ -192,8 +201,8 @@ export function Preview() {
           }} />}
         </div>
       </div>
-      <p class="pg-statusline mono">
-        {doc.value.panels.length} panel{doc.value.panels.length === 1 ? "" : "s"} · packs: {packs.value.join(", ")}
+      <p class="mono m-0 shrink-0 border-t border-border bg-background px-4 py-1 text-xs text-muted-foreground">
+        {panelCount} panel{panelCount === 1 ? "" : "s"} · packs: {packs.value.join(", ")}
       </p>
     </div>
   );

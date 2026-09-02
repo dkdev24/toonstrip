@@ -19,18 +19,17 @@ integration. Push to `main` deploys production; other branches get a preview URL
 
 ## Last Session
 
-2026-09-03: `PLAYGROUND_UI_PLAN.md` written; steps 1-3 done. shadcn/ui on
+2026-09-03: `PLAYGROUND_UI_PLAN.md` written; steps 1-4 done. shadcn/ui on
 `preact({ compat: true })` with Tailwind v4 scoped to the island (`site/src/components/ui/`,
 compat rules in plan §2.1). New shell: Configure | JSON over a full-width Preview with
-persisted draggable splits, tabs + sheet under 900 px. Configure pane is a Strip tab
-(packs, presets, reset) plus one tab per panel; clicking a preview panel opens its tab.
-e2e tests "shell:" and "configure tabs:" added.
+persisted draggable splits, tabs + sheet under 900 px. Configure pane: Strip tab plus one
+tab per panel. Every form and toolbar control is on `ui/`; `playground.css` is down to
+176 lines. All 8 playground e2e tests pass (the two old failures needed `ControlOrMeta+A`).
 
 ## Next Actions
 
-1. Playground UI renewal, `PLAYGROUND_UI_PLAN.md` steps 4-5: swap the remaining form
-   and toolbar controls onto `ui/`, remove dead CSS, then rewrite `DESIGN.md` §6.1 and
-   `SITE_DEV_PLAN.md` §6.1, worklog entry, site 0.9.0.
+1. Playground UI renewal, `PLAYGROUND_UI_PLAN.md` step 5: rewrite `DESIGN.md` §6 and
+   `SITE_DEV_PLAN.md` §6.1 to the new layout, changelog + worklog entries, v0.9.0.
 2. M8-M13 per `TOONSTRIP_DEV_PLAN.md` §13: vanilla-HTML/SSG docs + agent skill first
    (no dependencies), then React/Vue wrappers, then Next.js, then general SSR.
 3. **S9 Korean locale** per `SITE_DEV_PLAN.md` §13, after 1 and 2 land.
@@ -40,8 +39,5 @@ e2e tests "shell:" and "configure tabs:" added.
 
 ## Open Issues
 
-- Two playground e2e tests fail before any UI work (`playground.spec.ts` "JSON edit
-  updates…" and "keyboard-only…"): the CodeMirror `Control+A` + insertText edit does not
-  replace the document, so the canvas count stays 3. Reproduced on the untouched tree.
 - `toonstrip pack validate` misses a missing torso (checks NEUTRAL only); Playwright verify
   scripts are manual-only (`NOTES.md` M1–M5).
