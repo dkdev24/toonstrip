@@ -28,7 +28,9 @@ roadmap, sequenced before Korean (S9).
 
 ## Next Actions
 
-1. Playground UI renewal before starting Korean, to avoid re-touching markup twice.
+1. Playground UI renewal per `PLAYGROUND_UI_PLAN.md` (written 2026-09-03: preview
+   full-width bottom, form left / JSON right, per-panel tabs, shadcn on preact/compat).
+   Start with step 1, the compat + Tailwind spike, before anything else.
 2. M8-M13 per `TOONSTRIP_DEV_PLAN.md` §13: vanilla-HTML/SSG docs + agent skill first
    (no dependencies), then React/Vue wrappers, then Next.js, then general SSR.
 3. **S9 Korean locale** per `SITE_DEV_PLAN.md` §13, after 1 and 2 land.
