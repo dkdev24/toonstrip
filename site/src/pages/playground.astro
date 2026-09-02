@@ -12,6 +12,7 @@ import releaseNotes from "../content/strips/release-notes.json";
 import objection from "../content/strips/objection.json";
 import transcript from "../content/strips/transcript.json";
 import cms from "../content/strips/cms.json";
+import staticPng from "../content/strips/static-png.json";
 import emotions from "../content/strips/emotions.json";
 import cameras from "../content/strips/cameras.json";
 import mixedPacks from "../content/strips/mixed-packs.json";
@@ -34,6 +35,7 @@ const presets = [
   { name: "Objection and answer", doc: d(objection), packs: ["comic-chat"] },
   { name: "Conversation replay", doc: d(transcript), packs: ["comic-chat"] },
   { name: "From a CMS", doc: d(cms), packs: ["comic-chat"] },
+  { name: "Static PNG via CLI", doc: d(staticPng), packs: ["comic-chat"] },
   { name: "Emotion wheel gallery", doc: d(emotions), packs: ["comic-chat"] },
   { name: "Six cameras", doc: d(cameras), packs: ["comic-chat"] },
   { name: "Example pack (pip)", doc: d(pip), packs: ["example"] },

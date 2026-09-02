@@ -18,18 +18,20 @@ import releaseNotes from "../content/strips/release-notes.json";
 import objection from "../content/strips/objection.json";
 import transcript from "../content/strips/transcript.json";
 import cms from "../content/strips/cms.json";
+import staticPng from "../content/strips/static-png.json";
 
 const roster = loadRoster(["@toonstrip/pack-comic-chat", "@toonstrip/pack-example"]);
 const comicChat = roster.characters.filter((c) => c.pack === "comic-chat");
 const example = roster.characters.filter((c) => c.pack === "example");
 
-const useCases: { title: string; text: string; doc: ComicStripDocument }[] = [
+const useCases: { title: string; text: string; doc: ComicStripDocument; code?: string }[] = [
   { title: "TL;DR at the top of a long post", text: "Three panels that say what four thousand words say. The post stays; the strip is the summary.", doc: tldr as ComicStripDocument },
   { title: "Tutorials and FAQs as dialogue", text: "A question and an answer read faster with two faces than with a definition list.", doc: tutorial as ComicStripDocument },
   { title: "Release notes", text: "What changed, what you have to do, in two panels. This one is a real toonstrip release.", doc: releaseNotes as ComicStripDocument },
   { title: "Objection and answer", text: "The reader's doubt, voiced by a character, then answered. Over-the-shoulder and reaction shots do the work.", doc: objection as ComicStripDocument },
   { title: "Replaying a conversation", text: "A chat thread or interview excerpt, with the room title as the channel name. Lines map straight to balloons.", doc: transcript as ComicStripDocument },
   { title: "Data from anywhere", text: "The document is JSON. Write it by hand, generate it from a script, store it in a CMS field, or have an LLM you call yourself produce it. toonstrip only renders.", doc: cms as ComicStripDocument },
+  { title: "A static PNG when you need one", text: "npm READMEs, emails, social cards, and OG images can't run a canvas. The CLI renders the same document to a PNG with the same layout and art, so one JSON file feeds both.", doc: staticPng as ComicStripDocument, code: "npx toonstrip render strip.json --out strip.png --width 1200" },
 ];
 
 const configSnippet = `// astro.config.mjs
@@ -155,6 +157,7 @@ import { ComicStrip } from "@toonstrip/astro";
             <h3>{u.title}</h3>
             <p>{u.text}</p>
             <a href={playgroundUrl(u.doc)}>Open in playground →</a>
+            {u.code && <div class="use-case__code"><CodeBlock code={u.code} lang="sh" /></div>}
           </div>
         </article>
       ))}
@@ -302,6 +305,9 @@ import { ComicStrip } from "@toonstrip/astro";
   }
   .use-case__text h3 {
     margin: 0;
+  }
+  .use-case__code {
+    grid-column: 1 / -1;
   }
   .use-case__text p {
     margin: 0;

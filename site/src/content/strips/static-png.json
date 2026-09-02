@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "panels": [
+    {
+      "backdrop": "room8bs",
+      "camera": "medium",
+      "bodies": [
+        { "character": "scotty", "emotion": { "angle": 3.9269908169872414, "intensity": 0.6 } },
+        { "character": "rebecca", "emotion": { "angle": 0, "intensity": 0.5 } }
+      ],
+      "speakers": [
+        { "speaker": "scotty", "balloon": "speech", "text": "The README on npm can't run a canvas. Neither can an email." },
+        { "speaker": "rebecca", "balloon": "speech", "text": "Then render the same JSON to a PNG." }
+      ]
+    },
+    {
+      "backdrop": "room8bs",
+      "camera": "close-up",
+      "bodies": [
+        { "character": "rebecca", "emotion": { "angle": 0, "intensity": 0.8 } }
+      ],
+      "speakers": [
+        { "speaker": "rebecca", "balloon": "speech", "text": "One command. Same layout, same art, no browser needed." }
+      ]
+    }
+  ]
+}

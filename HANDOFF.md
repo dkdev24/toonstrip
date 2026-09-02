@@ -34,8 +34,7 @@ domain. Published `@toonstrip/cli@0.2.0`. Package READMEs link to the site, CHAN
 
 ## Next Actions
 
-1. **Daniel:** enable Cloudflare Web Analytics on the Pages project (CSP in
-   `site/public/_headers` already allows the beacon). Copy pass in his voice over
+1. **Daniel:** copy pass in his voice over
    `site/src/pages/index.astro` and `site/src/content/docs/*.mdx`. Link to the site from
    `danielkimdev.com`.
 2. `danielkimdev-astro` bump to `@toonstrip/astro@0.1.10`; `grues-in-comic` port of the
