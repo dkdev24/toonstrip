@@ -17,8 +17,7 @@ cli 0.2.0, packs 0.1.1)
 caller-supplied data, extracted/generalized from `grues-in-comic`'s comic pane (Zork/game/
 AI-inference coupling stripped). M0–M7 done. All 7 `@toonstrip/*` packages on npm. Site
 live at **https://toonstrip.danielkimdev.com** (intro, docs, playground, changelog).
-Full history in `WORKLOG.md`.
-**Deploy:** Cloudflare Pages project `toonstrip`, GitHub integration. Push to `main`
+Full history in `WORKLOG.md`. **Deploy:** Cloudflare Pages project `toonstrip`, GitHub integration. Push to `main`
 deploys production; other branches get a preview URL. Root `wrangler.toml` sets the output
 dir (`site/dist`); root `pnpm build` is the Pages build. No manual steps.
 
