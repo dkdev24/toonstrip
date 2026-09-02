@@ -201,6 +201,28 @@ const MIN_CORRIDOR_WIDTH = 90;
  * in `render.ts`) far more easily than two side-by-side ones, which is why a
  * realistic two-speaker panel could fail here even at the renderer's own
  * native `UNIT` size, well before any real-embed scale-down made it worse.
+ *
+ * **Every speaking balloon gets one, not just the first — a deliberate
+ * choice, tested against the alternative.** Bounding only the balloon with
+ * no laid predecessor (`laid.length === 0`) sounds more surgical, but it
+ * reopens the same bug for a *second* balloon whose own corridor-bounded
+ * predecessor still ends up wide: `getInterveningBBox`'s horizontal defense
+ * (`queryRouteRgn`) is anchored to the predecessor's `arrowX`, not its box's
+ * actual right edge, so an unbounded second balloon's roll can land inside
+ * that gap and still overlap the predecessor's real box, triggering the
+ * exact same stack-below fallback this divergence exists to prevent
+ * (reproduced with this project's own real dialogue and seed — see the
+ * `HANDOFF.md`/`WORKLOG.md` entry that first shipped this file, 2026-09-02).
+ * A sibling project (`grues-in-comic`) found a *different* problem with
+ * applying this to every balloon — its panelization pre-check shares this
+ * exact function with the renderer, so a narrower estimate here also
+ * changed how content gets grouped into panels, regressing its
+ * packing-density baseline for no corresponding benefit — but that risk
+ * doesn't apply here: nothing in this package calls `layoutBalloons` except
+ * the renderer itself, so it scopes the corridor to the first balloon only
+ * instead. Each repo's own real content and constraints, not a preference,
+ * decide which design is correct there.
+ *
  * Bounded by the midpoint to the nearest other speaker on either side, so no
  * balloon can reach into a neighbour's half before the squeeze pass even
  * runs. A caption and a bodiless speaker (no `arrowX`) get no corridor —
