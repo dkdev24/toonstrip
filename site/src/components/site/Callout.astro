@@ -1,0 +1,65 @@
+---
+/**
+ * Callout (DESIGN.md §5.5). `note` is drawn as a comic caption box (one of the
+ * three places comic structure is allowed); the rest are conventional.
+ */
+interface Props {
+  kind?: "note" | "tip" | "warning" | "danger";
+  title?: string;
+}
+const { kind = "note", title } = Astro.props;
+const defaultTitle = { note: "Note", tip: "Tip", warning: "Warning", danger: "Careful" }[kind];
+---
+
+<div class:list={["callout", `callout--${kind}`]}>
+  <p class="callout__title">{title ?? defaultTitle}</p>
+  <div class="callout__body"><slot /></div>
+</div>
+
+<style>
+  .callout {
+    margin: 0 0 var(--space-24);
+    padding: var(--space-16) var(--space-24);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-lg);
+    background: var(--paper-raised);
+    font-size: var(--text-small);
+  }
+  .callout__title {
+    margin: 0 0 var(--space-4);
+    font-size: var(--text-caption);
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+  }
+  .callout__body :global(> :last-child) {
+    margin-bottom: 0;
+  }
+  /* The comic caption box. */
+  .callout--note {
+    border: 2px solid var(--ink);
+    border-radius: 0;
+    background: var(--paper);
+  }
+  .callout--note .callout__title {
+    color: var(--ink);
+  }
+  .callout--tip {
+    border-left: 3px solid var(--accent);
+    background: var(--accent-soft);
+  }
+  .callout--warning {
+    border-left: 3px solid var(--warn);
+  }
+  .callout--warning .callout__title {
+    color: var(--warn);
+  }
+  .callout--danger {
+    border-left: 3px solid var(--danger);
+    background: var(--danger-soft);
+  }
+  .callout--danger .callout__title {
+    color: var(--danger);
+  }
+</style>

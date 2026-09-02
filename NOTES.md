@@ -324,3 +324,23 @@ resolved as items get addressed. Newest at bottom, grouped by milestone.
 - **`@toonstrip/astro` build warnings** ("Module node:path has been externalized for
   browser compatibility") appear on every site build, same as in `examples/astro-blog`
   (NOTES.md M4). Harmless; not silenced.
+
+## M7 S1
+
+- **Off-screen panels are black boxes by design of `packages/element`.** The element
+  paints a canvas only when it is within one viewport of the visible area and *releases*
+  it (0×0 backing store over a `#111` background) when it leaves. Consequences: (1) a
+  full-page screenshot shows black panels for everything below the fold — use
+  `check-page.mjs --at <selector>`; (2) **print / "Download PNG" cannot rely on the
+  canvases being painted.** The S4 playground exporter needs a way to force-paint every
+  panel (or render straight through `@toonstrip/core`'s `renderPanel` into its own
+  offscreen canvases with the element's loaded cast). A small public method on the
+  element (`paintAll()` / `toBlob()`), or exporting `loadCastFromPacks` + `renderPanel`
+  usage in the site, is a `packages/element` change and goes through `UPSTREAM_SYNC.md`.
+- **Astro ignores `src/pages/_*.astro`** (underscore = private), so the plan's
+  `/_kitchen-sink` became `/kitchen-sink` (noindex, out of the sitemap, in robots).
+- **`lz-string` is CommonJS**: `import { compressToEncodedURIComponent } from "lz-string"`
+  fails at SSR build time ("Named export not found"); the default import works in both
+  Node and the browser bundle.
+- **Git Bash mangles `/route` CLI args into `C:/Program Files/Git/route`**; set
+  `MSYS_NO_PATHCONV=1` when running `check-page.mjs` from Bash.

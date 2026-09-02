@@ -1,0 +1,84 @@
+---
+/**
+ * pnpm / npm / yarn install tabs (DESIGN.md §5.3). The chosen manager is
+ * remembered in localStorage `pm` and applied to every instance on the page.
+ */
+import CodeBlock from "./CodeBlock.astro";
+
+interface Props {
+  /** Packages to install, e.g. ["@toonstrip/astro", "@toonstrip/pack-comic-chat"]. */
+  packages: string[];
+  dev?: boolean;
+}
+const { packages, dev = false } = Astro.props;
+const list = packages.join(" ");
+const commands = {
+  pnpm: `pnpm add ${dev ? "-D " : ""}${list}`,
+  npm: `npm install ${dev ? "--save-dev " : ""}${list}`,
+  yarn: `yarn add ${dev ? "-D " : ""}${list}`,
+} as const;
+const managers = Object.keys(commands) as (keyof typeof commands)[];
+---
+
+<div class="pm-tabs" data-pm-tabs>
+  <div class="pm-tabs__bar" role="tablist" aria-label="Package manager">
+    {managers.map((pm, i) => (
+      <button class="chip" role="tab" type="button" data-pm={pm} aria-selected={i === 0 ? "true" : "false"} tabindex={i === 0 ? 0 : -1}>{pm}</button>
+    ))}
+  </div>
+  {managers.map((pm, i) => (
+    <div role="tabpanel" data-pm-panel={pm} hidden={i !== 0}>
+      <CodeBlock code={commands[pm]} lang="bash" title="terminal" />
+    </div>
+  ))}
+</div>
+
+<script>
+  const KEY = "pm";
+  const groups = document.querySelectorAll<HTMLElement>("[data-pm-tabs]");
+  function apply(pm: string) {
+    groups.forEach((group) => {
+      group.querySelectorAll<HTMLButtonElement>("[data-pm]").forEach((tab) => {
+        const on = tab.dataset.pm === pm;
+        tab.setAttribute("aria-selected", String(on));
+        tab.tabIndex = on ? 0 : -1;
+      });
+      group.querySelectorAll<HTMLElement>("[data-pm-panel]").forEach((panel) => {
+        panel.hidden = panel.dataset.pmPanel !== pm;
+      });
+    });
+  }
+  try {
+    const stored = localStorage.getItem(KEY);
+    if (stored) apply(stored);
+  } catch {}
+  groups.forEach((group) => {
+    group.addEventListener("click", (event) => {
+      const tab = (event.target as HTMLElement).closest<HTMLButtonElement>("[data-pm]");
+      if (!tab?.dataset.pm) return;
+      apply(tab.dataset.pm);
+      try {
+        localStorage.setItem(KEY, tab.dataset.pm);
+      } catch {}
+    });
+    group.addEventListener("keydown", (event) => {
+      const tabs = [...group.querySelectorAll<HTMLButtonElement>("[data-pm]")];
+      const index = tabs.indexOf(document.activeElement as HTMLButtonElement);
+      if (index < 0) return;
+      const delta = event.key === "ArrowRight" ? 1 : event.key === "ArrowLeft" ? -1 : 0;
+      if (!delta) return;
+      event.preventDefault();
+      const next = tabs[(index + delta + tabs.length) % tabs.length];
+      next.focus();
+      next.click();
+    });
+  });
+</script>
+
+<style>
+  .pm-tabs__bar {
+    display: flex;
+    gap: var(--space-8);
+    margin-bottom: var(--space-8);
+  }
+</style>

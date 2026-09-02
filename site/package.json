@@ -8,7 +8,7 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "check": "astro check",
+    "check": "node scripts/check-page.mjs",
     "test": "node -e \"process.exit(0)\"",
     "test:e2e": "playwright test"
   },
@@ -21,9 +21,11 @@
     "@toonstrip/pack-comic-chat": "workspace:*",
     "@toonstrip/pack-example": "workspace:*",
     "@toonstrip/schema": "workspace:*",
-    "astro": "^7.2.9"
+    "astro": "^7.2.9",
+    "lz-string": "^1.5.0"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
     "@playwright/test": "^1.48.0"
   }
 }

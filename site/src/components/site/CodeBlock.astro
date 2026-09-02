@@ -1,0 +1,85 @@
+---
+/**
+ * Code block (DESIGN.md §5.3): Shiki dual theme, language label, copy button.
+ * `code` is the raw source; for JSON pass the pretty-printed string.
+ */
+import { Code } from "astro:components";
+import type { BundledLanguage } from "shiki";
+
+interface Props {
+  code: string;
+  lang?: BundledLanguage | "text";
+  /** Optional filename shown in place of the language label. */
+  title?: string;
+  class?: string;
+}
+
+const { code, lang = "text", title, class: className } = Astro.props;
+const label = title ?? lang;
+---
+
+<div class:list={["code-block", className]}>
+  <div class="code-block__bar">
+    <span class="code-block__label caption">{label}</span>
+    <button class="button button--ghost button--dense code-block__copy" type="button" data-copy aria-label="Copy code">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="9" y="9" width="13" height="13" rx="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+      </svg>
+      <span data-copy-label>Copy</span>
+    </button>
+  </div>
+  <Code code={code} lang={lang as BundledLanguage} themes={{ light: "github-light", dark: "github-dark" }} wrap />
+</div>
+
+<script>
+  // One delegated handler for every code block on the page.
+  document.addEventListener("click", async (event) => {
+    const button = (event.target as HTMLElement).closest<HTMLButtonElement>("[data-copy]");
+    if (!button) return;
+    const block = button.closest(".code-block");
+    const code = block?.querySelector("pre")?.textContent ?? "";
+    const label = button.querySelector("[data-copy-label]");
+    try {
+      await navigator.clipboard.writeText(code);
+      button.classList.add("is-copied");
+      if (label) label.textContent = "Copied";
+    } catch {
+      if (label) label.textContent = "Press Ctrl+C";
+    }
+    setTimeout(() => {
+      button.classList.remove("is-copied");
+      if (label) label.textContent = "Copy";
+    }, 1500);
+  });
+</script>
+
+<style>
+  .code-block {
+    margin: 0 0 var(--space-24);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-md);
+    background: var(--paper-raised);
+    overflow: hidden;
+  }
+  .code-block__bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-12);
+    padding: var(--space-4) var(--space-8) var(--space-4) var(--space-16);
+    border-bottom: 1px solid var(--rule);
+    background: var(--paper-sunken);
+  }
+  .code-block__copy.is-copied {
+    color: var(--success);
+  }
+  .code-block :global(pre) {
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+    background: var(--paper-raised) !important;
+    font-size: var(--text-small);
+    max-height: 32rem;
+    overflow: auto;
+  }
+</style>

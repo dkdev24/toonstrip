@@ -1,0 +1,155 @@
+---
+/**
+ * The docs' signature block (SITE_DEV_PLAN.md §5.2, DESIGN.md §5.4): one JSON
+ * document shown as code AND rendered live, from the same object, with an
+ * "Open in playground" link carrying the document in the URL hash. The code
+ * shown and the strip shown cannot disagree.
+ */
+import { ComicStrip } from "@toonstrip/astro";
+import type { ComicStripDocument } from "@toonstrip/schema";
+import CodeBlock from "../site/CodeBlock.astro";
+import { playgroundUrl } from "../../lib/share";
+
+interface Props {
+  doc: ComicStripDocument;
+  packs?: string[];
+  title?: string;
+  /** Show only the first panel's JSON, with the full document behind a toggle. */
+  collapse?: boolean;
+  /** Astro client directive to use for the strip. `visible` is the docs default. */
+  load?: "visible" | "load" | "idle";
+  /**
+   * Layout. `stacked` (default): strip on top at full width, code below — right
+   * for 3+ panel strips. `side`: code left, strip right — for 1–2 panel strips.
+   */
+  layout?: "stacked" | "side";
+}
+
+const { doc, packs = ["comic-chat"], title, collapse = false, load = "visible", layout = "stacked" } = Astro.props;
+const full = JSON.stringify(doc, null, 2);
+const panelCount = doc.panels.length;
+const excerptDoc = { ...doc, panels: doc.panels.slice(0, 1) };
+const excerpt = collapse && panelCount > 1 ? JSON.stringify(excerptDoc, null, 2).replace(/\n\s*\]\n\}$/, `\n    // … ${panelCount - 1} more panel${panelCount > 2 ? "s" : ""}\n  ]\n}`) : full;
+const href = playgroundUrl(doc, packs);
+---
+
+<figure class:list={["code-and-strip", `code-and-strip--${layout}`]}>
+  <div class="code-and-strip__bar">
+    <figcaption class="caption">{title ?? "Example"}</figcaption>
+    <a class="code-and-strip__open" href={href}>Open in playground →</a>
+  </div>
+  <div class="code-and-strip__frame">
+    <div class="code-and-strip__code">
+      {collapse && panelCount > 1 ? (
+        <details class="code-and-strip__details">
+          <summary>
+            <span class="code-and-strip__summary-closed">Show all {panelCount} panels</span>
+            <span class="code-and-strip__summary-open">Show first panel only</span>
+          </summary>
+          <CodeBlock code={full} lang="json" title="strip.json" class="code-and-strip__block" />
+        </details>
+        <div class="code-and-strip__excerpt">
+          <CodeBlock code={excerpt} lang="json" title="strip.json" class="code-and-strip__block" />
+        </div>
+      ) : (
+        <CodeBlock code={full} lang="json" title="strip.json" class="code-and-strip__block" />
+      )}
+    </div>
+    <div class="code-and-strip__stage">
+      {load === "load" ? (
+        <ComicStrip document={doc} packs={packs} client:load />
+      ) : load === "idle" ? (
+        <ComicStrip document={doc} packs={packs} client:idle />
+      ) : (
+        <ComicStrip document={doc} packs={packs} client:visible />
+      )}
+    </div>
+  </div>
+</figure>
+
+<style>
+  .code-and-strip {
+    margin: 0 0 var(--space-32);
+  }
+  .code-and-strip__bar {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-16);
+    margin-bottom: var(--space-8);
+  }
+  .code-and-strip__bar figcaption {
+    margin: 0;
+  }
+  .code-and-strip__open {
+    font-size: var(--text-small);
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  /* The one comic-structured frame: 2px ink border, ink gutter between cells. */
+  .code-and-strip__frame {
+    display: grid;
+    grid-template-columns: 1fr;
+    border: 2px solid var(--ink);
+    border-radius: var(--radius-md);
+    background: var(--ink);
+    gap: 2px;
+    overflow: hidden;
+  }
+  @media (min-width: 900px) {
+    .code-and-strip--side .code-and-strip__frame {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    }
+  }
+  .code-and-strip__code {
+    background: var(--paper-raised);
+    min-width: 0;
+  }
+  /* Strip first: it's the point. In `side` on wide screens the code is left. */
+  .code-and-strip__stage {
+    order: -1;
+    background: var(--paper-sunken);
+    padding: var(--space-16);
+    min-width: 0;
+    display: flex;
+    align-items: center;
+  }
+  @media (min-width: 900px) {
+    .code-and-strip--side .code-and-strip__stage {
+      order: 0;
+    }
+  }
+  .code-and-strip :global(.code-and-strip__block) {
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+    height: 100%;
+  }
+  .code-and-strip :global(.code-and-strip__block pre) {
+    max-height: 28rem;
+  }
+  .code-and-strip__details summary {
+    cursor: pointer;
+    padding: var(--space-8) var(--space-16);
+    font-size: var(--text-caption);
+    font-weight: 500;
+    color: var(--link);
+    border-bottom: 1px solid var(--rule);
+    list-style: none;
+  }
+  .code-and-strip__details summary::-webkit-details-marker {
+    display: none;
+  }
+  .code-and-strip__summary-open {
+    display: none;
+  }
+  .code-and-strip__details[open] .code-and-strip__summary-open {
+    display: inline;
+  }
+  .code-and-strip__details[open] .code-and-strip__summary-closed {
+    display: none;
+  }
+  .code-and-strip__details[open] + .code-and-strip__excerpt {
+    display: none;
+  }
+</style>

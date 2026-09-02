@@ -1,5 +1,6 @@
 /* Global base styles. Tokens live in tokens.css; components in their own files. */
 @import "./tokens.css";
+@import "./components.css";
 
 *,
 *::before,

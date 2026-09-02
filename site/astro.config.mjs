@@ -18,7 +18,7 @@ export default defineConfig({
     mdx(),
     sitemap({
       // The component kitchen sink is a design check, not a page for visitors.
-      filter: (page) => !page.includes("/_kitchen-sink"),
+      filter: (page) => !page.includes("/kitchen-sink"),
     }),
   ],
 

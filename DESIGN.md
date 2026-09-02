@@ -42,7 +42,7 @@ below is checked for WCAG 2.2 AA (≥ 4.5:1 body text, ≥ 3:1 large text and UI
 | `--paper-sunken` | `#F1ECE0` | `#0F0E0B` | Inset areas: editor gutter, table stripes, preview stage |
 | `--ink` | `#1B1A17` | `#F2EEE3` | Primary text, panel borders, icons |
 | `--ink-2` | `#4A4740` | `#C9C3B4` | Secondary text, labels |
-| `--ink-3` | `#7A766C` | `#8E897B` | Muted text, placeholders (never for body copy) |
+| `--ink-3` | `#66625A` | `#8E897B` | Muted text, placeholders (never for body copy) |
 | `--rule` | `#DCD5C5` | `#322F27` | Borders, dividers, input outlines |
 | `--rule-strong` | `#B9B09B` | `#4B473C` | Focused/hovered outlines, table header rule |
 | `--accent` | `#F5C400` | `#FFD23F` | The balloon yellow: primary buttons, selection, highlight |
@@ -148,11 +148,13 @@ Package-manager tabs (pnpm/npm/yarn) sit inside the block header, remembered in
 ### 5.4 CodeAndStrip
 
 The docs' signature block and the one comic-structured component. A 2 px `--ink`
-frame, radius `md`, split into two cells with a 2 px ink divider (the "gutter"): JSON
-on the left (or top below `md`), the live strip on the right on a `--paper-sunken`
-stage. A `--text-caption` bar above the frame carries the example title, an "Open in
-playground" link, and a "Show all N panels" toggle when the JSON is collapsed. Strip
-first on mobile (it's the point), JSON second.
+frame, radius `md`, split into two cells by a 2 px ink divider (the "gutter"). Default
+layout is **stacked**: the live strip on top at full width on a `--paper-sunken` stage,
+the JSON below (a 3-panel strip beside a code column made a frame three panels tall;
+stacked lets the strip use all three columns). A `side` layout (JSON left, strip
+right) exists for one- and two-panel examples. A `--text-caption` bar above the frame
+carries the example title, an "Open in playground" link, and a "Show all N panels"
+toggle when the JSON is collapsed. The strip is always first on narrow screens.
 
 ### 5.5 Callout
 

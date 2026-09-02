@@ -4,6 +4,41 @@ Persistent project history. Append entries; do not edit past entries.
 
 ---
 
+## v0.8.1 — M7 S1: site shell components
+
+**Date:** 2026-09-02
+
+### Changes
+
+- `site/src/styles/components.css`: buttons (primary/secondary/ghost/danger/icon/dense),
+  chips, badges, cards, stage, section rhythm, grids — DESIGN.md §5 as shared classes.
+- Components: `CodeBlock` (Shiki dual theme via `astro:components` `Code`, label, copy
+  button with one delegated handler), `PackageManagerTabs` (pnpm/npm/yarn, remembered
+  in `localStorage`, arrow-key tabs), `Callout` (note = comic caption box; tip/warning/
+  danger conventional), `demo/CodeAndStrip` (one JSON object shown as code *and* rendered
+  live, "Open in playground" link via `lib/share.ts`, `collapse` shows first panel with a
+  `<details>` toggle, `layout` stacked|side), `demo/WidthSlider` (range + presets +
+  "900 px · 2 columns" readout from `layoutStrip`, dashed container outline).
+- `lib/share.ts`: isomorphic URL-hash encode/decode (`lz-string`, `#d=…&p=…`,
+  16 KB cap); default import because lz-string is CJS (named import broke SSR build).
+- `/kitchen-sink` page (Astro skips `_`-prefixed pages, hence no underscore); excluded
+  from sitemap and robots, `noindex`.
+- `scripts/check-page.mjs`: loads a route from the preview server, scrolls the page,
+  reports canvas count, aria-labels, console errors, and axe violations; `--shot`,
+  `--at <selector>` (viewport shot), `--dark`, `--width`; honours
+  `PLAYWRIGHT_CHROMIUM_PATH`.
+- a11y fixes from axe: `--ink-3` light darkened to `#66625A` (caption contrast; DESIGN.md
+  updated), callouts are `<div>`s not `<aside role=alert>` (landmark/role violations).
+- DESIGN.md §5.4 updated: `CodeAndStrip` default is stacked (strip on top, full width).
+
+### Status
+
+axe: zero violations on `/`, `/kitchen-sink` light desktop and dark 390 px. Strips
+render in `CodeAndStrip` and `WidthSlider` (readout matches the element's columns).
+Next: S2 intro page.
+
+---
+
 ## v0.8.0 — M7 S0: site scaffold (`site/`)
 
 **Date:** 2026-09-02

@@ -1,0 +1,124 @@
+---
+/**
+ * Width slider (DESIGN.md §5.9): a strip inside a container whose width the
+ * visitor controls, with a live "820 px · 2 columns" readout. The column count
+ * comes from the same `layoutStrip` policy the element uses, so the readout is
+ * the truth, not an estimate.
+ */
+import { ComicStrip } from "@toonstrip/astro";
+import type { ComicStripDocument } from "@toonstrip/schema";
+
+interface Props {
+  doc: ComicStripDocument;
+  packs?: string[];
+  min?: number;
+  max?: number;
+  initial?: number;
+  load?: "visible" | "load";
+}
+const { doc, packs = ["comic-chat"], min = 260, max = 1240, initial = 900, load = "visible" } = Astro.props;
+const presets = [
+  { label: "Phone", width: 390 },
+  { label: "Tablet", width: 768 },
+  { label: "Desktop", width: 1240 },
+  { label: "Fill", width: 0 },
+];
+---
+
+<div class="width-slider" data-width-slider data-min={min} data-max={max}>
+  <div class="width-slider__controls">
+    <label class="width-slider__label">
+      <span class="caption">Container width</span>
+      <input type="range" min={min} max={max} value={initial} step="10" data-width-range aria-describedby="width-readout" />
+    </label>
+    <output class="width-slider__readout mono" id="width-readout" data-width-readout aria-live="polite">{initial} px</output>
+    <div class="width-slider__presets" role="group" aria-label="Width presets">
+      {presets.map((p) => (
+        <button class="chip" type="button" data-width-preset={p.width}>{p.label}</button>
+      ))}
+    </div>
+  </div>
+  <div class="stage width-slider__stage">
+    <div class="width-slider__container" data-width-container style={`width:${initial}px`}>
+      {load === "load" ? (
+        <ComicStrip document={doc} packs={packs} client:load />
+      ) : (
+        <ComicStrip document={doc} packs={packs} client:visible />
+      )}
+    </div>
+  </div>
+</div>
+
+<script>
+  import { layoutStrip } from "@toonstrip/core";
+  const GUTTER = 10; // packages/element's own gutter; keep in sync with the element.
+
+  document.querySelectorAll<HTMLElement>("[data-width-slider]").forEach((root) => {
+    const range = root.querySelector<HTMLInputElement>("[data-width-range]")!;
+    const readout = root.querySelector<HTMLOutputElement>("[data-width-readout]")!;
+    const container = root.querySelector<HTMLElement>("[data-width-container]")!;
+    const stage = container.parentElement!;
+    const presets = root.querySelectorAll<HTMLButtonElement>("[data-width-preset]");
+
+    function describe(width: number) {
+      const { columns } = layoutStrip(width, { gutter: GUTTER });
+      readout.textContent = `${Math.round(width)} px · ${columns} column${columns === 1 ? "" : "s"}`;
+    }
+    function apply(width: number, fromPreset?: HTMLButtonElement) {
+      const stageInner = stage.clientWidth - parseFloat(getComputedStyle(stage).paddingLeft) * 2;
+      const fill = width === 0;
+      const actual = fill ? stageInner : Math.min(width, stageInner);
+      container.style.width = fill ? "100%" : `${actual}px`;
+      if (!fill) range.value = String(actual);
+      describe(actual);
+      presets.forEach((p) => p.setAttribute("aria-pressed", String(p === fromPreset)));
+    }
+    range.addEventListener("input", () => apply(Number(range.value)));
+    presets.forEach((p) => p.addEventListener("click", () => apply(Number(p.dataset.widthPreset), p)));
+    // Clamp on real resizes so the container never exceeds the stage.
+    new ResizeObserver(() => apply(container.style.width === "100%" ? 0 : Number(range.value))).observe(stage);
+    apply(Number(range.value));
+  });
+</script>
+
+<style>
+  .width-slider {
+    margin: 0 0 var(--space-32);
+  }
+  .width-slider__controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-16);
+    margin-bottom: var(--space-12);
+  }
+  .width-slider__label {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    flex: 1 1 14rem;
+  }
+  input[type="range"] {
+    width: 100%;
+    accent-color: var(--ink);
+  }
+  .width-slider__readout {
+    min-width: 9rem;
+    font-size: var(--text-small);
+    color: var(--ink-2);
+  }
+  .width-slider__presets {
+    display: flex;
+    gap: var(--space-8);
+  }
+  .width-slider__stage {
+    overflow: hidden;
+  }
+  .width-slider__container {
+    max-width: 100%;
+    margin-inline: auto;
+    outline: 1px dashed var(--rule-strong);
+    outline-offset: 6px;
+    border-radius: 2px;
+  }
+</style>
