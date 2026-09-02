@@ -50,7 +50,7 @@ below is checked for WCAG 2.2 AA (≥ 4.5:1 body text, ≥ 3:1 large text and UI
 | `--accent-soft` | `#FFF3B8` | `#3A3010` | Accent tint: selected list rows, active nav, marks |
 | `--link` | `#1F4FD8` | `#8AB4FF` | Links and secondary interactive text |
 | `--link-hover` | `#143AA8` | `#B3CBFF` | |
-| `--success` | `#1E7F4F` | `#5FD39A` | Valid document, copy confirmation |
+| `--success` | `#176B42` | `#5FD39A` | Valid document, copy confirmation |
 | `--warn` | `#B5540A` | `#F2A45C` | Non-fatal notices (fallback layout hit, pack toggle) |
 | `--danger` | `#C1272D` | `#FF7B7B` | Validation errors, destructive buttons |
 | `--danger-soft` | `#FBE3E3` | `#3B1A1A` | Error backgrounds |

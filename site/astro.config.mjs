@@ -1,5 +1,6 @@
 // @ts-check
 import mdx from "@astrojs/mdx";
+import preact from "@astrojs/preact";
 import sitemap from "@astrojs/sitemap";
 import { toonstrip } from "@toonstrip/astro";
 import { defineConfig, fontProviders } from "astro/config";
@@ -16,6 +17,8 @@ export default defineConfig({
     // Both packs are served so docs and the playground can show either.
     toonstrip({ packs: ["@toonstrip/pack-comic-chat", "@toonstrip/pack-example"] }),
     mdx(),
+    // Only the playground island uses Preact (SITE_DEV_PLAN.md §3).
+    preact(),
     sitemap({
       // The component kitchen sink is a design check, not a page for visitors.
       filter: (page) => !page.includes("/kitchen-sink"),

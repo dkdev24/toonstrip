@@ -4,6 +4,43 @@ Persistent project history. Append entries; do not edit past entries.
 
 ---
 
+## v0.8.4 — M7 S4: playground
+
+**Date:** 2026-09-02
+
+### Changes
+
+- `/playground` per `SITE_DEV_PLAN.md` §6: one Preact island (`@astrojs/preact`,
+  `@preact/signals`) with three views of one document. `lib/playground/state.ts` holds
+  the signals, bounded undo/redo (50), all form mutators (panel/body/line add/remove/
+  move/duplicate, pack toggle), `applyJson` (parse → `validateDocument` → replace only
+  when valid; ajv instance paths mapped to editor lines by `json-position.ts`), presets,
+  URL-hash boot (`lib/share.ts`) then `localStorage` autosave then first preset.
+- Components: `PanelForm` (backdrop thumbnails, camera segmented control, room title,
+  dark, character picker with sprite crops, per-body `EmotionWheel` + numeric fields +
+  pose + requested, lines with speaker/balloon/text), `EmotionWheel` (SVG slider,
+  pointer drag, arrow keys, `aria-valuetext` "SAD, intensity 0.6"), `JsonEditor`
+  (CodeMirror 6, lint gutter, problem list that focuses the line, token-based highlight
+  style so both themes pass AA), `Preview` (real `<comic-strip>`, width slider + presets
+  with column readout from `layoutStrip`, dark surface, undo/redo, presets menu, share,
+  export menu: PNG / JSON / Astro snippet / HTML snippet), `Playground` (tabs + bottom
+  sheet below 900 px, Ctrl/Cmd+Z).
+- `lib/playground/export.ts`: PNG export re-renders every panel through `@toonstrip/core`
+  with the element's own figure-freeze order (`selectFigures` per panel, cycles copied),
+  so it does not depend on which canvases the element currently has painted.
+- Playwright: `playwright.config.ts` (preview server, `PLAYWRIGHT_CHROMIUM_PATH`),
+  `tests/e2e/playground.spec.ts`: preset renders, form→JSON→preview sync, JSON edit →
+  form + invalid JSON keeps last strip, share-link round trip, keyboard-only authoring
+  of a 2-panel/2-character strip with caption + thought balloon, PNG export > 20 KB.
+- `site` `test` script now runs `validate-strips.mjs`; `test:e2e` is separate.
+
+### Status
+
+6/6 e2e pass; axe clean on `/playground` light + dark, desktop + 390 px. Next: S5
+changelog, then S6 polish.
+
+---
+
 ## v0.8.3 — M7 S3: docs
 
 **Date:** 2026-09-02

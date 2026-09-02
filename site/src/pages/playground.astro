@@ -1,10 +1,47 @@
 ---
+/** Playground (SITE_DEV_PLAN.md §6). The island gets the roster and presets as props. */
 import Base from "../layouts/Base.astro";
+import Playground from "../components/playground/Playground";
+import { loadRoster } from "../lib/roster";
+import type { ComicStripDocument } from "@toonstrip/schema";
+import "../styles/playground.css";
+import hero from "../content/strips/hero.json";
+import tldr from "../content/strips/tldr.json";
+import tutorial from "../content/strips/tutorial.json";
+import releaseNotes from "../content/strips/release-notes.json";
+import objection from "../content/strips/objection.json";
+import transcript from "../content/strips/transcript.json";
+import cms from "../content/strips/cms.json";
+import emotions from "../content/strips/emotions.json";
+import cameras from "../content/strips/cameras.json";
+import mixedPacks from "../content/strips/mixed-packs.json";
+import pip from "../content/strips/pip.json";
+
+const packSpecifiers = ["@toonstrip/pack-comic-chat", "@toonstrip/pack-example"];
+const r = loadRoster(packSpecifiers);
+const roster = {
+  characters: r.characters,
+  backdrops: r.backdrops,
+  packNames: [...new Set(r.characters.map((c) => c.pack))],
+};
+
+const d = (x: unknown) => x as ComicStripDocument;
+const presets = [
+  { name: "Hero strip", doc: d(hero), packs: ["comic-chat"] },
+  { name: "TL;DR", doc: d(tldr), packs: ["comic-chat"] },
+  { name: "Tutorial dialogue", doc: d(tutorial), packs: ["comic-chat"] },
+  { name: "Release notes", doc: d(releaseNotes), packs: ["comic-chat"] },
+  { name: "Objection and answer", doc: d(objection), packs: ["comic-chat"] },
+  { name: "Conversation replay", doc: d(transcript), packs: ["comic-chat"] },
+  { name: "From a CMS", doc: d(cms), packs: ["comic-chat"] },
+  { name: "Emotion wheel gallery", doc: d(emotions), packs: ["comic-chat"] },
+  { name: "Six cameras", doc: d(cameras), packs: ["comic-chat"] },
+  { name: "Example pack (pip)", doc: d(pip), packs: ["example"] },
+  { name: "Two packs", doc: d(mixedPacks), packs: ["comic-chat", "example"] },
+];
 ---
 
-<Base title="Playground" description="Edit a ComicStripDocument and watch it render live." wide>
-  <div class="prose">
-    <h1>Playground</h1>
-    <p class="lead">Coming in S4: form, JSON editor, and live preview over one document.</p>
-  </div>
+<Base title="Playground" description="Edit a Comic Strip Document three ways — form, JSON, and the live strip — then share it by URL or copy the embed snippet." bare>
+  <h1 class="visually-hidden">Playground</h1>
+  <Playground roster={roster} presets={presets} client:load />
 </Base>

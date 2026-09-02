@@ -358,3 +358,25 @@ resolved as items get addressed. Newest at bottom, grouped by milestone.
 - **Shiki `github-dark` comment colour fails AA** on `--paper-raised` dark (`#1E1D18`);
   `github-dark-default` passes. `danielkimdev-astro` uses `github-dark` on a different
   surface and may or may not have the same problem — worth an axe run there.
+
+## M7 S4
+
+- **Custom-element upgrade pitfall, hit for real.** Rendering `<comic-strip>` from Preact
+  and setting `.document`/`.packs` before `@toonstrip/element` finished its dynamic import
+  created *own properties* on the not-yet-upgraded element; after `customElements.define`
+  ran, those shadowed the class accessors and nothing ever rendered (no error, 0
+  canvases). `Preview.tsx` now mounts the tag only after the import resolves. Worth a
+  sentence in `docs/plain-html` for framework users; the element could also defend itself
+  by re-reading own props in `connectedCallback` (the standard "upgrade property" idiom) —
+  a `packages/element` change via `UPSTREAM_SYNC.md`.
+- **Preact + SVG: `tabIndex` must be `tabindex`.** On SVG elements Preact sets attributes
+  verbatim; `tabIndex="0"` is not `tabindex` in XML and Chrome never focuses the element.
+  The emotion wheel's keyboard support silently didn't work until this was lowercase.
+- **CodeMirror's `defaultHighlightStyle` is light-only** (`#aa1111` strings fail AA on the
+  dark surface). The editor now uses a 4-tag `HighlightStyle` built on site tokens.
+- **`@toonstrip/element` must be imported dynamically anywhere an Astro island's module
+  graph reaches**, because its index calls `customElements.define` at import and Astro
+  prerenders islands in Node (`HTMLElement is not defined`).
+- **PNG export re-renders instead of reading canvases** (see M7 S1 note): it reproduces the
+  element's per-panel figure freeze, so it should match on-screen figures; not pixel-
+  verified against the element's own paint yet.
