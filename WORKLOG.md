@@ -4,6 +4,107 @@ Persistent project history. Append entries; do not edit past entries.
 
 ---
 
+## v0.13.0 — M12: `@toonstrip/next`; M13: General SSR Placeholder Support
+
+**Date:** 2026-09-03
+
+### Changes
+
+M12/M13 shared prerequisite (`packages/element`):
+
+- `comic-strip-element.ts` no longer throws when imported with no DOM present. Two
+  guards: `class ComicStripElement extends HTMLElement` (evaluated at module load, so it
+  threw a bare `ReferenceError` in Node before anything else ran) now extends a fallback
+  no-op class when `HTMLElement` is undefined — never instantiated server-side, since SSR
+  renders `<comic-strip>` by tag name and never calls `new ComicStripElement()`.
+  `registerComicStripElement` now no-ops when `customElements` is undefined instead of
+  throwing. Verified by building and importing `dist/index.js` in a Node process with
+  `globalThis.window` deleted — import succeeds; only explicit instantiation (which no
+  real SSR path does) still throws, as expected.
+- M13's placeholder mechanism, in the same file: a `<slot name="placeholder">` in the
+  shadow template, styled to show by default and hide once the host carries a `data-live`
+  attribute (`.strip` is the inverse — hidden until `data-live`). `#rebuild()` sets
+  `data-live` once panel slots are sized and inserted (not once painted — an off-screen
+  panel may never paint under the existing IntersectionObserver visibility gating, so
+  gating the swap on paint would leave the placeholder up indefinitely for it); `#fail()`
+  also sets it, so an error notice isn't hidden behind a stale placeholder. New test in
+  `comic-strip-element.test.ts` asserts a slotted placeholder `<img>` is present with no
+  `data-live` before `.document` is set, and that `data-live` appears once the live strip
+  is built.
+
+M12 (`TOONSTRIP_DEV_PLAN.md` §13.4, dev-plan-designed to depend only on M10):
+
+- `packages/react/src/ComicStrip.tsx`: added an optional `placeholder: { src, width,
+  height }` prop, rendered as a light-DOM `<img slot="placeholder">` child of the
+  `comic-strip` host (via `createElement`'s children argument) — this lives in `react`,
+  not `next`, since `@toonstrip/next` wraps `react` rather than reimplementing anything
+  (dev plan §13.4's explicit instruction), and any other SSR-capable React framework can
+  reuse it without a `next`-specific dependency.
+- `packages/next` (new): `src/index.ts` is a `"use client"` re-export of `react`'s
+  `<ComicStrip>` — the RSC-protocol boundary Next requires around anything using
+  `useRef`/`useEffect`. Verified the directive survives `tsc`'s emit (present as the
+  first line of `dist/index.js`) and that importing `dist/index.js` in a DOM-less Node
+  process doesn't throw (relies on the `element` guard above).
+- Exit criterion ("no server-side document/window/customElements errors, no
+  hydration-mismatch warning") verified against a real `next build` + `next start` of the
+  new `examples/next-app` (below) via Playwright: zero console/page errors on either the
+  no-JS or hydrated pass.
+
+M13 (`TOONSTRIP_DEV_PLAN.md` §13.4, the "reuse §8's headless-canvas render path" item):
+
+- `packages/cli/src/render.ts`: `RenderResult` gained `cssWidth`/`cssHeight` (the
+  pre-`scale` layout dimensions) alongside the existing `width`/`height` (post-`scale`
+  PNG pixel dimensions) — needed so a placeholder `<img>`'s size attributes describe its
+  CSS box, not its (by default 2x) backing-store pixel count; using the pixel count
+  there was the first version of this that shipped, and it doubled the strip's on-screen
+  size until caught by the Playwright layout-shift check below.
+- `packages/next/src/server.ts` (new entry point `@toonstrip/next/server`, separate from
+  the package root so `@napi-rs/canvas` never reaches a client bundle): `renderPlaceholder(doc,
+  options)` calls `@toonstrip/cli`'s `renderDocument` and returns `{ src: "data:image/png;base64,…",
+  width: cssWidth, height: cssHeight }`. `@toonstrip/cli` is imported via a
+  `webpackIgnore`d dynamic `import()` rather than a static one: Next's
+  `serverExternalPackages` opt-out doesn't reliably apply when the direct importer is a
+  symlinked local workspace package rather than a `node_modules` one (confirmed by
+  reading `next/dist/build/handle-externals.js`'s resolution logic and by reproducing the
+  webpack failure — `@napi-rs/canvas`'s per-platform binary `require()`s got statically
+  bundled and failed to parse as JS — with `serverExternalPackages` set and not fixing
+  it), so the import is left untouched for webpack and resolved by Node at request time
+  instead. That resolution happens from the *bundled output file's* location, which is
+  why the consuming app needs `@toonstrip/cli` as its own direct dependency, not only
+  transitively through `@toonstrip/next` (documented in both docs pages below).
+- `examples/next-app` (new): App Router example. `app/page.tsx` is an async Server
+  Component calling `renderPlaceholder(doc, { width: 640 })` and passing the result into
+  `<ComicStrip placeholder={…}>`. `next.config.mjs` sets `serverExternalPackages:
+  ["@napi-rs/canvas", "@toonstrip/cli"]`. `scripts/copy-pack-assets.mjs` mirrors the
+  other examples' pattern for the client-side pack fetch.
+- Exit criterion ("shows the correct strip content in view source / with JS disabled,
+  then upgrades to the live canvas once hydrated, with no visible layout shift") verified
+  against a `next build && next start` of the example via Playwright: with
+  `javaScriptEnabled: false`, the placeholder `<img>` renders at its real size and no
+  `<canvas>` exists; with JS enabled, `data-live` and a shadow-DOM `<canvas>` appear,
+  the placeholder's computed `display` becomes `none`, and the host element's
+  `getBoundingClientRect()` is bit-for-bit identical before and after hydration (all four
+  deltas 0) once the `cssWidth`/`cssHeight` fix above landed — before that fix, height
+  differed by exactly 2x (the `scale` bug).
+- Docs: `docs/next.md` (repo-level) and `site/src/content/docs/next-reference.mdx`
+  (site-level, `order: 12` in Integrate — schema-reference/accessibility/faq/agent-skill
+  bumped one each). Stale "no SSR guard" notes in `docs/react.md`, `docs/vue.md`, and
+  their site equivalents corrected to reflect the `element`-level fix above (Vue/Nuxt
+  benefits from it too, though no Nuxt wrapper exists yet). `packages/react/src/index.ts`
+  now also exports the `ComicStripPlaceholder` type. `README.md`'s package table,
+  dependency line, and docs list updated; `CONTRIBUTING.md`'s file map gained the
+  previously-undocumented `packages/vue`/`examples/vue-vite` plus the new `next` entries.
+- Full workspace `pnpm -r build` and `pnpm -r test` verified clean (16 packages) after
+  every change, including the site build producing `/docs/next-reference/`.
+
+### Status
+
+`@toonstrip/next` built and tested; not yet published to npm (same as `react`/`vue`,
+still pending a publish decision — see `HANDOFF.md`). M0–M13 of `TOONSTRIP_DEV_PLAN.md`
+done.
+
+---
+
 ## v0.12.0 — M11: `@toonstrip/vue`
 
 **Date:** 2026-09-03

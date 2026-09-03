@@ -18,6 +18,7 @@ import { ComicStrip } from "@toonstrip/react";
 |---|---|---|
 | `document` | `ComicStripDocument` | The strip. Any object of the right shape; usually an imported JSON file. Pushed onto the element whenever it changes. |
 | `packs` | `string[]` | Base URLs of asset packs (same shape as `packages/element`'s own `.packs` — not the pack **names** `@toonstrip/astro`'s component takes, since there's no integration step resolving names to URLs here). Default `[]`. |
+| `placeholder` | `{ src, width, height }` | An SSR-rendered PNG to show, as a light-DOM `<img>`, until the live canvas paints. See [Next.js reference](/docs/next-reference/) — `@toonstrip/next/server`'s `renderPlaceholder` produces this shape. Optional; most apps don't set it directly. |
 | `className` / `style` | — | Forwarded straight to the underlying `<comic-strip>` element. |
 
 The component has no rendering logic of its own: it mounts `<comic-strip>` via a ref and
@@ -46,12 +47,16 @@ pnpm --filter react-vite-example dev
 
 ## Current limitations
 
-- No SSR guard — the package imports `@toonstrip/element` at module scope, which touches
-  `HTMLElement`. Fine for a client-rendered app; importing it on a server throws.
-  `@toonstrip/next` is where that gets solved properly, by wrapping this package behind a
-  client boundary.
 - Tested against React 18. The `peerDependencies` range also allows React 19, but 19
   isn't in the test matrix yet.
+
+<Callout kind="tip">
+Importing `@toonstrip/element` no longer throws on the server (it guards `HTMLElement`/
+`customElements` access) — this package is safe to render server-side. For Next.js App
+Router specifically, use [`@toonstrip/next`](/docs/next-reference/) instead of this
+package directly: it adds the `'use client'` boundary React Server Components require,
+plus an SSR-placeholder helper.
+</Callout>
 
 <Callout kind="tip">
 Vue is also published — see [Vue reference](/docs/vue-reference/). Svelte isn't yet;

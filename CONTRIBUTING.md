@@ -38,11 +38,16 @@ Read `TOONSTRIP_DEV_PLAN.md` §2 for the full architecture rationale.
 - `packages/element` — the browser custom element (`<comic-strip>`)
 - `packages/astro` — the Astro integration + component (`docs/astro.md`)
 - `packages/react` — the React `<ComicStrip>` component (`docs/react.md`)
+- `packages/vue` — the Vue `<ComicStrip>` component (`docs/vue.md`)
+- `packages/next` — `react`'s `<ComicStrip>` behind a Next.js App Router
+  client boundary, plus an SSR-placeholder helper (`docs/next.md`)
 - `packages/pack-comic-chat`, `packages/pack-example` — asset packs
   (`docs/packs.md`)
 - `packages/cli` — the `toonstrip` command
 - `examples/astro-blog` — a full worked Astro site
 - `examples/react-vite` — a full worked Vite + React app
+- `examples/vue-vite` — a full worked Vite + Vue app
+- `examples/next-app` — a full worked Next.js App Router app
 
 ## Adding a character or a new pack
 

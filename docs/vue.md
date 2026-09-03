@@ -76,9 +76,10 @@ pnpm --filter vue-vite-example dev
 
 ## Current limitations
 
-- No SSR guard. `@toonstrip/vue` imports `@toonstrip/element` at module
-  scope, which touches `HTMLElement` — fine for a client-rendered app like
-  the Vite example, but importing this package on a server (Nuxt) will
-  throw. No Nuxt-specific wrapper exists yet; it would follow `@toonstrip/next`'s
-  eventual pattern (M12/M13) if demand shows up.
+- `@toonstrip/element`'s module no longer throws when imported with no DOM
+  present (it guards `HTMLElement`/`customElements` access), so this package
+  is safe to import in a Nuxt server render pass. No Nuxt-specific wrapper
+  exists yet — a dedicated module (matching [`@toonstrip/next`](./next.md)'s
+  pattern: a client boundary plus an SSR-placeholder helper) would still need
+  writing if demand shows up.
 - Tested against Vue 3.5; the `peerDependencies` range allows any Vue 3.3+.

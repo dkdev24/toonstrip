@@ -24,19 +24,22 @@ docs, playground, changelog. Source in `site/`.
 | `packages/astro` | An Astro integration + `<ComicStrip>` component wrapping `element` |
 | `packages/react` | A `<ComicStrip>` React component wrapping `element` |
 | `packages/vue` | A `<ComicStrip>` Vue component wrapping `element` |
+| `packages/next` | `react`'s `<ComicStrip>` behind an App-Router-safe `'use client'` boundary, plus an SSR-placeholder helper (`@toonstrip/next/server`) built on `cli` |
 | `packages/pack-comic-chat` | The default asset pack: the original 15-character Comic Chat roster + 3 backdrops (MIT, see its `NOTICE`) |
 | `packages/pack-example` | A second, small, wholly original pack proving the pack contract isn't coupled to `pack-comic-chat` |
 | `packages/cli` | The `toonstrip` CLI (`pack validate`, `render` to PNG) |
 | `examples/astro-blog` | A minimal Astro site embedding a live strip in a blog post |
 | `examples/react-vite` | A minimal Vite + React app embedding a live strip, prop-updated without a remount |
 | `examples/vue-vite` | A minimal Vite + Vue app embedding a live strip, prop-updated without a remount |
+| `examples/next-app` | A minimal Next.js App Router app: server-rendered PNG placeholder swapped for the live canvas on hydration |
 | `examples/vanilla-html` | A single `.html` file embedding a live strip with no build step — CDN imports, no `package.json` |
 | `skills/toonstrip` | An agent skill teaching an AI coding agent to author and validate a `ComicStripDocument` |
 | `site` | toonstrip.danielkimdev.com (Astro; deployed by Cloudflare Pages on push) |
 
 Dependency direction is one-way: `schema → core → element → astro`, and
-`element → react` and `element → vue` alongside it. Asset packs depend on
-`schema` only.
+`element → react → next` and `element → vue` alongside it (`next` also
+depends on `cli` for its SSR placeholder). Asset packs depend on `schema`
+only.
 
 ## Quick start (development)
 
@@ -57,6 +60,8 @@ including how to add a new character or asset pack.
 - [`docs/astro.md`](./docs/astro.md) — embedding a strip in Astro
 - [`docs/react.md`](./docs/react.md) — embedding a strip with `@toonstrip/react`
 - [`docs/vue.md`](./docs/vue.md) — embedding a strip with `@toonstrip/vue`
+- [`docs/next.md`](./docs/next.md) — embedding a strip with `@toonstrip/next`,
+  including the SSR placeholder
 - [`docs/vanilla-html.md`](./docs/vanilla-html.md) — embedding a strip with
   no build step at all (plain HTML, CDN imports)
 - [`TOONSTRIP_DEV_PLAN.md`](./TOONSTRIP_DEV_PLAN.md) — the full project plan

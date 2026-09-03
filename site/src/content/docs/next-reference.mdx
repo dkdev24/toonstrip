@@ -1,0 +1,89 @@
+---
+title: Next.js reference
+description: <ComicStrip> behind an App-Router-safe client boundary, plus an SSR placeholder helper.
+order: 12
+section: Integrate
+---
+import Callout from "../../components/site/Callout.astro";
+
+`@toonstrip/next` wraps [`@toonstrip/react`](/docs/react-reference/) for Next.js App
+Router: a `'use client'` boundary around `<ComicStrip>`, plus a server-only helper that
+renders a real PNG placeholder for the server render pass.
+
+## `<ComicStrip>`
+
+```tsx
+// app/page.tsx — a Server Component; no "use client" needed here
+import { ComicStrip } from "@toonstrip/next";
+
+<ComicStrip document={doc} packs={["/packs/comic-chat/"]} />
+```
+
+Same props as [`@toonstrip/react`](/docs/react-reference/)'s `<ComicStrip>` — this package
+re-exports it behind a `'use client'` module, the boundary React Server Components require
+around anything using `useRef`/`useEffect`. You can import it directly from a Server
+Component; you don't need to mark your own page `'use client'`.
+
+## SSR placeholder
+
+```tsx
+// app/page.tsx
+import { ComicStrip } from "@toonstrip/next";
+import { renderPlaceholder } from "@toonstrip/next/server";
+
+export default async function Page() {
+  const placeholder = await renderPlaceholder(doc, { width: 640 });
+  return <ComicStrip document={doc} packs={["/packs/comic-chat/"]} placeholder={placeholder} />;
+}
+```
+
+`renderPlaceholder` reuses `@toonstrip/cli`'s headless-canvas render path — the same one
+behind [`toonstrip render`](/docs/astro-reference/) — to produce a PNG on the server,
+sized in CSS pixels to match the `width` you give it. `<ComicStrip>` renders that as a
+light-DOM `<img slot="placeholder">` inside `<comic-strip>` — present in the raw server
+HTML with no client JS, so it shows with JavaScript disabled and in "view source". Once
+client JS hydrates and the live canvas is ready, `@toonstrip/element` hides the placeholder
+and shows the live strip itself; no code in this package drives that swap.
+
+Match the `width` you pass to `renderPlaceholder` to the CSS width your `<ComicStrip>` is
+actually laid out at — a mismatch produces a placeholder sized differently than the live
+strip, which shows up as a layout shift on hydration.
+
+`renderPlaceholder` is a separate entry point (`@toonstrip/next/server`, not the package
+root) because it pulls in `@toonstrip/cli`, which loads `@napi-rs/canvas` — a native Node
+addon that must never end up in a client bundle. Only call it from a Server Component or
+other server-only code.
+
+<Callout kind="warn">
+`@toonstrip/cli`'s native dependency needs two things in your app's own `next.config`:
+list `@napi-rs/canvas` (and, if you hit the same issue, `@toonstrip/cli`) under
+`serverExternalPackages`, and add `@toonstrip/cli` as your app's own direct dependency
+(not only a transitive one through `@toonstrip/next`) — see `examples/next-app`'s
+`next.config.mjs` and `package.json` for a working setup, and that example's
+`app/page.tsx` for the full pattern above.
+</Callout>
+
+## Worked example
+
+`examples/next-app` in the repo is an App Router app: a Server Component page renders a
+strip with a placeholder, `scripts/copy-pack-assets.mjs` copies
+`@toonstrip/pack-comic-chat`'s files into `public/packs/comic-chat/` for the client-side
+cast fetch (same script `examples/react-vite` and `examples/vue-vite` use), and
+`renderPlaceholder` reads the pack straight from `node_modules` for the server-side render.
+Run it locally:
+
+```
+pnpm --filter next-app-example build && pnpm --filter next-app-example start
+```
+
+## Current limitations
+
+- Tested against Next.js 15 (App Router) and React 18. Pages Router isn't covered.
+- No Nuxt-equivalent wrapper yet — see [Vue reference](/docs/vue-reference/)'s note on
+  that.
+
+<Callout kind="tip">
+`@toonstrip/element`'s module no longer throws when imported on a server — that guard
+(dev plan §13.4) is what makes this package's client boundary safe to import from a
+Server Component in the first place.
+</Callout>

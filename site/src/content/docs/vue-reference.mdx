@@ -53,11 +53,12 @@ pnpm --filter vue-vite-example dev
 
 ## Current limitations
 
-- No SSR guard — the package imports `@toonstrip/element` at module scope, which touches
-  `HTMLElement`. Fine for a client-rendered app; importing it on a server (Nuxt) throws.
-- Tested against Vue 3.5. No Nuxt-specific wrapper yet — see [React reference](/docs/react-reference/)'s
-  equivalent note about `@toonstrip/next`; a Nuxt module would follow the same pattern if
-  demand shows up.
+- Tested against Vue 3.5. No Nuxt-specific wrapper yet — `@toonstrip/element`'s module no
+  longer throws when imported on a server (it guards `HTMLElement`/`customElements`
+  access, dev plan §13.4), so this package is safe to import in a Nuxt server render pass;
+  a dedicated Nuxt module (matching [`@toonstrip/next`](/docs/next-reference/)'s pattern —
+  a client boundary plus an SSR-placeholder helper) would still need writing if demand
+  shows up.
 
 <Callout kind="tip">
 Svelte isn't published yet — until then, [Plain HTML](/docs/plain-html/)'s "From a

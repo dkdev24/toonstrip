@@ -6,6 +6,29 @@ shipped. Written for users; the engineering history behind each entry is in `WOR
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.13.0 — 2026-09-03
+
+**Packages:** unchanged (`@toonstrip/schema` 0.1.3, `@toonstrip/core` 0.1.7,
+`@toonstrip/element` 0.1.8, `@toonstrip/astro` 0.1.11, `@toonstrip/cli` 0.2.1,
+`@toonstrip/pack-comic-chat` 0.1.1). `@toonstrip/next` 0.1.0 built, not yet published.
+
+### Added
+
+- **A Next.js wrapper.** `@toonstrip/next` wraps `@toonstrip/react`'s `<ComicStrip>`
+  behind an App Router-safe client boundary, so it drops straight into a Server
+  Component. A minimal App Router example (`examples/next-app`) ships alongside it.
+  Documented at [Next.js reference](https://toonstrip.danielkimdev.com/docs/next-reference/).
+- **Server-rendered placeholders.** `@toonstrip/next/server`'s `renderPlaceholder` renders
+  a real PNG of your strip on the server, so a Next.js page shows the actual strip
+  content immediately — in "view source", and with JavaScript disabled — instead of a
+  blank shell, then swaps to the live canvas on hydration with no layout shift.
+
+### Fixed
+
+- **`@toonstrip/element` no longer throws when imported on a server.** This was already
+  the practical blocker for using `@toonstrip/react` or `@toonstrip/vue` in any
+  server-rendering framework; it's now safe to import them there.
+
 ## 0.12.0 — 2026-09-03
 
 **Packages:** unchanged (`@toonstrip/schema` 0.1.3, `@toonstrip/core` 0.1.7,

@@ -163,4 +163,27 @@ describe("ComicStripElement", () => {
 
     el.remove();
   });
+
+  // dev plan §13.4 (M13): an SSR placeholder image is a light-DOM child slotted
+  // in via slot="placeholder", shown until the live canvases are ready, then
+  // hidden — this is what lets a server-rendered PNG swap for the live strip
+  // on hydration with no gap and no layout shift.
+  it("hides the slotted placeholder and marks data-live once the live strip is built", async () => {
+    const el = document.createElement("comic-strip-test") as HTMLElement & {
+      packs: string[];
+      document: unknown;
+    };
+    const placeholder = document.createElement("img");
+    placeholder.slot = "placeholder";
+    el.append(placeholder);
+    document.body.append(el);
+
+    expect(el.hasAttribute("data-live")).toBe(false);
+
+    el.packs = ["/pack/"];
+    el.document = { version: 1, panels: [{ backdrop: "pastoral", bodies: [], speakers: [] }] };
+
+    await vi.waitFor(() => expect(el.hasAttribute("data-live")).toBe(true));
+    el.remove();
+  });
 });

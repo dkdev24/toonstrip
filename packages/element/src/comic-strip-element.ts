@@ -64,9 +64,21 @@ const STYLE = `
 }
 .panel { display: block; background: #111; }
 .notice { color: #b00; font: 14px sans-serif; }
+::slotted([slot="placeholder"]) { display: block; }
+:host([data-live]) ::slotted([slot="placeholder"]) { display: none; }
+:host(:not([data-live])) .strip { display: none; }
 `;
 
-export class ComicStripElement extends HTMLElement {
+// `HTMLElement` does not exist during a framework's server render pass
+// (Next.js App Router, and any other Node SSR target — dev plan §13.4).
+// Falling back to a plain class there keeps the module importable; nothing
+// server-side ever calls `new ComicStripElement()` (SSR renders the
+// `<comic-strip>` tag by name, it never runs this class's code), so the
+// fallback body is never exercised.
+const ElementBase: typeof HTMLElement =
+  typeof HTMLElement !== "undefined" ? HTMLElement : (class {} as unknown as typeof HTMLElement);
+
+export class ComicStripElement extends ElementBase {
   #root: ShadowRoot;
   #strip: HTMLDivElement;
   #resizeObserver: ResizeObserver;
@@ -86,9 +98,11 @@ export class ComicStripElement extends HTMLElement {
     this.#root = this.attachShadow({ mode: "open" });
     const style = document.createElement("style");
     style.textContent = STYLE;
+    const placeholderSlot = document.createElement("slot");
+    placeholderSlot.name = "placeholder";
     this.#strip = document.createElement("div");
     this.#strip.className = "strip";
-    this.#root.append(style, this.#strip);
+    this.#root.append(style, placeholderSlot, this.#strip);
     this.#resizeObserver = new ResizeObserver(() => this.#relayout());
     // A face that finishes loading after first paint (declared late, or
     // fetched by another element) repaints every painted panel.
@@ -150,6 +164,9 @@ export class ComicStripElement extends HTMLElement {
     notice.className = "notice";
     notice.textContent = message;
     this.#strip.append(notice);
+    // Reveal the (now-error-bearing) strip over a stale SSR placeholder (§13.4)
+    // rather than leaving a placeholder image up with no way to tell it's stale.
+    this.setAttribute("data-live", "");
     console.error("comic-strip:", message);
   }
 
@@ -211,6 +228,11 @@ export class ComicStripElement extends HTMLElement {
       this.#slots.push(slot);
       this.#visibilityObserver.observe(canvas);
     }
+    // Slots are sized (via #resizeSlot above) even before any of them paint,
+    // so swapping now — rather than waiting for a first paint that an
+    // off-screen panel may never get (visibility gating) — cannot shift
+    // layout relative to an SSR placeholder (§13.4) sized to match.
+    this.setAttribute("data-live", "");
   }
 
   #measure(): { width: number; height: number } {
@@ -276,6 +298,8 @@ export class ComicStripElement extends HTMLElement {
   }
 }
 
+/** No-op during a server render pass (dev plan §13.4): `customElements` does not exist there. */
 export function registerComicStripElement(tagName = "comic-strip"): void {
+  if (typeof customElements === "undefined") return;
   if (!customElements.get(tagName)) customElements.define(tagName, ComicStripElement);
 }

@@ -9,6 +9,9 @@ node_modules/
 examples/astro-blog/public/_toonstrip/
 examples/react-vite/public/packs/
 examples/vue-vite/public/packs/
+examples/next-app/public/packs/
+examples/next-app/.next/
+examples/next-app/next-env.d.ts
 site/public/_toonstrip/
 site/.astro/
 packages/schema/src/generated-validate.js

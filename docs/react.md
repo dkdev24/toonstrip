@@ -66,11 +66,12 @@ pnpm --filter react-vite-example dev
 
 ## Current limitations
 
-- No SSR guard. `@toonstrip/react` imports `@toonstrip/element` at module
-  scope, which touches `HTMLElement` — fine for a client-rendered app like
-  the Vite example, but importing this package on a server (Next.js, Remix)
-  will throw. `@toonstrip/next` (M12) is where that gets solved, by wrapping
-  this package behind a `'use client'` boundary rather than fixing it here.
+- `@toonstrip/element`'s module no longer throws when imported with no DOM
+  present (it guards `HTMLElement`/`customElements` access), so this package
+  is safe to import on a server. For Next.js App Router specifically, use
+  [`@toonstrip/next`](./next.md) instead of this package directly: it adds
+  the `'use client'` boundary React Server Components require, plus an
+  SSR-placeholder helper.
 - Tested against React 18; the `peerDependencies` range also allows React 19
   since nothing in the wrapper depends on 18-specific behavior, but 19 isn't
   in the test matrix yet.

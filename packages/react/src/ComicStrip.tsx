@@ -15,16 +15,32 @@ import { createElement, useEffect, useRef, type CSSProperties, type ReactElement
 import type { ComicStripElement } from "@toonstrip/element";
 import type { ComicStripDocument } from "@toonstrip/schema";
 
+/** An SSR-rendered PNG (dev plan §13.4) to show until the live canvas paints — see `@toonstrip/next`'s `renderPlaceholder`. */
+export interface ComicStripPlaceholder {
+  /** Image URL — typically a `data:image/png;base64,...` URI from `renderPlaceholder`. */
+  src: string;
+  width: number;
+  height: number;
+}
+
 export interface ComicStripProps {
   /** The strip to render (dev plan §3). Re-set on the element whenever this changes. */
   document: ComicStripDocument;
   /** Base URLs of registered asset packs, searched in order. Default `[]`. */
   packs?: string[];
+  /**
+   * A server-rendered placeholder to show until hydration paints the live
+   * canvas (dev plan §13.4). Rendered as a light-DOM `<img>` so it is present
+   * in the server HTML with no client JS — `@toonstrip/element` slots it in
+   * and hides it itself once the live strip is ready, so no flicker even
+   * between hydration and first paint.
+   */
+  placeholder?: ComicStripPlaceholder;
   className?: string;
   style?: CSSProperties;
 }
 
-export function ComicStrip({ document: doc, packs, className, style }: ComicStripProps): ReactElement {
+export function ComicStrip({ document: doc, packs, placeholder, className, style }: ComicStripProps): ReactElement {
   const ref = useRef<ComicStripElement | null>(null);
 
   useEffect(() => {
@@ -38,5 +54,17 @@ export function ComicStrip({ document: doc, packs, className, style }: ComicStri
   // Plain createElement, not JSX, for the custom element tag itself: React's
   // JSX.IntrinsicElements has no "comic-strip" entry, and createElement
   // sidesteps needing a global ambient-type augmentation just for one tag.
-  return createElement("comic-strip", { ref, className, style });
+  return createElement(
+    "comic-strip",
+    { ref, className, style },
+    placeholder
+      ? createElement("img", {
+          slot: "placeholder",
+          src: placeholder.src,
+          width: placeholder.width,
+          height: placeholder.height,
+          alt: "",
+        })
+      : null,
+  );
 }

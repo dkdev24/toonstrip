@@ -34,8 +34,12 @@ export interface RenderOptions {
 
 export interface RenderResult {
   png: Buffer;
+  /** PNG pixel dimensions (post-`scale` backing-store size — the file's actual size). */
   width: number;
   height: number;
+  /** CSS-pixel layout dimensions (pre-`scale`) — what an `<img>` embedding this PNG should be sized to (dev plan §13.4's SSR placeholder), so a high-`scale` render doesn't display 2x too large. */
+  cssWidth: number;
+  cssHeight: number;
   columns: number;
 }
 
@@ -137,5 +141,5 @@ export async function renderDocument(input: unknown, options: RenderOptions = {}
     ctx.drawImage(panelCanvas, col * (layout.panelWidth + GUTTER), row * (layout.panelHeight + GUTTER), layout.panelWidth, layout.panelHeight);
   });
 
-  return { png: canvas.toBuffer("image/png"), width: canvas.width, height: canvas.height, columns };
+  return { png: canvas.toBuffer("image/png"), width: canvas.width, height: canvas.height, cssWidth: outW, cssHeight: outH, columns };
 }
