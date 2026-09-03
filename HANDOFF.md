@@ -23,21 +23,28 @@ prod (`wrangler.toml` output dir `site/dist`; root `pnpm build` is the build).
 Reference, order 17) covering both input paths, the join, and errors vs warnings, with a
 cross-link from `asset-packs.mdx`; site builds. Published
 **`@toonstrip/asset-packager` 0.2.0** to npm (33 tests green; tarball verified, its
-`@toonstrip/core` workspace dep rewritten to 0.1.7).
+`@toonstrip/core` workspace dep rewritten to 0.1.7). Then a repo-wide over-engineering
+audit → **`PONYTAIL_AUDIT.md`**: 46 ranked findings, ~2,400 hand-written lines + ~700
+generated + 9 deps cuttable. Nothing applied.
 
 ## Next Actions
 
-1. **S9 Korean locale** per `SITE_DEV_PLAN.md` §13 — M8-M13 all done, so this is
+1. **Work `PONYTAIL_AUDIT.md`** in its suggested order: dead files/deps first (no
+   behaviour change), then the packager cuts, then the schema's ajv removal (biggest
+   single win), then the upstream-shared core cuts as one batch per `UPSTREAM_SYNC.md`.
+2. **S9 Korean locale** per `SITE_DEV_PLAN.md` §13 — M8-M13 all done, so this is
    unblocked (per that plan: land English content once, not twice).
-2. **Daniel:** copy pass in his voice over `index.astro`/`docs/*.mdx`; link the site
+3. **Daniel:** copy pass in his voice over `index.astro`/`docs/*.mdx`; link the site
    from `danielkimdev.com`.
-3. If usage warrants: per-page OG images, Pagefind, short-link Worker (§9); a Nuxt wrapper.
+4. If usage warrants: per-page OG images, Pagefind, short-link Worker (§9); a Nuxt wrapper.
 
 ## Open Issues
 
 - `toonstrip pack validate` misses a missing torso (checks NEUTRAL only);
   `toonstrip-pack validate` does catch it on the source side. Playwright verify scripts
   are manual-only (`NOTES.md` M1–M5).
+- `next-reference.mdx:57` passes `Callout kind="warn"`, outside the component's union —
+  renders unstyled. One-word fix, found during the audit.
 - `renderPlaceholder` needs `@toonstrip/cli` as the consuming app's own direct dep (not
   just transitive via `next`) plus `serverExternalPackages` in `next.config` — see
   `docs/next.md` "Native dependency". Packaging papercut, not a bug.
