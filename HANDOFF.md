@@ -4,18 +4,16 @@ Cross-session context memory. Update this file at the end of every session.
 
 ## Current Version
 
-**0.15.1** (M14 `@toonstrip/asset-packager`, M15 sheet input; npm: schema 0.1.3, core
-0.1.7, element 0.1.8, astro 0.1.11, cli 0.2.1, packs 0.1.1, react/vue/next 0.1.0,
-asset-packager 0.2.0)
+**0.15.1** (npm: schema 0.1.3, core 0.1.7, element 0.1.8, astro 0.1.11, cli 0.2.1, packs
+0.1.1, react/vue/next 0.1.0, asset-packager 0.2.0)
 
 ## Project Status
 
 `toonstrip`: framework-embeddable canvas widget rendering a comic strip from
-caller-supplied data, extracted/generalized from `grues-in-comic`'s comic pane
-(Zork/game/AI-inference coupling stripped). M0–M15 of `TOONSTRIP_DEV_PLAN.md` done.
-11 `@toonstrip/*` packages on npm. Site live at **https://toonstrip.danielkimdev.com**.
-**Deploy:** Cloudflare Pages `toonstrip`, GitHub integration; push to `main` deploys
-prod (`wrangler.toml` output dir `site/dist`; root `pnpm build` is the build).
+caller-supplied data, generalized from `grues-in-comic`'s comic pane (Zork/game/AI
+coupling stripped). M0–M15 of `TOONSTRIP_DEV_PLAN.md` done. 11 packages on npm. Site live
+at **https://toonstrip.danielkimdev.com**. **Deploy:** Cloudflare Pages `toonstrip`; push
+to `main` deploys prod (output `site/dist`; root `pnpm build` is the build).
 
 ## Last Session
 
