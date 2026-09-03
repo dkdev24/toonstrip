@@ -131,6 +131,12 @@ declare at least one torso.
 The example pack's sheet is drawn by a 60-line script with `@napi-rs/canvas`; it is the
 smallest complete pack and the one to copy.
 
+<Callout kind="tip">
+Doing this from real drawings rather than rectangles? Don't write the manifest by hand —
+[`@toonstrip/asset-packager`](/docs/asset-packager/) takes a folder of per-pose PNGs, or one
+labelled sheet, and writes `pack.json`, the sprite sheets and the sockets for you.
+</Callout>
+
 ## Licensing
 
 Say what the art is. If any of it is not wholly yours, ship a `NOTICE` crediting the

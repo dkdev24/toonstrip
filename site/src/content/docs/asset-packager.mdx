@@ -1,0 +1,185 @@
+---
+title: Asset packager
+description: Turn a folder of PNGs, or one labelled sheet, into a valid toonstrip asset pack.
+order: 17
+section: Reference
+---
+
+import Callout from "../../components/site/Callout.astro";
+
+Writing a [pack](/docs/asset-packs/) by hand means writing `pack.json`, a manifest per
+character, sprite-sheet rectangles and a face/torso socket for every pose. `@toonstrip/asset-packager`
+does that part: you supply finished drawings, it validates them, packs the sheets, derives
+the join and writes the pack.
+
+It is offline and deterministic. No model call, no network — it consumes PNGs, whether they
+came out of an image model, Procreate or Aseprite. toonstrip still generates no art (see the
+[FAQ](/docs/faq/)); this is the step *after* you have some.
+
+```
+npm install -D @toonstrip/asset-packager
+```
+
+## The whole loop
+
+```
+# 1. scaffold a source pack
+npx toonstrip-pack init ./my-source --name my-pack
+
+# 2. draw or generate the poses into ./my-source/characters/<id>/, then check them
+npx toonstrip-pack validate ./my-source
+
+# 3. build, and look at the join preview before shipping
+npx toonstrip-pack build ./my-source --out ./my-pack --preview joins.png
+
+# 4. the output is a normal pack
+npx toonstrip pack validate ./my-pack
+npx toonstrip render strip.json --out strip.png --pack ./my-pack
+```
+
+`--npm` on the build also writes the loader skeleton (`package.json`, `src/index.ts`) that
+makes the output directory an installable package, the same shape as the two shipped packs.
+`--force` builds despite errors, for when you want to look at a broken pack rather than read
+about it.
+
+<Callout kind="tip">
+`toonstrip-pack` (the packager, source in) and `toonstrip` (the [CLI](/docs/getting-started/),
+pack out) are separate commands. Step 4 above runs the second one against the first one's
+output as an independent check.
+</Callout>
+
+## Two ways in
+
+### One PNG per pose
+
+```
+my-source/
+  source.json                      # name, version, license, spec overrides
+  characters/<id>/
+    face-NEUTRAL.png               # required
+    torso-NEUTRAL.png              # required
+    face-HAPPY.png
+    torso-WAVE.png
+    face-SAD@0.5-2.png             # optional intensity and variant
+  backdrops/<id>.png
+```
+
+Filenames are `<kind>-<EMOTION>[@<intensity>][-<variant>].png`, with `kind` either `face` or
+`torso` and `EMOTION` one of the nine face names (`NEUTRAL`, `HAPPY`, `COY`, `BORED`,
+`SCARED`, `SAD`, `ANGRY`, `SHOUT`, `LAUGH`) or nine torso names (`NEUTRAL`, `WAVE`,
+`POINTOTHER`, `POINTSELF`, `DOUBLEPOINT`, `SHRUG`, `3QRWALK`, `SIDEWALK`, `3QFWALK`). Case
+matters, and anything unrecognised in the directory is ignored rather than rejected, so
+reference sketches can live alongside the art.
+
+Every part is a **square, transparent PNG, one pose per file**, at least 256×256 and ideally
+1024×1024. A face is a head with a short neck stub, ending at the join; a torso is shoulders
+to waist with the neck line at its top edge and the bottom running off the canvas. The full
+rules are in [`docs/asset-image-spec.md`](https://github.com/dkdev24/toonstrip/blob/main/docs/asset-image-spec.md).
+
+### One sheet, many assets
+
+When the art comes from an image model, generate a grid in one pass instead of a file per
+pose: identity cannot drift between cells, and the packager registers every pose against the
+character's NEUTRAL cell. Backdrops work the same way — one image, many scenes.
+
+```
+# a reference sheet to prompt with; also prints the source.json fragment and a prompt
+npx toonstrip-pack template --out ref.png
+npx toonstrip-pack template --out scenes.png --kind backdrop --ids hall,cellar,attic --columns 2
+```
+
+The grid shape is yours to declare. Name the cells in `source.json`:
+
+```json
+{
+  "characters": [
+    {
+      "id": "pim",
+      "sheet": {
+        "file": "characters/pim/sheet.png",
+        "layout": [
+          ["face-NEUTRAL", "face-HAPPY"],
+          ["torso-NEUTRAL", "torso-WAVE"]
+        ],
+        "labelBand": 0.1
+      }
+    }
+  ],
+  "backdropSheets": [
+    { "file": "backdrops/interiors.png", "ids": ["hall", "cellar", "attic", "kitchen"], "columns": 2 }
+  ]
+}
+```
+
+Cells are sliced on the gutters actually present rather than on an even division, so a
+model's imprecision is absorbed. Label bands are cropped first, and character cells are keyed
+by flood-filling in from the edges — a flat white background is expected here, because few
+models emit transparency. A white shirt stays white; it is not connected to the edge.
+
+<Callout kind="warning">
+A background that is not flat — a gradient, a painted room, a checkerboard standing in for
+transparency — cannot be keyed, and you get `background is not transparent`. Ask for a plain
+single-colour background.
+</Callout>
+
+A sheet costs detail. A model capping at 1536px gives roughly 512px cells on a 3×3 and about
+300px on a 5×4; against the default 256px `cell`, a 3×3 is comfortable and a 5×4 is marginal.
+The packager errors when the grid cannot carry the pack's cell size. Options and diagnostics
+in full: [`docs/asset-sheets.md`](https://github.com/dkdev24/toonstrip/blob/main/docs/asset-sheets.md).
+
+### Mixing the two
+
+A per-pose file **overrides** a sheet cell of the same name. That is the fix for one weak
+cell: regenerate that pose on its own with the sheet as reference, drop it in as
+`characters/<id>/face-LAUGH.png`, rebuild. No edit to `source.json`.
+
+## The join
+
+A face and a torso are separate drawings composited at render time, so the packager has to
+know where the head meets the neck. Three routes, in priority order:
+
+1. `anchors` in `source.json` — explicit input-canvas pixel coordinates.
+2. A single opaque magenta (`#ff00ff`) marker pixel in the art, erased before packing.
+3. The convention — a face joins at the bottom-centre of its drawing, a torso at the
+   top-centre of its.
+
+The join is derived once per character from its **NEUTRAL** pose and reused for every other
+pose. Keep the head and body in the same place across poses and change only the expression or
+the arms.
+
+A wrong join still produces a *valid* pack, which is what `--preview` is for: it composites
+each character's NEUTRAL pair and crosses the join, so a floating or buried head is visible
+at a glance. Look at it before shipping.
+
+## Errors vs warnings
+
+`validate` and `build` both report the same two-tier diagnostics, and list every problem
+rather than stopping at the first.
+
+**Errors** block the build: a non-square canvas, an opaque background on the per-pose path, a
+missing NEUTRAL face or torso, an unknown emotion name, a blank or misnamed sheet cell, a
+grid too dense for the pack's cell size.
+
+**Warnings** build anyway and are worth a look: a soft or feathered outline, a drawing running
+into a gutter, a pose more than 12% off the NEUTRAL cell's scale, a torso floating above the
+bottom of its canvas, a character with only one pose, two near-identical backdrop cells.
+
+Sheet diagnostics name the cell they are about, as `sheet.png[column,row] -> name`.
+
+## As a library
+
+The CLI is a thin wrapper; both stages are importable.
+
+```ts
+import { analyze, buildPack } from "@toonstrip/asset-packager";
+
+const { report } = await analyze("./my-source");   // errors + warnings
+const result = await buildPack({ source: "./my-source", out: "./my-pack" });
+```
+
+## Licensing what you build
+
+Say what the art is. If any of it is not wholly yours — including anything a model produced
+from a reference you do not own — ship a `NOTICE` crediting the source and its licence. The
+default pack's `NOTICE` (Microsoft Comic Chat art, MIT, with a trademark disclaimer) is the
+worked example. `source.json`'s `license` field lands in the built `pack.json`.

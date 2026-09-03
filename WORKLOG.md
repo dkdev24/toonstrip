@@ -1817,3 +1817,32 @@ M9 (`TOONSTRIP_DEV_PLAN.md` §13.2):
 Site/repo 0.10.0. M0–M9 of `TOONSTRIP_DEV_PLAN.md` done. npm packages unchanged (schema
 0.1.3, core 0.1.7, element 0.1.8, astro 0.1.11, cli 0.2.1, packs 0.1.1). Next: M10
 (`@toonstrip/react`) and M11 (`@toonstrip/vue`) per §13.3.
+
+## v0.15.1 — Asset-Packager Docs Page; `@toonstrip/asset-packager` Published
+
+**Date:** 2026-09-04
+
+### Changes
+
+- `site/src/content/docs/asset-packager.mdx`: new Reference page (order 17) for
+  `@toonstrip/asset-packager`. Covers the full loop (`init` → `validate` → `build
+  --preview` → `toonstrip pack validate`), both input paths (one PNG per pose, and sheet
+  input via `template` + a `sheet`/`backdropSheets` declaration in `source.json`), the
+  file-overrides-cell rule, the three join-resolution routes and why `--preview` matters,
+  the errors-vs-warnings split, the `analyze`/`buildPack` library API, and licensing.
+  Deep detail stays in the repo docs (`docs/asset-image-spec.md`, `docs/asset-sheets.md`),
+  linked from the page rather than duplicated.
+- `site/src/content/docs/asset-packs.mdx`: a tip at the end of "Adding a character, step
+  by step" pointing at the new page, so the hand-written-manifest path names the tool
+  that removes it.
+- Published **`@toonstrip/asset-packager` 0.2.0** to npm (public). 33 tests green before
+  publish; the published tarball was fetched back and its `@toonstrip/core` workspace dep
+  confirmed rewritten to `0.1.7`. The registry read endpoint 404'd for several minutes
+  after a successful publish (negative CDN cache); a re-publish attempt returning "cannot
+  publish over the previously published versions: 0.2.0" is what confirmed it landed.
+
+### Status
+
+Site/repo 0.15.1. M0–M15 of `TOONSTRIP_DEV_PLAN.md` done. 11 packages on npm (schema
+0.1.3, core 0.1.7, element 0.1.8, astro 0.1.11, cli 0.2.1, packs 0.1.1, react/vue/next
+0.1.0, asset-packager 0.2.0). Next: S9 Korean locale per `SITE_DEV_PLAN.md` §13.
