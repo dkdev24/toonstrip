@@ -19,32 +19,35 @@ prod (`wrangler.toml` output dir `site/dist`; root `pnpm build` is the build).
 
 ## Last Session
 
-2026-09-04: Site docs page for the packager (`site/src/content/docs/asset-packager.mdx`,
-Reference, order 17) covering both input paths, the join, and errors vs warnings, with a
-cross-link from `asset-packs.mdx`; site builds. Published
-**`@toonstrip/asset-packager` 0.2.0** to npm (33 tests green; tarball verified, its
-`@toonstrip/core` workspace dep rewritten to 0.1.7). Then a repo-wide over-engineering
-audit → **`PONYTAIL_AUDIT.md`**: 46 ranked findings, ~2,400 hand-written lines + ~700
-generated + 9 deps cuttable. Nothing applied.
+2026-09-04: New site docs page for the packager (`docs/asset-packager.mdx`, Reference,
+order 17; both input paths, the join, errors vs warnings) + cross-link from
+`asset-packs.mdx`. Published **`@toonstrip/asset-packager` 0.2.0** to npm (33 tests green;
+tarball verified, `@toonstrip/core` dep rewritten to 0.1.7). Then a repo-wide
+over-engineering audit → **`PONYTAIL_AUDIT.md`**: 46 ranked findings (~2,400 lines + ~700
+generated + 9 deps cuttable) with a Progress table at its top. Applied 2 of them — **#31**
+(dead `ui/scroll-area.tsx`, -1 radix dep) and **#42** (unused `codemirror` meta-package,
+-3 installed packages); build green after each.
 
 ## Next Actions
 
-1. **Work `PONYTAIL_AUDIT.md`** in its suggested order: dead files/deps first (no
-   behaviour change), then the packager cuts, then the schema's ajv removal (biggest
-   single win), then the upstream-shared core cuts as one batch per `UPSTREAM_SYNC.md`.
-2. **S9 Korean locale** per `SITE_DEV_PLAN.md` §13 — M8-M13 all done, so this is
+1. **Fix `site`'s Playwright suite** — 8/8 playground specs fail, pre-existing. It is the
+   safety net for the site-side audit items; #12 should wait for it.
+2. **Keep working `PONYTAIL_AUDIT.md`** in its suggested order: #29, then
+   #41/#40/#11/#5/#44, then the packager cuts, the schema's ajv removal, and the
+   upstream-shared core batch per `UPSTREAM_SYNC.md`.
+3. **S9 Korean locale** per `SITE_DEV_PLAN.md` §13 — M8-M13 all done, so this is
    unblocked (per that plan: land English content once, not twice).
-3. **Daniel:** copy pass in his voice over `index.astro`/`docs/*.mdx`; link the site
+4. **Daniel:** copy pass in his voice over `index.astro`/`docs/*.mdx`; link the site
    from `danielkimdev.com`.
-4. If usage warrants: per-page OG images, Pagefind, short-link Worker (§9); a Nuxt wrapper.
+5. If usage warrants: per-page OG images, Pagefind, short-link Worker (§9); a Nuxt wrapper.
 
 ## Open Issues
 
 - `toonstrip pack validate` misses a missing torso (checks NEUTRAL only);
-  `toonstrip-pack validate` does catch it on the source side. Playwright verify scripts
-  are manual-only (`NOTES.md` M1–M5).
+  `toonstrip-pack validate` does catch it on the source side.
+- `site`'s 8 playground e2e specs all fail (pre-existing); other Playwright verify
+  scripts are manual-only (`NOTES.md` M1–M5).
 - `next-reference.mdx:57` passes `Callout kind="warn"`, outside the component's union —
   renders unstyled. One-word fix, found during the audit.
-- `renderPlaceholder` needs `@toonstrip/cli` as the consuming app's own direct dep (not
-  just transitive via `next`) plus `serverExternalPackages` in `next.config` — see
-  `docs/next.md` "Native dependency". Packaging papercut, not a bug.
+- `renderPlaceholder` needs `@toonstrip/cli` as the app's own direct dep plus
+  `serverExternalPackages` in `next.config` — `docs/next.md`. Papercut, not a bug.
