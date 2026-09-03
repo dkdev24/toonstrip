@@ -6,6 +6,34 @@ shipped. Written for users; the engineering history behind each entry is in `WOR
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.12.0 — 2026-09-03
+
+**Packages:** unchanged (`@toonstrip/schema` 0.1.3, `@toonstrip/core` 0.1.7,
+`@toonstrip/element` 0.1.8, `@toonstrip/astro` 0.1.11, `@toonstrip/cli` 0.2.1,
+`@toonstrip/pack-comic-chat` 0.1.1). `@toonstrip/vue` 0.1.0 built, not yet published.
+
+### Added
+
+- **A Vue wrapper.** `@toonstrip/vue`'s `<ComicStrip>` component mounts
+  `@toonstrip/element`'s `<comic-strip>` custom element and updates it reactively on a
+  `document`/`packs` change — no remount, same pattern as `@toonstrip/react`. A minimal
+  Vite + Vue example (`examples/vue-vite`) ships alongside it. Documented at
+  [Vue reference](https://toonstrip.danielkimdev.com/docs/vue-reference/).
+
+## 0.11.0 — 2026-09-03
+
+**Packages:** unchanged (`@toonstrip/schema` 0.1.3, `@toonstrip/core` 0.1.7,
+`@toonstrip/element` 0.1.8, `@toonstrip/astro` 0.1.11, `@toonstrip/cli` 0.2.1,
+`@toonstrip/pack-comic-chat` 0.1.1). `@toonstrip/react` 0.1.0 built, not yet published.
+
+### Added
+
+- **A React wrapper.** `@toonstrip/react`'s `<ComicStrip>` component mounts
+  `@toonstrip/element`'s `<comic-strip>` custom element via a ref and updates it on a
+  `document`/`packs` prop change without remounting. A minimal Vite + React example
+  (`examples/react-vite`) ships alongside it. Documented at
+  [React reference](https://toonstrip.danielkimdev.com/docs/react-reference/).
+
 ## 0.10.0 — 2026-09-03
 
 **Packages:** unchanged (`@toonstrip/schema` 0.1.3, `@toonstrip/core` 0.1.7,

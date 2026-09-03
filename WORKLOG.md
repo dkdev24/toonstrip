@@ -4,6 +4,58 @@ Persistent project history. Append entries; do not edit past entries.
 
 ---
 
+## v0.12.0 — M11: `@toonstrip/vue`
+
+**Date:** 2026-09-03
+
+### Changes
+
+- `packages/vue`: `<ComicStrip>`, a thin wrapper around `packages/element`'s
+  `<comic-strip>` custom element (dev plan §13.3), same pattern as `packages/react`.
+  `ComicStrip.ts` is a `defineComponent` whose `setup()` returns a render function
+  (`h("comic-strip", { ref })` — a render function rather than an SFC `<template>` for
+  this one tag, the same reason `@toonstrip/react` uses `createElement` instead of JSX:
+  it sidesteps needing `compilerOptions.isCustomElement` configured just for
+  `comic-strip`). An `onMounted` hook sets the initial `document`/`packs`, and a `watch`
+  per prop pushes subsequent changes onto the element via the template ref. `class`/
+  `style` aren't declared as props — Vue's default single-root attribute inheritance
+  forwards them to the rendered root automatically. No rendering logic of its own,
+  matching the restraint the dev plan calls out for `packages/astro`/`packages/react`.
+  Side-effect `import "@toonstrip/element"` registers the element eagerly at module load,
+  same as `packages/react` — an SSR guard is deferred to a future Nuxt wrapper, not built
+  yet, following `@toonstrip/next`'s (M12) eventual pattern if demand shows up.
+- Tests (`packages/vue/test/ComicStrip.test.ts`, vitest + jsdom + `@vue/test-utils`, no
+  vitest.config.ts needed since no JSX/SFC compilation is involved — same as
+  `packages/element`'s bare setup): mounts and forwards `document`/`packs`; calls
+  `wrapper.setProps()` with a new `document` and asserts the same root DOM node is reused
+  (`===`) rather than remounted, with its `.document` updated to the new value. Same
+  fixture-document/fetch-stubbing approach as `packages/react`'s suite.
+- `examples/vue-vite`: a Vite + Vue app with a toggle button swapping between two
+  hand-written `ComicStripDocument`s (`src/strips.ts`), `<script setup lang="ts">` SFC.
+  `scripts/copy-pack-assets.mjs` is the same script `examples/react-vite` uses, copying
+  `@toonstrip/pack-comic-chat`'s files into `public/packs/comic-chat/` as a
+  `predev`/`prebuild` step.
+- M11's exit criterion ("embeds a strip and updates it reactively") verified two ways:
+  the unit test's DOM-node-identity assertion, and live in a real Chrome tab — tagged the
+  mounted `<comic-strip>` with a scratch `__scratch` property via devtools' console,
+  clicked the demo's toggle button, confirmed the tag survived (`sameNode: true`) and the
+  panel count changed (2 → 1) to match the new document.
+- Docs: `docs/vue.md` (repo-level, mirrors `docs/react.md`) and
+  `site/src/content/docs/vue-reference.mdx` (site-level, mirrors `react-reference.mdx`,
+  `order: 11` in the Integrate section — schema-reference/accessibility/faq/agent-skill
+  bumped one each to make room). Cross-linked from `react-reference.mdx`'s callout and
+  `plain-html.mdx`'s "From a framework" section. `README.md`'s package table, dependency
+  line, and docs list updated.
+- Full workspace `pnpm build` and `pnpm test` verified clean after the change, including
+  the site build producing the new `/docs/vue-reference/` route.
+
+### Status
+
+Package built and tested; not yet published to npm (same as `@toonstrip/react`, still
+pending a publish decision — see `HANDOFF.md`).
+
+---
+
 ## v0.11.0 — M10: `@toonstrip/react`
 
 **Date:** 2026-09-03
