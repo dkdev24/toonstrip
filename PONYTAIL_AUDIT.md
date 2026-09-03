@@ -13,13 +13,20 @@ existing dep), `yagni` (abstraction with one implementation), `shrink` (same log
 
 ## Progress
 
-**1 of 46 applied. ~33 lines and 1 dependency cut; ~2,367 hand-written lines, ~700 generated
-and 8 deps still on the table.** A row marked **done** in the table below is landed and the
+**2 of 46 applied. ~33 lines and 2 dependencies cut; ~2,367 hand-written lines, ~700 generated
+and 7 deps still on the table.** A row marked **done** in the table below is landed and the
 build is green; everything else is untouched.
 
 | Date | Item | What landed | Commit |
 |---|---|---|---|
-| 2026-09-04 | #31 | Deleted `site/src/components/ui/scroll-area.tsx` (zero importers) and dropped `@radix-ui/react-scroll-area` from `site/package.json`; lockfile updated, `pnpm build` green, 23 pages built | (this commit) |
+| 2026-09-04 | #31 | Deleted `site/src/components/ui/scroll-area.tsx` (zero importers) and dropped `@radix-ui/react-scroll-area` from `site/package.json`; lockfile updated, `pnpm build` green, 23 pages built | `ee908f8` |
+| 2026-09-04 | #42 | Dropped the `codemirror` meta-package from `site/package.json`; all six `@codemirror/*` scoped packages the editor imports stay declared. `pnpm install` removed 3 packages, `pnpm build` green | (this commit) |
+
+**Caveat on #42's verification:** `site`'s Playwright suite (`pnpm test:e2e`) fails all 8
+playground specs, and it fails identically on a clean tree at `ee908f8` — pre-existing, not
+caused by these cuts. So the CodeMirror editor's *runtime* behaviour after #42 is covered by the
+production build only, not by a passing browser test. Fixing that suite is the prerequisite for
+confidently doing #12 (the `json-position.ts` rewrite), which touches editor internals.
 
 ## Two standing caveats
 
@@ -83,7 +90,7 @@ and each names a path — re-verify before cutting.
 | 39 | delete | Computed-but-never-read fields and never-passed optional params: `AlphaStats.opaque` (accumulated in the hot per-pixel loop), `TemplateResult.labelBand`, `gridBoundaries`' `profiles`, `LayoutResult.leftover`, `DOCK_DELTA = 0`, `const LARGE = Infinity`, and the defaults `maxShift`/`edge`/`tolerance`/`window`/`ring` that no call site exercises | Nothing | `packages/asset-packager`, `packages/core/src/balloon-layout.ts` | ~28 |
 | 40 | deps | `@napi-rs/canvas` is a runtime dep of `@toonstrip/core` but imported only from `test/` and `examples/` — every browser consumer downloads a native binary | `devDependencies` | `packages/core/package.json:20` | 1 line, large install win |
 | 41 | deps | `@toonstrip/schema` is a declared dep of `@toonstrip/astro` but never imported, and a runtime dep of react/vue/next used only via `import type` | Drop from astro; demote to devDeps in the three wrappers | `packages/{astro,react,vue,next}` | 4 dep entries |
-| 42 | deps | The `codemirror` meta-package is never imported — every import is a scoped `@codemirror/*` already listed separately | Drop | `site/package.json:48` | 1 dep |
+| 42 | deps | **done** — the `codemirror` meta-package is never imported — every import is a scoped `@codemirror/*` already listed separately | Drop | `site/package.json:48` | 1 dep |
 | 43 | delete | Unexported-worthy or unused exports: `packRoot` (zero callers in both packs), `defaultPackDir` on the CLI's public index, `PopoverAnchor`, `SheetTrigger`, `SheetClose`, `ScrollBar`, `buttonVariants`, `MAX_HASH_LENGTH`, the element's `columns` getter (test + deleted demo only), `validate.ts`'s pass-through re-export of `Diagnostic`, `image.ts` re-exporting `createCanvas`/`loadImage` | Nothing, or import from source | `packages/*`, `site/src` | ~25 |
 | 44 | delete | The `theme-change` CustomEvent is dispatched and nobody listens (no `addEventListener` in `site/` or `packages/`) | Drop the dispatch and the contract paragraph | `site/src/components/site/ThemeToggle.astro:28` | 2 |
 | 45 | delete | `spriteStyle()` in `PanelForm` duplicates `Sprite.astro`'s crop math line for line | One shared helper | `site/src/components/playground/PanelForm.tsx:31-41` | ~10 |
@@ -102,7 +109,7 @@ and each names a path — re-verify before cutting.
 
 ## Suggested order
 
-1. Dependency and dead-file cuts first — ~~#31~~, #42, #29, #41, #40, #11, #5, #44. No behaviour
+1. Dependency and dead-file cuts first — ~~#31~~, ~~#42~~, #29, #41, #40, #11, #5, #44. No behaviour
    change, no upstream sync, immediate install-size win.
 2. Then the packager cuts (#2, #13, #10, #21, #22, #25) — one package, full test coverage.
 3. Then the schema rewrite (#1), the biggest single win, gated on keeping the
