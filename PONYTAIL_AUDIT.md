@@ -7,9 +7,19 @@ performance were explicitly out of scope and are not covered here.
 Baseline at audit time: ~16,600 lines across 175 source files (`.ts/.tsx/.astro/.vue/.mjs`,
 excluding `node_modules`, `dist`, `.astro`, `.next`).
 
-Nothing here is applied. Findings are ranked by lines removed. Tags: `delete` (dead or
+Findings are ranked by lines removed. Tags: `delete` (dead or
 speculative), `stdlib` (hand-rolled standard library), `native` (duplicating the platform or an
 existing dep), `yagni` (abstraction with one implementation), `shrink` (same logic, fewer lines).
+
+## Progress
+
+**1 of 46 applied. ~33 lines and 1 dependency cut; ~2,367 hand-written lines, ~700 generated
+and 8 deps still on the table.** A row marked **done** in the table below is landed and the
+build is green; everything else is untouched.
+
+| Date | Item | What landed | Commit |
+|---|---|---|---|
+| 2026-09-04 | #31 | Deleted `site/src/components/ui/scroll-area.tsx` (zero importers) and dropped `@radix-ui/react-scroll-area` from `site/package.json`; lockfile updated, `pnpm build` green, 23 pages built | (this commit) |
 
 ## Two standing caveats
 
@@ -62,7 +72,7 @@ and each names a path — re-verify before cutting.
 | 28 † | shrink | `orderBodies` — a 9-line doc comment over the expression `n - 1 - i < i`, one caller | Inline into `layoutAvatars` | `packages/core/src/render.ts:231-246` | ~15 |
 | 29 | deps | `class-variance-authority` for one `cva()` call whose `outline` variant and `default` size are never used, and whose `buttonVariants` export is imported nowhere | Two `Record<string,string>` lookups fed to the existing `cn()` | `site/src/components/ui/button.tsx` | ~15, 1 dep |
 | 30 | native | `toCanvas` inlined by hand three times inside `grid.ts` (`createCanvas`→`createImageData`→`data.set`→`putImageData`) | `toCanvas(raster)`, already exported from `image.ts:147` | `packages/asset-packager/src/grid.ts` | ~12 |
-| 31 | delete | `scroll-area.tsx` — zero importers; the only reference to `@radix-ui/react-scroll-area` is inside the file itself | Nothing | `site/src/components/ui/scroll-area.tsx` | ~33, 1 dep |
+| 31 | delete | **done** — `scroll-area.tsx` had zero importers; the only reference to `@radix-ui/react-scroll-area` was inside the file itself | Nothing | `site/src/components/ui/scroll-area.tsx` | ~33, 1 dep |
 | 32 | delete | Dead CSS: `.pg-statusline`, `.button--icon`, `.grid--2`, the `[data-spike]` selectors left from deleted spike pages, tokens `--dur-base`/`--space-128` | Nothing | `site/src/styles/*` | ~20 |
 | 33 | yagni | Small unused surface: `CodeAndStrip`'s `collapse` + excerpt machinery, `Slider`'s array API for one single-number caller, `SheetContent`'s three unrendered sides, `WidthSlider`'s `min`/`max`/`packs`, `PackageManagerTabs`' `dev`, React's never-set `className`/`style` | Nothing | `site/src/components`, `packages/react` | ~45 |
 | 34 | yagni | Single-caller wrappers: `useMediaQuery` (one constant query), `PaneBar` (one call site, `children` never filled, markup hand-inlined in `JsonEditor` anyway), `packages/astro/src/tag-name.ts` (8 lines wrapping one string) | Inline each | `site/src/components/playground`, `packages/astro` | ~26 |
@@ -92,7 +102,7 @@ and each names a path — re-verify before cutting.
 
 ## Suggested order
 
-1. Dependency and dead-file cuts first — #31, #42, #29, #41, #40, #11, #5, #44. No behaviour
+1. Dependency and dead-file cuts first — ~~#31~~, #42, #29, #41, #40, #11, #5, #44. No behaviour
    change, no upstream sync, immediate install-size win.
 2. Then the packager cuts (#2, #13, #10, #21, #22, #25) — one package, full test coverage.
 3. Then the schema rewrite (#1), the biggest single win, gated on keeping the
