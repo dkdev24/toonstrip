@@ -26,6 +26,8 @@ docs, playground, changelog. Source in `site/`.
 | `packages/pack-example` | A second, small, wholly original pack proving the pack contract isn't coupled to `pack-comic-chat` |
 | `packages/cli` | The `toonstrip` CLI (`pack validate`, `render` to PNG) |
 | `examples/astro-blog` | A minimal Astro site embedding a live strip in a blog post |
+| `examples/vanilla-html` | A single `.html` file embedding a live strip with no build step — CDN imports, no `package.json` |
+| `skills/toonstrip` | An agent skill teaching an AI coding agent to author and validate a `ComicStripDocument` |
 | `site` | toonstrip.danielkimdev.com (Astro; deployed by Cloudflare Pages on push) |
 
 Dependency direction is one-way: `schema → core → element → astro`. Asset
@@ -48,6 +50,8 @@ including how to add a new character or asset pack.
 - [`docs/packs.md`](./docs/packs.md) — the asset pack contract, and a
   worked walkthrough for adding a character
 - [`docs/astro.md`](./docs/astro.md) — embedding a strip in Astro
+- [`docs/vanilla-html.md`](./docs/vanilla-html.md) — embedding a strip with
+  no build step at all (plain HTML, CDN imports)
 - [`TOONSTRIP_DEV_PLAN.md`](./TOONSTRIP_DEV_PLAN.md) — the full project plan
 - [`SITE_DEV_PLAN.md`](./SITE_DEV_PLAN.md) / [`DESIGN.md`](./DESIGN.md) — the M7
   plan and UI/UX guide for the public site, toonstrip.danielkimdev.com

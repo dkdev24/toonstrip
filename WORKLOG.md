@@ -1396,3 +1396,64 @@ per `TOONSTRIP_DEV_PLAN.md` §13, then S9 Korean on the new markup.
 ### Status
 
 Site 0.9.1, npm packages unchanged.
+
+## v0.10.0 — M8 Vanilla-HTML/No-Build-Step Example; M9 Agent Skill
+
+**Date:** 2026-09-03
+
+### Changes
+
+M8 (`TOONSTRIP_DEV_PLAN.md` §13.1):
+
+- `examples/vanilla-html/index.html`: a single `.html` file with no `package.json` and
+  no bundler config, embedding a live 3-panel strip. Imports `@toonstrip/element` from
+  `esm.sh`, which resolves the package's own bare `@toonstrip/core`/`@toonstrip/schema`
+  imports into a working ESM graph — `unpkg` serves package files as-is and would leave
+  those imports unresolved in a plain `<script type="module">` with no import map.
+  Points `packs` at `unpkg` (a raw file server with CORS enabled) for the pack's static
+  `pack.json`/sprite sheets/backdrops, which need no such resolution. Verified rendering
+  correctly (three panels, correct figures/poses/balloons/backdrops, no console errors)
+  served from a local static file server via a real Chrome tab; the extension's `file://`
+  navigation is blocked by tool policy, not evidence against the `file://` claim — a
+  top-level `file://` page fetching `https://` resources with `Access-Control-Allow-Origin: *`
+  has no same-origin restriction in Chrome.
+- `docs/vanilla-html.md`: new root doc explaining the esm.sh-vs-unpkg split in full and
+  when to prefer self-hosting over CDN imports for production use.
+- `site/src/content/docs/plain-html.mdx`: added a "No build step at all" section
+  pointing at the new example, so the live docs site covers the same ground as the repo
+  doc without duplicating it.
+- `README.md`: added `examples/vanilla-html` and `skills/toonstrip` to the packages
+  table, and `docs/vanilla-html.md` to the documents list.
+
+M9 (`TOONSTRIP_DEV_PLAN.md` §13.2):
+
+- `skills/toonstrip/SKILL.md`: a distributable skill teaching an AI coding agent the
+  `ComicStripDocument` v1 shape, the exact emotion-wheel angles (`EMOTION_ANGLES` in
+  `packages/core/src/emotion.ts`, restated as a lookup table so an agent hits named
+  points instead of guessing), the three exposed gesture poses, the default
+  `pack-comic-chat` pack's real 15-character/3-backdrop id list (so an agent never
+  invents an id that doesn't exist), and the `toonstrip render`-to-validate workflow —
+  with an explicit instruction to always run it rather than hand back an unverified
+  document.
+- Self-tested against the dev plan's own M9 exit criterion: wrote a two-panel document
+  (`kevin`/`lynnea`, `field` backdrop, a `wave` pose, HAPPY/SAD angles from the skill's
+  table) using only the skill's guidance, ran `node packages/cli/dist/bin.js render …
+  --pack packages/pack-comic-chat`, and it rendered correctly on the first attempt — no
+  schema errors, no unresolved ids, output visually confirmed (waving figure, correct
+  expressions, both balloon texts legible).
+- `pnpm -r build` run once this session (to produce `dist/` for the self-test above); no
+  runtime code changed, so no npm package versions bumped.
+- `site/src/content/docs/agent-skill.mdx` (Reference, order 13): documents the skill for
+  site readers — what it teaches, how to install it into an agent's skills directory
+  (e.g. Claude Code's `.claude/skills/`), and how to verify a document it produced.
+  Cross-linked from a new FAQ entry. No manual wiring needed for `llms.txt`/`llms-full.txt`
+  since both are generated from the docs content collection. Verified: `pnpm --filter
+  toonstrip-site build` succeeds and `/docs/agent-skill/` renders correctly (sidebar
+  placement, Callout, code blocks, cross-links) in a real Chrome tab served from
+  `site/dist`.
+
+### Status
+
+Site/repo 0.10.0. M0–M9 of `TOONSTRIP_DEV_PLAN.md` done. npm packages unchanged (schema
+0.1.3, core 0.1.7, element 0.1.8, astro 0.1.11, cli 0.2.1, packs 0.1.1). Next: M10
+(`@toonstrip/react`) and M11 (`@toonstrip/vue`) per §13.3.

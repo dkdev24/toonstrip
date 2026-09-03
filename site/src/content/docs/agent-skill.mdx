@@ -1,0 +1,68 @@
+---
+title: Agent skill
+description: A packaged SKILL.md that teaches an AI coding agent the document shape, so it stops guessing.
+order: 13
+section: Reference
+---
+
+import Callout from "../../components/site/Callout.astro";
+
+toonstrip does not generate strips (see the [FAQ](/docs/faq/)) — but if you're asking an
+AI coding agent to author a `ComicStripDocument` for you, it should not have to guess the
+shape, the emotion-wheel angles, or which character ids actually exist. `skills/toonstrip/SKILL.md`
+in the repository packages exactly that knowledge into one file an agent can load.
+
+## What it teaches
+
+- The full [`ComicStripDocument`](/docs/schema-reference/) v1 shape — `Panel`, `Body`,
+  `Line` — including that every object is `additionalProperties: false`, so a typo'd key
+  fails validation instead of being silently ignored.
+- The exact [emotion wheel](/docs/emotions-and-poses/) angles (`HAPPY` at `0`, `SAD` at
+  `Math.PI`, and so on) as a lookup table, so the agent hits a named point instead of
+  inventing a number.
+- The default `@toonstrip/pack-comic-chat` pack's real 15 character ids and 3 backdrop
+  ids — an agent using this skill will not fabricate a `character` or `backdrop` that
+  doesn't exist, which is otherwise a hard error at render time, not a silent fallback.
+- The `toonstrip render` workflow as the required last step: never hand back a document
+  without actually running it through the CLI first.
+
+## Using it
+
+Drop the file into wherever your agent looks for skills. For [Claude Code](https://claude.com/claude-code),
+that's a `SKILL.md` under `.claude/skills/`:
+
+```
+mkdir -p .claude/skills/toonstrip
+curl -o .claude/skills/toonstrip/SKILL.md \
+  https://raw.githubusercontent.com/dkdev24/toonstrip/main/skills/toonstrip/SKILL.md
+```
+
+Other agents that support a similar convention can point at the same file directly —
+it's plain Markdown with a YAML frontmatter header, no toonstrip-specific tooling
+required to read it.
+
+<Callout kind="tip">
+No skill support in your agent? Paste the file's contents into the prompt directly, or
+point the agent at <a href="/llms-full.txt">/llms-full.txt</a> — the whole docs site as
+one Markdown file, which covers the same schema and workflow in more depth.
+</Callout>
+
+## Verifying it worked
+
+The skill's own instructions end with "run `toonstrip render`, don't just hand back
+JSON." If an agent using this skill gives you a document, the fast check is the same one
+the skill teaches:
+
+```
+npx @toonstrip/cli render doc.json --out strip.png
+```
+
+A schema error or an unresolved character/backdrop id fails loudly (`FAIL:`, exit 1)
+with every problem listed — not just the first. A clean run means the document is both
+structurally valid and actually resolves against a real pack.
+
+## Source
+
+[`skills/toonstrip/SKILL.md`](https://github.com/dkdev24/toonstrip/blob/main/skills/toonstrip/SKILL.md)
+in the repository. It has no dependency on any other milestone in this project's plan —
+the schema and CLI it teaches are already stable and published.

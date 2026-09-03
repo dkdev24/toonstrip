@@ -72,3 +72,27 @@ syntax (`.document={doc}` in Lit, `prop:document={doc}` in Solid, `:document.pro
 The element imports `@toonstrip/core` and `@toonstrip/schema`; any ESM bundler handles it.
 The schema validator is precompiled at build time, so there is no `eval` and a strict
 Content Security Policy does not need `unsafe-eval`.
+
+## No build step at all
+
+The `install`/`npm`/bundler steps above assume *something* resolves the bare
+`import "@toonstrip/element"` specifier. With no bundler and no import map, use
+[esm.sh](https://esm.sh) instead, which resolves a package's own dependencies for you:
+
+```html
+<script type="module">
+  import "https://esm.sh/@toonstrip/element@0.1.8";
+</script>
+```
+
+Point `packs` at a CDN too — unpkg serves a pack's static files (`pack.json`, sprite
+sheets, backdrops) as-is, with CORS enabled:
+
+```js
+strip.packs = ["https://unpkg.com/@toonstrip/pack-comic-chat@0.1.1/"];
+```
+
+The full worked example is `examples/vanilla-html/index.html` in the repo: one file, no
+`package.json`, opens from `file://` or any static file server. Pin exact versions in
+both URLs, same as any other dependency — see the repo's `docs/vanilla-html.md` for the
+esm.sh-vs-unpkg reasoning in full.

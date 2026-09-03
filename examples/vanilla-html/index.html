@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>toonstrip — vanilla HTML, no build step</title>
+<style>
+  body { font: 16px/1.5 system-ui, sans-serif; max-width: 720px; margin: 2rem auto; padding: 0 1rem; }
+  comic-strip { display: block; margin: 1.5rem 0; }
+  code { background: #f0f0f0; padding: 0.1em 0.35em; border-radius: 3px; }
+</style>
+</head>
+<body>
+<h1>toonstrip, no build step</h1>
+<p>
+  This page has no <code>package.json</code>, no bundler, and no dev server config. It
+  works opened directly from disk (<code>file://</code>) or served by any static file
+  server. Everything — the <code>&lt;comic-strip&gt;</code> element and the default
+  character/backdrop art — loads from a CDN at runtime.
+</p>
+
+<comic-strip id="strip"></comic-strip>
+
+<p id="status">Loading…</p>
+
+<script type="module">
+  // esm.sh resolves @toonstrip/element's own dependencies (@toonstrip/core,
+  // @toonstrip/schema) into a working ESM graph — unlike unpkg, which serves
+  // package files as-is and would leave the package's bare "@toonstrip/core"
+  // import unresolved in a plain <script type="module">.
+  import "https://esm.sh/@toonstrip/element@0.1.8";
+
+  const strip = document.getElementById("strip");
+  const status = document.getElementById("status");
+
+  // Static files (pack.json + character sheets + backdrop images) are just
+  // files, so unpkg — a raw npm-package file server — works fine for these.
+  strip.packs = ["https://unpkg.com/@toonstrip/pack-comic-chat@0.1.1/"];
+
+  strip.document = {
+    version: 1,
+    panels: [
+      {
+        backdrop: "pastoral",
+        camera: "establishing",
+        roomTitle: "Outside town",
+        bodies: [{ character: "dan", emotion: { angle: 0, intensity: 0.6 } }],
+        speakers: [{ speaker: "caption", balloon: "caption", text: "A field outside town, no bundler in sight." }],
+      },
+      {
+        backdrop: "pastoral",
+        camera: "medium",
+        bodies: [
+          { character: "dan", emotion: { angle: 0, intensity: 0.8 }, pose: "wave" },
+          { character: "anna", emotion: { angle: 0, intensity: 0.7 } },
+        ],
+        speakers: [
+          { speaker: "dan", balloon: "speech", text: "This whole page is one HTML file." },
+          { speaker: "anna", balloon: "speech", text: "No build step at all?" },
+        ],
+      },
+      {
+        backdrop: "room8bs",
+        camera: "close-up",
+        bodies: [{ character: "anna", emotion: { angle: 0, intensity: 1 } }],
+        speakers: [{ speaker: "anna", balloon: "thought", text: "Just a <script type=\"module\"> and two CDN URLs." }],
+      },
+    ],
+  };
+
+  status.textContent = "Loaded from esm.sh (element) and unpkg (asset pack).";
+</script>
+</body>
+</html>
