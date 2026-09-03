@@ -1,0 +1,31 @@
+{
+  "name": "fixture",
+  "version": "0.1.0",
+  "license": "MIT",
+  "description": "Generated fixture pack for @toonstrip/asset-packager tests.",
+  "attribution": "Drawn by scripts/make-fixture.mjs — no model involved.",
+  "spec": {
+    "cell": 256,
+    "backdropSize": 512,
+    "joinOverlap": 4
+  },
+  "characters": [
+    {
+      "id": "nib",
+      "name": "Nib",
+      "type": "COMPLEX",
+      "torsoFirst": false
+    },
+    {
+      "id": "bo",
+      "name": "Bo",
+      "type": "COMPLEX",
+      "torsoFirst": false
+    }
+  ],
+  "backdrops": [
+    {
+      "id": "yard"
+    }
+  ]
+}

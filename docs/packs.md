@@ -7,6 +7,12 @@ small original pack used only to prove the contract (`@toonstrip/pack-example`,
 one character — see the end of this doc). Anyone can write a new pack; this
 document is that walkthrough.
 
+> **Don't want to hand-write a rect table?** If you have (or can generate) one
+> transparent PNG per pose, `@toonstrip/asset-packager` builds everything below
+> for you — sheets, rects, join anchors, `pack.json`. The input rules are in
+> [`docs/asset-image-spec.md`](./asset-image-spec.md). Read on if you would
+> rather assemble a pack yourself, or want to know what the packager emits.
+
 ## Directory layout
 
 ```

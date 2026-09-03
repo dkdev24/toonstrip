@@ -6,6 +6,71 @@ shipped. Written for users; the engineering history behind each entry is in `WOR
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.15.0 — 2026-09-03
+
+**Packages:** `@toonstrip/asset-packager` 0.2.0 (built, not yet published); everything
+else unchanged (`@toonstrip/schema` 0.1.3, `@toonstrip/core` 0.1.7,
+`@toonstrip/element` 0.1.8, `@toonstrip/astro` 0.1.11, `@toonstrip/cli` 0.2.1,
+`@toonstrip/react` 0.1.0, `@toonstrip/vue` 0.1.0, `@toonstrip/next` 0.1.0,
+`@toonstrip/pack-comic-chat` 0.1.1).
+
+### Added
+
+- **Build a pack from one image instead of many.** `@toonstrip/asset-packager` now takes
+  **sheets**: a single image holding a grid of labelled cells, sliced into many pack
+  assets. A character sheet carries a character's poses; a backdrop sheet carries whole
+  scenes — as many backdrops as the grid holds, from one prompt. The grid is whatever
+  shape you declare, and several sheets of different shapes can live in one pack.
+- **Why it matters for generated art.** A sheet is one generation pass, so a character's
+  hair, line weight and head size cannot drift between poses the way they do across
+  separate generations — and because every cell shares one scale, the packager aligns
+  each pose to the character's neutral cell and corrects a pose drawn a few pixels off,
+  instead of deriving a slightly wrong join from that pose alone.
+- **`toonstrip-pack template`** writes the reference sheet to hand an image model, and
+  prints both the `source.json` fragment for it and a prompt skeleton to fill in.
+- **Flat backgrounds are accepted on sheets.** Few image models can emit real
+  transparency, so a sheet arriving on plain white is keyed out per cell (a white shirt
+  stays white — keying floods in from the edges), along with printed labels and painted
+  gutters.
+- **New diagnostics, each naming its cell:** a blank cell an id points at, more ids than
+  cells, a drawing running into the gutter, a pose drawn at a different scale from
+  neutral, two near-identical backdrop scenes, and a grid too dense to carry the pack's
+  cell size.
+- **Sheets and files mix.** Where both describe the same asset the individual file wins,
+  so one weak cell can be regenerated on its own — using the sheet as its reference — and
+  dropped in without touching `source.json`.
+- Documented in `docs/asset-sheets.md`; the agent skill now teaches the sheet workflow and
+  the two-reference prompt pattern alongside the per-pose one.
+
+## 0.14.0 — 2026-09-03
+
+**Packages:** unchanged (`@toonstrip/schema` 0.1.3, `@toonstrip/core` 0.1.7,
+`@toonstrip/element` 0.1.8, `@toonstrip/astro` 0.1.11, `@toonstrip/cli` 0.2.1,
+`@toonstrip/react` 0.1.0, `@toonstrip/vue` 0.1.0, `@toonstrip/next` 0.1.0,
+`@toonstrip/pack-comic-chat` 0.1.1). `@toonstrip/asset-packager` 0.1.0 built, not yet
+published.
+
+### Added
+
+- **Build an asset pack from plain PNGs.** `@toonstrip/asset-packager` (the
+  `toonstrip-pack` command) turns a directory of one-pose-per-file transparent PNGs into
+  a valid pack: it checks the images, packs the sprite sheets, works out where each head
+  joins its neck, and writes `pack.json` and the per-character manifests. Adding a
+  character no longer means hand-writing a rect table. It runs entirely offline — no
+  model, no network; it only ever reads finished images, whether they came from an image
+  model, Procreate or Aseprite.
+- **The asset image specification.** `docs/asset-image-spec.md` in the repository
+  states the rules an input PNG has to follow — naming, canvas, where to place the
+  drawing, what has to stay consistent between a character's poses — tightly enough that
+  an image-generation prompt can hit them.
+- **A join preview.** `toonstrip-pack build --preview joins.png` composites each
+  character's neutral face and torso and marks the derived join, so a head that lands off
+  the neck is visible before you ship the pack. A wrong join still produces a
+  *structurally valid* pack, so this is the check that matters.
+- **The agent skill now covers art, not just documents.** `skills/toonstrip/SKILL.md`
+  teaches an AI coding agent how to write per-pose generation prompts that satisfy the
+  spec, then run the packager and act on its errors and warnings.
+
 ## 0.13.0 — 2026-09-03
 
 **Packages:** unchanged (`@toonstrip/schema` 0.1.3, `@toonstrip/core` 0.1.7,

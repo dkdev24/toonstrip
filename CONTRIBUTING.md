@@ -44,6 +44,9 @@ Read `TOONSTRIP_DEV_PLAN.md` §2 for the full architecture rationale.
 - `packages/pack-comic-chat`, `packages/pack-example` — asset packs
   (`docs/packs.md`)
 - `packages/cli` — the `toonstrip` command
+- `packages/asset-packager` — the `toonstrip-pack` command: per-pose PNGs or
+  grid sheets in, a valid pack out (`docs/asset-image-spec.md`,
+  `docs/asset-sheets.md`)
 - `examples/astro-blog` — a full worked Astro site
 - `examples/react-vite` — a full worked Vite + React app
 - `examples/vue-vite` — a full worked Vite + Vue app
@@ -58,6 +61,23 @@ validate with `toonstrip pack validate`, and render a real panel to confirm).
 `packages/pack-example` is the minimal reference pack to copy the structure
 from if you're starting a brand-new pack rather than adding to an existing
 one.
+
+If you have (or can generate) one transparent PNG per pose, don't write the
+rect table by hand: follow [`docs/asset-image-spec.md`](./docs/asset-image-spec.md)
+and let `@toonstrip/asset-packager` build the pack —
+
+```
+node packages/asset-packager/dist/bin.js init ./my-source --name my-pack
+node packages/asset-packager/dist/bin.js build ./my-source --out ./my-pack --preview joins.png
+node packages/cli/dist/bin.js pack validate ./my-pack
+```
+
+`packages/asset-packager/fixtures/source` is a working source pack (drawn by
+`scripts/make-fixture.mjs`, no model involved) to compare against, and
+`fixtures/source-sheets` is the same thing for sheet input — one image per grid
+of poses or scenes (`scripts/make-sheet-fixture.mjs`), which is the path to use
+when the art comes from an image model
+([`docs/asset-sheets.md`](./docs/asset-sheets.md)).
 
 ## Tests
 

@@ -28,12 +28,13 @@ docs, playground, changelog. Source in `site/`.
 | `packages/pack-comic-chat` | The default asset pack: the original 15-character Comic Chat roster + 3 backdrops (MIT, see its `NOTICE`) |
 | `packages/pack-example` | A second, small, wholly original pack proving the pack contract isn't coupled to `pack-comic-chat` |
 | `packages/cli` | The `toonstrip` CLI (`pack validate`, `render` to PNG) |
+| `packages/asset-packager` | The `toonstrip-pack` CLI: turns per-pose PNGs *or* grid sheets into a valid pack (validate, slice, register, sheet-pack, derive join anchors). No model, no network |
 | `examples/astro-blog` | A minimal Astro site embedding a live strip in a blog post |
 | `examples/react-vite` | A minimal Vite + React app embedding a live strip, prop-updated without a remount |
 | `examples/vue-vite` | A minimal Vite + Vue app embedding a live strip, prop-updated without a remount |
 | `examples/next-app` | A minimal Next.js App Router app: server-rendered PNG placeholder swapped for the live canvas on hydration |
 | `examples/vanilla-html` | A single `.html` file embedding a live strip with no build step — CDN imports, no `package.json` |
-| `skills/toonstrip` | An agent skill teaching an AI coding agent to author and validate a `ComicStripDocument` |
+| `skills/toonstrip` | An agent skill teaching an AI coding agent to author and validate a `ComicStripDocument`, and to build an asset pack from generated art |
 | `site` | toonstrip.danielkimdev.com (Astro; deployed by Cloudflare Pages on push) |
 
 Dependency direction is one-way: `schema → core → element → astro`, and
@@ -57,6 +58,11 @@ including how to add a new character or asset pack.
 - [`docs/schema.md`](./docs/schema.md) — the `ComicStripDocument` format
 - [`docs/packs.md`](./docs/packs.md) — the asset pack contract, and a
   worked walkthrough for adding a character
+- [`docs/asset-image-spec.md`](./docs/asset-image-spec.md) — the rules a
+  character/backdrop PNG must follow to be packed by
+  [`@toonstrip/asset-packager`](./packages/asset-packager) into a pack
+- [`docs/asset-sheets.md`](./docs/asset-sheets.md) — sheet input: one generated
+  image holding a grid of poses or scenes, sliced into many pack assets
 - [`docs/astro.md`](./docs/astro.md) — embedding a strip in Astro
 - [`docs/react.md`](./docs/react.md) — embedding a strip with `@toonstrip/react`
 - [`docs/vue.md`](./docs/vue.md) — embedding a strip with `@toonstrip/vue`

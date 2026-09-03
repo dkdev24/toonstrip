@@ -1,0 +1,50 @@
+{
+  "name": "@toonstrip/asset-packager",
+  "version": "0.2.0",
+  "description": "Turns a directory of per-pose PNGs into a valid toonstrip asset pack: validates them against the asset image spec, packs sprite sheets, derives join anchors, writes pack.json and per-character manifests.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "toonstrip-pack": "./dist/bin.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "fixture": "node scripts/make-fixture.mjs",
+    "fixture:sheets": "node scripts/make-sheet-fixture.mjs",
+    "test": "vitest run",
+    "lint": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@napi-rs/canvas": "^0.1.100",
+    "@toonstrip/core": "workspace:*"
+  },
+  "devDependencies": {
+    "@toonstrip/cli": "workspace:*",
+    "@types/node": "^22.9.0",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.4"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "toonstrip",
+    "comic",
+    "asset-pack",
+    "spritesheet",
+    "sprite-sheet-slicer",
+    "packer"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dkdev24/toonstrip.git",
+    "directory": "packages/asset-packager"
+  },
+  "homepage": "https://github.com/dkdev24/toonstrip#readme",
+  "bugs": "https://github.com/dkdev24/toonstrip/issues"
+}

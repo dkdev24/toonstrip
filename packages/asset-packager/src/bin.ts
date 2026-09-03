@@ -1,0 +1,129 @@
+#!/usr/bin/env node
+import { mkdirSync, writeFileSync } from "node:fs";
+import { dirname } from "node:path";
+import { analyze } from "./analyze.js";
+import { buildPack } from "./build.js";
+import { initSource } from "./init.js";
+import { renderTemplate, type TemplateKind } from "./template.js";
+import type { Diagnostic } from "./validate.js";
+
+function usage(): never {
+  console.error(`Usage:
+  toonstrip-pack init <source-dir> [--name <pack-name>]
+  toonstrip-pack validate <source-dir>
+  toonstrip-pack build <source-dir> --out <pack-dir> [--preview <joins.png>] [--npm] [--force]
+  toonstrip-pack template --out <ref.png> [--kind character|backdrop] [--ids a,b,c]
+                          [--columns N] [--rows N] [--cell 512] [--label-band 0.1]
+
+A source dir holds source.json plus either individual PNGs
+(characters/<id>/<kind>-<EMOTION>.png, backdrops/<id>.png) or sheets declared in
+source.json, in any grid shape. See docs/asset-image-spec.md for the image rules
+and docs/asset-sheets.md for sheet input.`);
+  process.exit(1);
+}
+
+function flag(args: string[], name: string): string | undefined {
+  const i = args.indexOf(`--${name}`);
+  return i >= 0 ? args[i + 1] : undefined;
+}
+
+function print(diagnostics: Diagnostic[], label: string): void {
+  if (diagnostics.length === 0) return;
+  console.error(`${label}:`);
+  for (const d of diagnostics) {
+    console.error(`  - ${d.file ? `${d.file}: ` : ""}${d.message}`);
+  }
+}
+
+const argv = process.argv.slice(2);
+const [command, target] = argv;
+
+async function main(): Promise<number> {
+  if (command === "init") {
+    if (!target || target.startsWith("--")) usage();
+    const result = initSource(target, flag(argv, "name"));
+    console.log(`scaffolded ${result.dir}`);
+    for (const file of result.files) console.log(`  + ${file}`);
+    for (const file of result.skipped) console.log(`  = ${file} (already there, left alone)`);
+    console.log(`\nNext: read POSES.md, then drop face-NEUTRAL.png and torso-NEUTRAL.png into`);
+    console.log(`${result.dir}/characters/<id>/`);
+    return 0;
+  }
+
+  if (command === "template") {
+    const out = flag(argv, "out");
+    if (!out) usage();
+    const ids = flag(argv, "ids");
+    const number = (name: string) => (flag(argv, name) ? Number(flag(argv, name)) : undefined);
+    const result = await renderTemplate({
+      kind: (flag(argv, "kind") ?? "character") as TemplateKind,
+      names: ids ? ids.split(",").map((s) => s.trim()).filter(Boolean) : undefined,
+      columns: number("columns"),
+      rows: number("rows"),
+      cell: number("cell"),
+      labelBand: number("label-band"),
+    });
+    mkdirSync(dirname(out), { recursive: true });
+    writeFileSync(out, result.png);
+    console.log(`wrote ${out} (${result.grid.columns}x${result.grid.rows} cells)`);
+    console.log(`\nPaste into source.json:\n`);
+    console.log(JSON.stringify(result.declaration, null, 2));
+    console.log(`\nPrompt the image model with the sheet above and:\n`);
+    console.log(result.prompt);
+    return 0;
+  }
+
+  if (command === "validate") {
+    if (!target || target.startsWith("--")) usage();
+    const { report, source } = await analyze(target);
+    print(report.warnings, `${report.warnings.length} warning(s)`);
+    if (report.ok) {
+      const parts = source.characters.reduce((n, c) => n + c.parts.length, 0);
+      console.log(
+        `OK: ${target} is a buildable source pack ` +
+          `(${source.characters.length} character(s), ${parts} pose(s), ${source.backdrops.length} backdrop(s))`,
+      );
+      return 0;
+    }
+    print(report.errors, `FAIL: ${report.errors.length} error(s)`);
+    return 1;
+  }
+
+  if (command === "build") {
+    const out = flag(argv, "out");
+    if (!target || target.startsWith("--") || !out) usage();
+    const result = await buildPack({
+      source: target,
+      out,
+      npm: argv.includes("--npm"),
+      force: argv.includes("--force"),
+      preview: flag(argv, "preview"),
+    });
+    print(result.warnings, `${result.warnings.length} warning(s)`);
+    if (result.files.length === 0) {
+      print(result.errors, `FAIL: ${result.errors.length} error(s), nothing written`);
+      return 1;
+    }
+    print(result.errors, `${result.errors.length} error(s) (built anyway: --force)`);
+    console.log(`wrote ${result.files.length} file(s) to ${out}`);
+    for (const character of result.characters) {
+      const { avatar, joins } = character;
+      console.log(
+        `  ${character.id}: ${avatar.faces.length} face(s), ${avatar.torsos.length} torso(s), ` +
+          `sheet ${avatar.sheetWidth}x${avatar.sheetHeight}, ` +
+          `join from ${joins.face?.origin ?? "-"}/${joins.torso?.origin ?? "-"}`,
+      );
+    }
+    console.log(`\nNext: toonstrip pack validate ${out}`);
+    return 0;
+  }
+
+  usage();
+}
+
+main()
+  .then((code) => process.exit(code))
+  .catch((err: Error) => {
+    console.error(`FAIL: ${err.message}`);
+    process.exit(1);
+  });

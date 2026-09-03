@@ -4,6 +4,160 @@ Persistent project history. Append entries; do not edit past entries.
 
 ---
 
+## v0.15.0 — M15: sheet input for `@toonstrip/asset-packager`
+
+**Date:** 2026-09-03
+
+### Changes
+
+M15 (added to `TOONSTRIP_DEV_PLAN.md` as a table row + §15 before implementation, then
+corrected the same session: grid dimensions are declared per sheet, any rows x columns —
+the 3x3 in the original sketch was only an example). The motivation is that M14 can only
+*detect* identity drift and anchor error after the fact, while one generation pass
+prevents both: a sheet is one character in one style, and its cells share one scale.
+
+New in `packages/asset-packager` (0.1.0 -> 0.2.0, still unpublished):
+
+- `src/grid.ts` — grid maths and raster surgery: `gridFor` (declare either dimension,
+  derive the rest, trailing cells unused), alpha/uniformity projection profiles,
+  `boundaries` (nominal even division, each internal boundary pulled to the emptiest
+  line within a window — a sheet with no visible gutters keeps the nominal split, the
+  correct fallback rather than a failure), crop/`padToSquare`/`resizeRaster`,
+  `keyBackground` (border-connected flood fill, so a white shirt survives),
+  `sceneSignature`/`sameScene` (16x16 difference hash + mean colour; an 8x8 average hash
+  alone was too coarse for band-structured backdrops — two different scenes collided at
+  distance 0 in the fixture), `flatness` for blank-cell detection.
+- `src/register.ts` — silhouette-disagreement alignment, coarse then fine. This is the
+  thing per-pose input cannot do: a pose drawn a few pixels off is corrected against the
+  NEUTRAL cell rather than deriving its own join. Verified both ways — a unit test
+  recovers known shifts exactly, and the fixture's deliberate per-cell jitter (7,-5 /
+  -6,4 / 5,6) comes out with every pose's socket within a pixel of NEUTRAL's.
+- `src/sheet.ts` — one slicer, two kinds. Character sheets take a `layout` (rows of part
+  names, `null` to skip); backdrop sheets take `ids` in reading order plus an optional
+  column count. Per cell: label-band crop, `inset` trim (a slice boundary lands in the
+  *middle* of a painted gutter stroke, so half of it would otherwise read as art),
+  keying, square padding (sideways when the cell is tall, upward-only when wide, so a
+  torso stays flush with the bottom and the floating-torso check keeps meaning what it
+  says), normalisation to one cell size, then registration.
+- `src/template.ts` + `toonstrip-pack template` — the reference sheet to prompt with,
+  plus the `source.json` fragment and a prompt skeleton printed to stdout. Guides are
+  drawn pale and named as guides in the prompt text; the slicer crops and keys
+  regardless.
+- Wiring: `expandSheets` in `analyze.ts` slices declared sheets into the same
+  `SourcePart`/`SourceBackdrop` values the per-pose path produces, so validation,
+  packing, join derivation and `--preview` cannot tell the inputs apart. A per-pose file
+  overrides a sheet cell of the same name (the hybrid workflow). Sheet images are
+  excluded from pose/backdrop discovery so a sheet is never mistaken for an asset.
+  `measure.ts` accepts an in-memory raster; `validate.ts` skips the square/min-input
+  errors for sliced cells (the slicer reports cell-size problems instead, against
+  `spec.cell`); `pack.ts` applies each part's registration, rescaled the same way its
+  raster was — an early cut mixed cell-space and cell-size pixels.
+- `fixtures/source-sheets` + `scripts/make-sheet-fixture.mjs`: a sheet pack drawn with
+  plain canvas calls that imitates real model output — opaque white ground, painted
+  gutter strokes, printed label bands, per-cell jitter — plus two backdrop sheets of
+  *different* shapes (2x2 interiors, 3x2 carrying five exteriors with a cell to spare),
+  since nothing may assume a square grid. 18 new tests (33 in the package), including
+  the CLI-validator gate and a build-and-render check.
+- M15 exit criterion verified by hand as well: both backdrop sheet shapes sliced into
+  exactly their declared ids, the character sheet built from five cells, `toonstrip pack
+  validate` passed, and `toonstrip render` produced a correct three-panel strip with
+  full-bleed sliced backdrops. Join preview inspected by eye.
+- Docs: `docs/asset-sheets.md` (when to prefer a sheet, template workflow, both
+  declaration shapes, every option, errors vs warnings, mixing with files, an honest
+  note on the resolution cost of a dense grid), plus pointers from
+  `docs/asset-image-spec.md`, README, CONTRIBUTING and the package README. The agent
+  skill gains a "Sheets" section with the two-reference prompt pattern and how to read
+  cell-named diagnostics.
+
+### Status
+
+Repo 0.15.0. M0-M15 of `TOONSTRIP_DEV_PLAN.md` done. npm packages unchanged (schema
+0.1.3, core 0.1.7, element 0.1.8, astro 0.1.11, cli 0.2.1, packs 0.1.1, react/vue/next
+0.1.0); `@toonstrip/asset-packager` 0.2.0 built and tested, not yet published. Next: a
+site docs page for the packager (per-pose + sheets) and publishing it, then S9 Korean
+locale per `SITE_DEV_PLAN.md` §13.
+
+---
+
+## v0.14.0 — M14: `@toonstrip/asset-packager`
+
+**Date:** 2026-09-03
+
+### Changes
+
+New milestone, added to `TOONSTRIP_DEV_PLAN.md` as M14 + §14 before implementation: the
+gap between "I have drawings" and "I have a pack". §6 fixed the pack format and M5 proved
+a human can hand-author one, but the sprite sheet, the rect table and the face/torso join
+were still hand-written per pack (`pack-example/scripts/generate.mjs` was a one-off, not a
+tool). With image models now the likely source of new art, that gap was the practical
+barrier to dev-plan requirement 5.
+
+- `packages/asset-packager` (`@toonstrip/asset-packager` 0.1.0, bin `toonstrip-pack`):
+  `init` scaffolds a source pack, `validate` checks one, `build` emits the §6 output tree
+  (`pack.json`, `characters/<id>/{<id>.json,sheet.png}`, `backdrops/<id>.png`, `NOTICE`,
+  `README.md`, plus `--npm` for a `pack-example`-shaped loader skeleton). Offline and
+  deterministic — no model call and no network anywhere in the package, keeping §0's "no
+  AI content generation" boundary intact. Depends on `@toonstrip/core` for the emotion
+  tables/types and `@napi-rs/canvas` for pixels (the decoder already in the repo).
+- Input format (the authoring side, new): `source.json` plus
+  `characters/<id>/<kind>-<EMOTION>[@intensity][-variant].png` and `backdrops/<id>.png`.
+  One square transparent PNG per pose; intensity defaults to 1 (0 for NEUTRAL, which is
+  what separates it from HAPPY on the wheel); variants are what the renderer's round-robin
+  `PoseCycle` cycles through. Unrecognised filenames are skipped with a warning, so
+  reference sketches can live in the same directory.
+- Join derivation is the one place this can emit a valid-but-wrong pack, so it is layered:
+  an `anchors` entry in `source.json` wins, else an opaque `#ff00ff` marker pixel in the
+  art (found and erased before packing, so it never reaches the sheet), else the
+  convention — face joins at bottom-centre of its drawing, torso at top-centre of its.
+  Derived **once per character from its NEUTRAL pose** and reused in canvas space for
+  every other pose, which is why the spec asks for the head and body to stay put across
+  poses: a raised arm moves a torso's alpha box but must not move its neck.
+  `--preview` composites each character's NEUTRAL pair and crosses the derived join, the
+  only check that catches a floating or buried head (no validator can).
+- Validation splits errors (unbuildable: non-square, undersized, opaque background, blank,
+  unknown emotion, intensity out of range, missing NEUTRAL, missing backdrop, out-of-canvas
+  anchor) from warnings (builds but likely wrong: fill outside the per-kind window, >35%
+  semi-transparent pixels, clipping, a torso floating above the bottom edge, a single face
+  pose, non-square/low-res backdrop, skipped filename). A model-generated batch normally
+  lands entirely in warnings, which is the list a reviewer actually needs.
+- `fixtures/source` (drawn by `scripts/make-fixture.mjs` with plain canvas calls, no model):
+  two characters × 4 faces + 3 torsos + 1 backdrop, one using the convention path and one
+  the marker path. 15 vitest tests, including the load-bearing one — build the fixture, then
+  run `@toonstrip/cli`'s own `validatePack` over the output, the same gate a hand-authored
+  pack goes through.
+- M14 exit criterion verified end-to-end by hand as well: built the fixture, `toonstrip pack
+  validate` passed, and `toonstrip render` produced a correct two-panel strip (both
+  characters, correct expressions, a WAVE gesture, balloons) from PNGs that carried no rect
+  table of their own. Join preview inspected: heads sit on necks on both anchor paths.
+- Docs: `docs/asset-image-spec.md` (the input contract — naming, canvas, placement,
+  cross-pose consistency, marking the join, `source.json`, errors vs warnings, how to check
+  your work), a pointer at the top of `docs/packs.md` for readers who would rather not
+  hand-write a rect table, plus README/CONTRIBUTING entries.
+- `skills/toonstrip/SKILL.md`: extended rather than forked into a second skill. New section
+  teaches the other direction of the same contract — how to turn a character description
+  into per-pose generation prompts that satisfy the spec (a fixed style block repeated
+  verbatim across a batch, one pose clause varying), then how to run the packager and read
+  its diagnostics, with the explicit instruction to look at `joins.png` before claiming a
+  pack works. The skill authors prompts; the package never sees one.
+
+### Status
+
+Repo 0.14.0. M0–M14 of `TOONSTRIP_DEV_PLAN.md` done. npm packages unchanged (schema 0.1.3,
+core 0.1.7, element 0.1.8, astro 0.1.11, cli 0.2.1, packs 0.1.1, react/vue/next 0.1.0);
+`@toonstrip/asset-packager` 0.1.0 built and tested, not yet published.
+
+Also added, planned but unimplemented: **M15 + §15**, sheet input for the packager — one
+generated image holding a grid of assets (a character sheet, or a 3×3 grid of nine whole
+backdrops) sliced into many pack assets, `toonstrip-pack template` to emit the reference
+sheet the model is prompted with, cell registration against the NEUTRAL cell, and
+cross-cell consistency/duplication warnings. The motivation is that a single generation
+pass is what actually prevents identity drift across a character's poses, which M14 can
+only detect after the fact; the slicer sits in front of M14's pipeline and leaves the
+per-pose path unchanged. Next: M15, then a site docs page for the packager + publishing
+it, then S9 Korean locale per `SITE_DEV_PLAN.md` §13.
+
+---
+
 ## v0.13.0 — M12: `@toonstrip/next`; M13: General SSR Placeholder Support
 
 **Date:** 2026-09-03

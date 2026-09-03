@@ -1,0 +1,62 @@
+{
+  "name": "fixture-sheets",
+  "version": "0.1.0",
+  "license": "MIT",
+  "description": "Generated sheet-input fixture pack for @toonstrip/asset-packager tests.",
+  "attribution": "Drawn by scripts/make-sheet-fixture.mjs — no model involved.",
+  "spec": {
+    "cell": 256,
+    "backdropSize": 512,
+    "joinOverlap": 4
+  },
+  "characters": [
+    {
+      "id": "pim",
+      "name": "Pim",
+      "type": "COMPLEX",
+      "torsoFirst": false,
+      "sheet": {
+        "file": "characters/pim/sheet.png",
+        "layout": [
+          [
+            "face-NEUTRAL",
+            "face-HAPPY",
+            "face-SAD"
+          ],
+          [
+            "torso-NEUTRAL",
+            "torso-WAVE",
+            null
+          ]
+        ],
+        "labelBand": 0.1,
+        "keyBackground": true
+      }
+    }
+  ],
+  "backdropSheets": [
+    {
+      "file": "backdrops/interiors.png",
+      "ids": [
+        "hall",
+        "cellar",
+        "attic",
+        "kitchen"
+      ],
+      "columns": 2,
+      "labelBand": 0.1
+    },
+    {
+      "file": "backdrops/exteriors.png",
+      "ids": [
+        "yard",
+        "lane",
+        "dock",
+        "market",
+        "ridge"
+      ],
+      "columns": 3,
+      "labelBand": 0.1
+    }
+  ]
+}
