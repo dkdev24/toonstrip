@@ -4,6 +4,59 @@ Persistent project history. Append entries; do not edit past entries.
 
 ---
 
+## v0.11.0 — M10: `@toonstrip/react`
+
+**Date:** 2026-09-03
+
+### Changes
+
+- `packages/react`: `<ComicStrip>`, a thin wrapper around `packages/element`'s
+  `<comic-strip>` custom element (dev plan §13.3). `ComicStrip.tsx` mounts the element via
+  a ref (`React.createElement("comic-strip", { ref, className, style })` — plain
+  `createElement`, not JSX, since `comic-strip` has no `JSX.IntrinsicElements` entry) and
+  pushes `document`/`packs` onto it as DOM properties from two `useEffect`s, one per prop.
+  No rendering logic of its own, matching the restraint the dev plan already calls out for
+  `packages/astro`. Side-effect `import "@toonstrip/element"` registers the element eagerly
+  at module load — fine for a client-rendered app; an SSR guard is deferred to
+  `@toonstrip/next` (M12), per the dev plan's own sequencing note.
+- Tests (`packages/react/test/ComicStrip.test.tsx`, vitest + jsdom + a
+  `@vitejs/plugin-react` vitest config for JSX transform): mounts and forwards
+  `document`/`packs`; re-renders with a new `document` and asserts the same
+  `<comic-strip>` DOM node is reused (`===`) rather than remounted, with its `.document`
+  updated to the new value. Both fixture documents use `dark: true` panels with no bodies,
+  so the element's cast loader never needs a real pack fetch — `fetch` is still stubbed to
+  fail instantly (avoids a real, slow network attempt) and the resulting `console.error`
+  from the element's own `#fail()` path is silenced.
+- `examples/react-vite`: a Vite + React app (no CRA — deprecated) with a toggle button
+  swapping between two hand-written `ComicStripDocument`s (`src/strips.ts`).
+  `scripts/copy-pack-assets.mjs` copies `@toonstrip/pack-comic-chat`'s files into
+  `public/packs/comic-chat/` as a `predev`/`prebuild` step — the Vite equivalent of what
+  `packages/astro`'s integration does at `astro:config:setup`, since Vite has no
+  integration-hook system to run this automatically.
+- M10's exit criterion ("embeds a strip and updates it on prop change without a full
+  remount") verified two ways: the unit test's DOM-node-identity assertion, and live in a
+  real Chrome tab — tagged the mounted `<comic-strip>` with a scratch `__marker` property
+  via devtools' console, clicked the demo's toggle button, confirmed the tag survived
+  (`sameNode: true`) and the panel count changed (2 → 1) to match the new document.
+- Docs: `docs/react.md` (mirrors `docs/astro.md`'s shape) and
+  `site/src/content/docs/react-reference.mdx` (Integrate section, order 10 — bumped
+  schema-reference/accessibility/faq/agent-skill 10→11→12→13→14 to make room), cross-linked
+  from `plain-html.mdx`'s "From a framework" section. `README.md`/`CONTRIBUTING.md`
+  package tables and the `schema → core → element → astro`/`react` dependency line
+  updated. Root `.gitignore` gained `examples/react-vite/public/packs/` (generated,
+  same treatment as the Astro examples' `_toonstrip/`).
+
+### Status
+
+M10 done. `packages/react@0.1.0` built and tested but **not published** — npm publish
+waits for Daniel's go, same pattern as v0.8.9's unpublished core/element/astro/cli bumps.
+Site build verified clean locally (`pnpm --filter toonstrip-site run build`); the new
+`/docs/react-reference/` page confirmed in the build output and in generated `llms.txt`.
+Next: M11 `@toonstrip/vue`, reusing this session's wrapper + example-app + testing pattern
+rather than reinventing it (`HANDOFF.md` Next Actions).
+
+---
+
 ## v0.8.9 — Korean text in balloons: Noto Sans KR font stack + font-ready element
 
 **Date:** 2026-09-02

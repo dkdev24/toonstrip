@@ -18,15 +18,16 @@ This is a pnpm workspace (`pnpm-workspace.yaml`: `packages/*`, `examples/*`).
 
 ```
 schema → core → element → astro
+                        └→ react
 ```
 
 One-way — `schema` has no dependents it depends on, `core` depends only on
-`schema`, `element` wraps `core`, `astro` wraps `element`. Asset packs
-(`pack-comic-chat`, `pack-example`, and any third-party pack) depend on
-`schema` only — they ship a manifest plus images and never import rendering
-code (see `docs/packs.md`'s "Why types are duplicated" for why this matters).
-`cli` and any future `avb-import` depend on `core`/`schema` but nothing
-depends on them.
+`schema`, `element` wraps `core`, `astro` and `react` each wrap `element`
+independently (neither depends on the other). Asset packs (`pack-comic-chat`,
+`pack-example`, and any third-party pack) depend on `schema` only — they ship
+a manifest plus images and never import rendering code (see `docs/packs.md`'s
+"Why types are duplicated" for why this matters). `cli` and any future
+`avb-import` depend on `core`/`schema` but nothing depends on them.
 
 Read `TOONSTRIP_DEV_PLAN.md` §2 for the full architecture rationale.
 
@@ -36,10 +37,12 @@ Read `TOONSTRIP_DEV_PLAN.md` §2 for the full architecture rationale.
 - `packages/core` — the rendering engine; Node/canvas-API-only, no DOM
 - `packages/element` — the browser custom element (`<comic-strip>`)
 - `packages/astro` — the Astro integration + component (`docs/astro.md`)
+- `packages/react` — the React `<ComicStrip>` component (`docs/react.md`)
 - `packages/pack-comic-chat`, `packages/pack-example` — asset packs
   (`docs/packs.md`)
 - `packages/cli` — the `toonstrip` command
 - `examples/astro-blog` — a full worked Astro site
+- `examples/react-vite` — a full worked Vite + React app
 
 ## Adding a character or a new pack
 

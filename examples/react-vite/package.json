@@ -1,0 +1,27 @@
+{
+  "name": "react-vite-example",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "predev": "node scripts/copy-pack-assets.mjs",
+    "dev": "vite",
+    "prebuild": "node scripts/copy-pack-assets.mjs",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@toonstrip/pack-comic-chat": "workspace:*",
+    "@toonstrip/react": "workspace:*",
+    "@toonstrip/schema": "workspace:*",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.3",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.11"
+  }
+}

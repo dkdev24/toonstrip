@@ -1,0 +1,60 @@
+---
+title: React reference
+description: The <ComicStrip> component's props, and why prop updates don't remount the element.
+order: 10
+section: Integrate
+---
+import Callout from "../../components/site/Callout.astro";
+
+## `<ComicStrip>`
+
+```tsx
+import { ComicStrip } from "@toonstrip/react";
+
+<ComicStrip document={doc} packs={["/packs/comic-chat/"]} />
+```
+
+| Prop | Type | Meaning |
+|---|---|---|
+| `document` | `ComicStripDocument` | The strip. Any object of the right shape; usually an imported JSON file. Pushed onto the element whenever it changes. |
+| `packs` | `string[]` | Base URLs of asset packs (same shape as `packages/element`'s own `.packs` — not the pack **names** `@toonstrip/astro`'s component takes, since there's no integration step resolving names to URLs here). Default `[]`. |
+| `className` / `style` | — | Forwarded straight to the underlying `<comic-strip>` element. |
+
+The component has no rendering logic of its own: it mounts `<comic-strip>` via a ref and
+sets `document`/`packs` as DOM properties in a `useEffect`, the same way
+`@toonstrip/astro`'s client renderer does.
+
+## Updating without a remount
+
+`<ComicStrip>` always renders the same host tag in the same position, so React's
+reconciliation reuses the existing `<comic-strip>` DOM node across re-renders — a new
+`document` value updates that node in place rather than tearing it down and rebuilding
+it. Verified during M10 by tagging the live element with a scratch property from
+devtools' console, then confirming it survived a `document` change.
+
+## Worked example
+
+`examples/react-vite` in the repo is a Vite + React app: a toggle button swaps between
+two hand-written documents, and `scripts/copy-pack-assets.mjs` copies
+`@toonstrip/pack-comic-chat`'s files into `public/packs/comic-chat/` before `dev`/`build`
+(Vite has no integration-hook system the way Astro does, so this is a plain Node script
+rather than a config-time hook). Run it locally:
+
+```
+pnpm --filter react-vite-example dev
+```
+
+## Current limitations
+
+- No SSR guard — the package imports `@toonstrip/element` at module scope, which touches
+  `HTMLElement`. Fine for a client-rendered app; importing it on a server throws.
+  `@toonstrip/next` is where that gets solved properly, by wrapping this package behind a
+  client boundary.
+- Tested against React 18. The `peerDependencies` range also allows React 19, but 19
+  isn't in the test matrix yet.
+
+<Callout kind="tip">
+Vue and Svelte wrappers aren't published yet — until then, [Plain HTML](/docs/plain-html/)'s
+"From a framework" section covers using the custom element directly with any framework's
+property-binding syntax.
+</Callout>
