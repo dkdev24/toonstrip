@@ -1367,3 +1367,32 @@ published to npm.
 
 Site 0.9.0, npm packages unchanged. Next: `PLAYGROUND_UI_PLAN.md` is complete; M8-M13
 per `TOONSTRIP_DEV_PLAN.md` §13, then S9 Korean on the new markup.
+
+## v0.9.1 — Fix Overlapping Labels in ToggleGroup; Drop the `UiSpike` Kitchen-Sink Spike
+
+**Date:** 2026-09-03
+
+### Changes
+
+- `site/src/components/ui/toggle-group.tsx`: `ToggleGroupItem` combined `flex-1`
+  (flex-basis 0) with an explicit `min-w-8`, which overrides the browser's automatic
+  content-based minimum size and let items shrink narrower than their `whitespace-nowrap`
+  text — the Camera segmented control and the Phone/Tablet/Desktop/Fill width presets
+  rendered with overlapping labels and no visible boundary between options. Dropped
+  `min-w-8` so items keep their content-based floor, added a small gap and an idle
+  `bg-card`/`hover:bg-muted` state so unselected segments read as distinct buttons.
+  Fixes both call sites (`PanelForm.tsx` camera/pose, `Preview.tsx` width presets) since
+  they share this component. Verified in the local dev server, light and dark.
+- Removed `UiSpike.tsx` and its `<h2>`/mount block from `kitchen-sink.astro`: the
+  step-1 shadcn-on-preact/compat spike had done its job once steps 2-4 shipped the real
+  playground UI, and it was adding ~75 KB JS to that page for no remaining reason
+  (open issue from `HANDOFF.md`, v0.9.0 session).
+- Local install had a broken `tslib` (declared in `site/package.json` and the lockfile,
+  but not physically present under `node_modules/.pnpm` on this machine, breaking
+  every site build). Unrelated to the above — confirmed by reproducing on a clean
+  `main` with the changes stashed out. Fixed with a full `node_modules` wipe and
+  reinstall; not a code change.
+
+### Status
+
+Site 0.9.1, npm packages unchanged.

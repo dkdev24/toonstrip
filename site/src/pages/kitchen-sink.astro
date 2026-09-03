@@ -9,8 +9,6 @@ import Callout from "../components/site/Callout.astro";
 import PackageManagerTabs from "../components/site/PackageManagerTabs.astro";
 import CodeAndStrip from "../components/demo/CodeAndStrip.astro";
 import WidthSlider from "../components/demo/WidthSlider.astro";
-import UiSpike from "../components/playground/UiSpike";
-import "../styles/playground-ui.css";
 import hero from "../content/strips/hero.json";
 import korean from "../content/strips/korean.json";
 import type { ComicStripDocument } from "@toonstrip/schema";
@@ -86,6 +84,4 @@ const doc = hero as ComicStripDocument;
   <h2>Korean balloon text</h2>
   <p>Hangul must render in Noto Sans KR (loaded by the page), never a brush script. Latin in the same balloon stays Comic Sans.</p>
   <CodeAndStrip doc={korean as ComicStripDocument} title="Korean strip" layout="side" load="load" />
-  <h2>shadcn/ui on preact/compat (PLAYGROUND_UI_PLAN.md step 1)</h2>
-  <UiSpike client:load />
 </Base>
