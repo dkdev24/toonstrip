@@ -22,9 +22,8 @@ order 17; both input paths, the join, errors vs warnings) + cross-link from
 `asset-packs.mdx`. Published **`@toonstrip/asset-packager` 0.2.0** to npm (33 tests green;
 tarball verified, `@toonstrip/core` dep rewritten to 0.1.7). Then a repo-wide
 over-engineering audit → **`PONYTAIL_AUDIT.md`**: 46 ranked findings (~2,400 lines + ~700
-generated + 9 deps cuttable) with a Progress table at its top. Applied 2 of them — **#31**
-(dead `ui/scroll-area.tsx`, -1 radix dep) and **#42** (unused `codemirror` meta-package,
--3 installed packages); build green after each.
+generated + 9 deps cuttable) with a Progress table at its top. Applied 2 — **#31** (dead
+`ui/scroll-area.tsx`, -1 radix dep) and **#42** (unused `codemirror`, -3 packages).
 
 ## Next Actions
 
@@ -43,8 +42,8 @@ generated + 9 deps cuttable) with a Progress table at its top. Applied 2 of them
 
 - `toonstrip pack validate` misses a missing torso (checks NEUTRAL only);
   `toonstrip-pack validate` does catch it on the source side.
-- `site`'s 8 playground e2e specs all fail (pre-existing); other Playwright verify
-  scripts are manual-only (`NOTES.md` M1–M5).
+- `site`'s 8 playground e2e specs all fail (pre-existing); other Playwright scripts are
+  manual-only (`NOTES.md` M1–M5).
 - `next-reference.mdx:57` passes `Callout kind="warn"`, outside the component's union —
   renders unstyled. One-word fix, found during the audit.
 - `renderPlaceholder` needs `@toonstrip/cli` as the app's own direct dep plus
