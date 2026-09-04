@@ -207,7 +207,7 @@ import { ComicStrip } from "@toonstrip/astro";
   </section>
 
   <!-- 7. Where it came from -->
-  <section class="section" id="origin">
+  <section class="section origin" id="origin">
     <div class="section__intro">
       <p class="caption">Where it came from</p>
       <h2>Extracted from a bigger, weirder project.</h2>
@@ -225,6 +225,17 @@ import { ComicStrip } from "@toonstrip/astro";
         same default Comic Chat asset pack, but driven by plain data you supply yourself.
       </p>
     </div>
+    <figure class="origin-shot">
+      <img
+        src="/grues-in-comic-screenshot.webp"
+        alt="Grues in Comic: a two-panel Comic Chat-style strip of a Zork scene above the game's text console."
+        width="806"
+        height="650"
+        loading="lazy"
+        decoding="async"
+      />
+      <figcaption>Grues in Comic, rendering a Zork playthrough with the same engine.</figcaption>
+    </figure>
   </section>
 </Base>
 
@@ -359,5 +370,37 @@ import { ComicStrip } from "@toonstrip/astro";
   .compare td:last-child {
     font-weight: 500;
     color: var(--ink);
+  }
+  @media (min-width: 900px) {
+    .origin {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: var(--space-48);
+      align-items: start;
+    }
+    .origin .section__intro {
+      max-width: none;
+      margin-bottom: 0;
+    }
+    .origin .origin-shot {
+      margin-top: 0;
+    }
+  }
+  .origin-shot {
+    margin: var(--space-32) 0 0;
+    max-width: 512px;
+  }
+  .origin-shot img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-sm);
+    background: var(--paper-raised);
+  }
+  .origin-shot figcaption {
+    margin-top: var(--space-8);
+    font-size: var(--text-caption);
+    color: var(--ink-2);
   }
 </style>
