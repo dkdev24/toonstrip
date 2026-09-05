@@ -12,7 +12,7 @@ character, sprite-sheet rectangles and a face/torso socket for every pose. `@too
 does that part: you supply finished drawings, it validates them, packs the sheets, derives
 the join and writes the pack.
 
-It is offline and deterministic. No model call, no network — it consumes PNGs, whether they
+It is offline and deterministic. No model call, no network: it consumes PNGs, whether they
 came out of an image model, Procreate or Aseprite. toonstrip still generates no art (see the
 [FAQ](/docs/faq/)); this is the step *after* you have some.
 
@@ -78,7 +78,7 @@ rules are in [`docs/asset-image-spec.md`](https://github.com/dkdev24/toonstrip/b
 
 When the art comes from an image model, generate a grid in one pass instead of a file per
 pose: identity cannot drift between cells, and the packager registers every pose against the
-character's NEUTRAL cell. Backdrops work the same way — one image, many scenes.
+character's NEUTRAL cell. Backdrops work the same way: one image, many scenes.
 
 ```
 # a reference sheet to prompt with; also prints the source.json fragment and a prompt
@@ -111,12 +111,12 @@ The grid shape is yours to declare. Name the cells in `source.json`:
 
 Cells are sliced on the gutters actually present rather than on an even division, so a
 model's imprecision is absorbed. Label bands are cropped first, and character cells are keyed
-by flood-filling in from the edges — a flat white background is expected here, because few
+by flood-filling in from the edges: a flat white background is expected here, because few
 models emit transparency. A white shirt stays white; it is not connected to the edge.
 
 <Callout kind="warning">
-A background that is not flat — a gradient, a painted room, a checkerboard standing in for
-transparency — cannot be keyed, and you get `background is not transparent`. Ask for a plain
+A background that is not flat (a gradient, a painted room, a checkerboard standing in for
+transparency) cannot be keyed, and you get `background is not transparent`. Ask for a plain
 single-colour background.
 </Callout>
 
@@ -136,9 +136,9 @@ cell: regenerate that pose on its own with the sheet as reference, drop it in as
 A face and a torso are separate drawings composited at render time, so the packager has to
 know where the head meets the neck. Three routes, in priority order:
 
-1. `anchors` in `source.json` — explicit input-canvas pixel coordinates.
+1. `anchors` in `source.json`: explicit input-canvas pixel coordinates.
 2. A single opaque magenta (`#ff00ff`) marker pixel in the art, erased before packing.
-3. The convention — a face joins at the bottom-centre of its drawing, a torso at the
+3. The convention: a face joins at the bottom-centre of its drawing, a torso at the
    top-centre of its.
 
 The join is derived once per character from its **NEUTRAL** pose and reused for every other
@@ -177,7 +177,7 @@ const result = await buildPack({ source: "./my-source", out: "./my-pack" });
 
 ## Licensing what you build
 
-Say what the art is. If any of it is not wholly yours — including anything a model produced
-from a reference you do not own — ship a `NOTICE` crediting the source and its licence. The
+Say what the art is. If any of it is not wholly yours (including anything a model produced
+from a reference you do not own), ship a `NOTICE` crediting the source and its licence. The
 default pack's `NOTICE` (Microsoft Comic Chat art, MIT, with a trademark disclaimer) is the
 worked example. `source.json`'s `license` field lands in the built `pack.json`.

@@ -21,8 +21,8 @@ import { ComicStrip } from "@toonstrip/vue";
 | Prop | Type | Meaning |
 |---|---|---|
 | `document` | `ComicStripDocument` | The strip. Any object of the right shape; usually an imported JSON file. Pushed onto the element whenever it changes. |
-| `packs` | `string[]` | Base URLs of asset packs (same shape as `packages/element`'s own `.packs` — not the pack **names** `@toonstrip/astro`'s component takes, since there's no integration step resolving names to URLs here). Default `[]`. |
-| `class` / `style` | — | Fall through to the underlying `<comic-strip>` element automatically (Vue's default single-root attribute inheritance) — not declared as props. |
+| `packs` | `string[]` | Base URLs of asset packs (same shape as `packages/element`'s own `.packs`, not the pack **names** `@toonstrip/astro`'s component takes, since there's no integration step resolving names to URLs here). Default `[]`. |
+| `class` / `style` | n/a | Fall through to the underlying `<comic-strip>` element automatically (Vue's default single-root attribute inheritance), not declared as props. |
 
 The component has no rendering logic of its own: it mounts `<comic-strip>` via a template
 ref and sets `document`/`packs` as DOM properties from a `watch`, the same way
@@ -31,9 +31,9 @@ ref and sets `document`/`packs` as DOM properties from a `watch`, the same way
 ## Updating without a remount
 
 `<ComicStrip>` always renders the same host tag (`h("comic-strip", { ref })`, a render
-function rather than an SFC `<template>` for this one tag — sidesteps needing
+function rather than an SFC `<template>` for this one tag, which sidesteps needing
 `compilerOptions.isCustomElement` just for `comic-strip`), so Vue's patching reuses the
-existing `<comic-strip>` DOM node across re-renders — a new `document` value updates that
+existing `<comic-strip>` DOM node across re-renders. A new `document` value updates that
 node in place rather than tearing it down and rebuilding it. Verified during M11 by
 tagging the live element with a scratch property from devtools' console, then confirming
 it survived a `document` change.
@@ -44,7 +44,7 @@ it survived a `document` change.
 hand-written documents, and `scripts/copy-pack-assets.mjs` copies
 `@toonstrip/pack-comic-chat`'s files into `public/packs/comic-chat/` before `dev`/`build`
 (Vite has no integration-hook system the way Astro does, so this is a plain Node script
-rather than a config-time hook — the same script `examples/react-vite` uses). Run it
+rather than a config-time hook, the same script `examples/react-vite` uses). Run it
 locally:
 
 ```
@@ -53,7 +53,7 @@ pnpm --filter vue-vite-example dev
 
 ## Current limitations
 
-- Tested against Vue 3.5. No Nuxt-specific wrapper yet — `@toonstrip/element`'s module no
+- Tested against Vue 3.5. No Nuxt-specific wrapper yet. `@toonstrip/element`'s module no
   longer throws when imported on a server (it guards `HTMLElement`/`customElements`
   access, dev plan §13.4), so this package is safe to import in a Nuxt server render pass.
   Per [Next.js reference](/docs/next-reference/)'s deprecation of `@toonstrip/next`,
@@ -62,7 +62,7 @@ pnpm --filter vue-vite-example dev
   and an SSR-placeholder helper already exists on `@toonstrip/cli`.
 
 <Callout kind="tip">
-Svelte isn't published yet — until then, [Plain HTML](/docs/plain-html/)'s "From a
+Svelte isn't published yet. Until then, [Plain HTML](/docs/plain-html/)'s "From a
 framework" section covers using the custom element directly with any framework's
 property-binding syntax.
 </Callout>

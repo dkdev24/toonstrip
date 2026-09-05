@@ -17,9 +17,9 @@ import { ComicStrip } from "@toonstrip/react";
 | Prop | Type | Meaning |
 |---|---|---|
 | `document` | `ComicStripDocument` | The strip. Any object of the right shape; usually an imported JSON file. Pushed onto the element whenever it changes. |
-| `packs` | `string[]` | Base URLs of asset packs (same shape as `packages/element`'s own `.packs` — not the pack **names** `@toonstrip/astro`'s component takes, since there's no integration step resolving names to URLs here). Default `[]`. |
-| `placeholder` | `{ src, width, height }` | An SSR-rendered PNG to show, as a light-DOM `<img>`, until the live canvas paints. See [Next.js reference](/docs/next-reference/) — `@toonstrip/cli`'s `renderPlaceholder` produces this shape. Optional; most apps don't set it directly. |
-| `className` / `style` | — | Forwarded straight to the underlying `<comic-strip>` element. |
+| `packs` | `string[]` | Base URLs of asset packs (same shape as `packages/element`'s own `.packs`, not the pack **names** `@toonstrip/astro`'s component takes, since there's no integration step resolving names to URLs here). Default `[]`. |
+| `placeholder` | `{ src, width, height }` | An SSR-rendered PNG to show, as a light-DOM `<img>`, until the live canvas paints. See [Next.js reference](/docs/next-reference/): `@toonstrip/cli`'s `renderPlaceholder` produces this shape. Optional; most apps don't set it directly. |
+| `className` / `style` | n/a | Forwarded straight to the underlying `<comic-strip>` element. |
 
 The component has no rendering logic of its own: it mounts `<comic-strip>` via a ref and
 sets `document`/`packs` as DOM properties in a `useEffect`, the same way
@@ -28,7 +28,7 @@ sets `document`/`packs` as DOM properties in a `useEffect`, the same way
 ## Updating without a remount
 
 `<ComicStrip>` always renders the same host tag in the same position, so React's
-reconciliation reuses the existing `<comic-strip>` DOM node across re-renders — a new
+reconciliation reuses the existing `<comic-strip>` DOM node across re-renders. A new
 `document` value updates that node in place rather than tearing it down and rebuilding
 it. Verified during M10 by tagging the live element with a scratch property from
 devtools' console, then confirming it survived a `document` change.
@@ -52,15 +52,15 @@ pnpm --filter react-vite-example dev
 
 <Callout kind="tip">
 Importing `@toonstrip/element` no longer throws on the server (it guards `HTMLElement`/
-`customElements` access) — this package is safe to render server-side. `<ComicStrip>`
+`customElements` access), so this package is safe to render server-side. `<ComicStrip>`
 also carries its own `'use client'` directive, so it's directly usable from a Next.js App
-Router Server Component with no extra wrapper — see the
+Router Server Component with no extra wrapper. See
 [Next.js reference](/docs/next-reference/) for the SSR-placeholder helper
 (`@toonstrip/cli`'s `renderPlaceholder`) that goes with it.
 </Callout>
 
 <Callout kind="tip">
-Vue is also published — see [Vue reference](/docs/vue-reference/). Svelte isn't yet;
+Vue is also published. See [Vue reference](/docs/vue-reference/). Svelte isn't yet;
 until then, [Plain HTML](/docs/plain-html/)'s "From a framework" section covers using the
 custom element directly with any framework's property-binding syntax.
 </Callout>
