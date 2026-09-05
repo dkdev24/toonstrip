@@ -55,8 +55,6 @@ export function alphaBox(raster: Raster): Box | null {
 }
 
 export interface AlphaStats {
-  /** Fraction of the whole canvas that is fully or nearly opaque. */
-  opaque: number;
   /** Fraction of the drawing's own box that is partially transparent. */
   fringe: number;
   /** Highest alpha found in the four corner pixels. */
@@ -67,14 +65,12 @@ export interface AlphaStats {
 
 export function alphaStats(raster: Raster, box: Box | null): AlphaStats {
   const { width, height, data } = raster;
-  let opaque = 0;
   let partial = 0;
   let transparent = 0;
   for (let i = 3; i < data.length; i += 4) {
     const a = data[i]!;
-    if (a >= 250) opaque++;
-    else if (a > ALPHA_FLOOR) partial++;
-    else transparent++;
+    if (a > ALPHA_FLOOR && a < 250) partial++;
+    else if (a <= ALPHA_FLOOR) transparent++;
   }
   const corners = [
     data[3]!,
@@ -84,7 +80,6 @@ export function alphaStats(raster: Raster, box: Box | null): AlphaStats {
   ];
   const boxArea = box ? box.width * box.height : 1;
   return {
-    opaque: opaque / (width * height),
     fringe: partial / boxArea,
     cornerAlpha: Math.max(...corners),
     fullyOpaque: transparent === 0 && partial === 0,

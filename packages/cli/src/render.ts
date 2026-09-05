@@ -10,7 +10,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { dirname, isAbsolute, join, resolve } from "node:path";
 import { createCanvas, GlobalFonts, loadImage, type Image } from "@napi-rs/canvas";
-import { layoutStrip, renderPanel, selectFigures, type Cast, type CastManifest, type PackedAvatar, type PackedBackdrop, type PoseCycle } from "@toonstrip/core";
+import { copyCycles, layoutStrip, renderPanel, selectFigures, type Cast, type CastManifest, type PackedAvatar, type PackedBackdrop, type PoseCycle } from "@toonstrip/core";
 import { validateDocument, type ComicStripDocument } from "@toonstrip/schema";
 
 const GUTTER = 10;
@@ -90,12 +90,6 @@ async function loadCast(packDirs: string[], characterIds: string[], backdropIds:
   const manifest: CastManifest = { version: 1, cast, backdrops: backdropsManifest };
   // @napi-rs/canvas images satisfy the drawImage contract; its types are not the DOM's.
   return { manifest, sheets: sheets as unknown as Cast["sheets"], backdrops: backdrops as unknown as Cast["backdrops"] };
-}
-
-function copyCycles(cycles: ReadonlyMap<string, PoseCycle>): Map<string, PoseCycle> {
-  const out = new Map<string, PoseCycle>();
-  for (const [k, v] of cycles) out.set(k, { ...v });
-  return out;
 }
 
 export async function renderDocument(input: unknown, options: RenderOptions = {}): Promise<RenderResult> {

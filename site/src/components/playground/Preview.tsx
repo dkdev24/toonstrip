@@ -139,7 +139,7 @@ export function Preview() {
     <div class="pg-preview flex min-h-0 flex-1 flex-col">
       <div class="flex min-h-11 shrink-0 flex-wrap items-center gap-2 border-b border-border bg-background px-4 py-1.5" role="toolbar" aria-label="Preview">
         <div class="flex min-w-32 flex-1 basis-40 items-center gap-2">
-          <Slider min={260} max={sliderMax} step={10} value={[width || Math.min(stageWidth, sliderMax) || 260]} onValueChange={([v]) => setWidth(v)} aria-label="Container width" />
+          <Slider min={260} max={sliderMax} step={10} value={width || Math.min(stageWidth, sliderMax) || 260} onValueChange={(v) => setWidth(v)} aria-label="Container width" />
         </div>
         <output class="mono shrink-0 text-xs text-muted-foreground" aria-live="polite">
           {Math.round(effective)} px · {columns} col

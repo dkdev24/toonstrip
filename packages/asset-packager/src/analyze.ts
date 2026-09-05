@@ -15,6 +15,7 @@
  */
 
 import { existsSync } from "node:fs";
+import { comparePartOrder } from "./spec.js";
 import { measureBackdrop, measurePart, type MeasuredBackdrop, type MeasuredPart } from "./measure.js";
 import { readSource, type SourcePack } from "./source.js";
 import { sliceBackdropSheet, sliceCharacterSheet } from "./sheet.js";
@@ -69,13 +70,7 @@ export async function expandSheets(source: SourcePack): Promise<Diagnostic[]> {
       // Per-pose files override the cell of the same name.
       const own = new Set(character.parts.map((p) => p.file));
       character.parts.push(...result.parts.filter((p) => !own.has(p.file)));
-      character.parts.sort(
-        (a, b) =>
-          a.kind.localeCompare(b.kind) ||
-          a.emotion.localeCompare(b.emotion) ||
-          a.intensity - b.intensity ||
-          a.variant - b.variant,
-      );
+      character.parts.sort(comparePartOrder);
     }
   }
 

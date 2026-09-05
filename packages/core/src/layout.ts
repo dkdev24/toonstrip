@@ -13,7 +13,7 @@
 export const UNIT = { width: 400, height: 340 };
 
 /** The column ceiling on a wide viewport — a decision, not a fit result. */
-export const MAX_COLUMNS = 3;
+const MAX_COLUMNS = 3;
 
 /**
  * Shrink tolerance: the floor a panel may shrink to *in order to earn
@@ -35,8 +35,6 @@ export interface StripLayout {
 export interface LayoutOptions {
   /** Space between panels, both axes. */
   gutter?: number;
-  /** Ceiling on columns; defaults to {@link MAX_COLUMNS}. */
-  maxColumns?: number;
 }
 
 /**
@@ -46,10 +44,10 @@ export interface LayoutOptions {
  * shrunk to >= 0.85 native still earns the two-up layout. {@link layoutStrip}
  * fills in the actual share width afterward.
  */
-export function columnsFor(available: number, gutter: number, maxColumns = MAX_COLUMNS): number {
+function columnsFor(available: number, gutter: number): number {
   const minWidth = UNIT.width * MIN_PANEL_SCALE;
   const fit = Math.floor((available + gutter) / (minWidth + gutter));
-  return Math.max(1, Math.min(fit, maxColumns));
+  return Math.max(1, Math.min(fit, MAX_COLUMNS));
 }
 
 /**
@@ -71,7 +69,7 @@ export function layoutStrip(available: number, options: LayoutOptions = {}): Str
   // A container that has not been measured yet reports 0; fall back to the
   // unit rather than dividing a row into a zero-width panel.
   const width = available > 0 ? available : UNIT.width;
-  const columns = columnsFor(width, gutter, options.maxColumns);
+  const columns = columnsFor(width, gutter);
   const share = (width - (columns - 1) * gutter) / columns;
   // Native is the ceiling — never a free stretch.
   const panelWidth = Math.max(1, Math.min(share, UNIT.width));
@@ -80,14 +78,4 @@ export function layoutStrip(available: number, options: LayoutOptions = {}): Str
     panelWidth,
     panelHeight: Math.round((panelWidth / UNIT.width) * UNIT.height),
   };
-}
-
-/**
- * Which cell a panel occupies. Kept as its own function because it is the
- * half of the policy that says *reading order is row-major* — the strip's
- * DOM order and the grid's flow have to agree with it or a resize would
- * renumber the comic.
- */
-export function cellFor(index: number, columns: number): { row: number; column: number } {
-  return { row: Math.floor(index / columns), column: index % columns };
 }

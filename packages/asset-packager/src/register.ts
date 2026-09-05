@@ -53,15 +53,15 @@ function disagreement(
 }
 
 /**
- * Best shift of `reference` onto `cell`, searched within `maxShift` px.
+ * Best shift of `reference` onto `cell`, searched within 14% of the cell width.
  * Both rasters must be the same size — sheet cells always are, having been
  * sliced from one grid and padded to one square.
  */
-export function register(cell: Raster, reference: Raster, maxShift?: number): Registration {
+export function register(cell: Raster, reference: Raster): Registration {
   if (cell.width !== reference.width || cell.height !== reference.height) return NO_SHIFT;
   const width = cell.width;
   const height = cell.height;
-  const reach = Math.max(2, Math.round(maxShift ?? width * 0.14));
+  const reach = Math.max(2, Math.round(width * 0.14));
   const a = maskOf(cell);
   const b = maskOf(reference);
 

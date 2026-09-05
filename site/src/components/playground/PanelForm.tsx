@@ -16,28 +16,16 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from ".
 import { ToggleGroup, ToggleGroupItem } from "../ui/toggle-group";
 import { Input, Textarea, Label, Checkbox } from "../ui/input";
 import { cn } from "../../lib/utils";
+import { spriteCropStyle } from "../../lib/sprite-crop";
 import {
   doc, selectedPanel, stripTab, activeCharacters, activeBackdrops, roster, packs, togglePack, presets, loadPreset,
   addPanel, duplicatePanel, removePanel, movePanel, updatePanel,
   addBody, updateBody, removeBody, moveBody,
   addLine, updateLine, removeLine, moveLine,
-  type RosterCharacter,
 } from "../../lib/playground/state";
 
 const CAMERAS: CameraPreset[] = ["establishing", "wide", "medium", "over-shoulder", "close-up", "reaction"];
 const POSES = ["none", "wave", "point", "shrug"] as const;
-
-function spriteStyle(c: RosterCharacter, size: number): string {
-  const scale = Math.min(size / Math.max(c.thumb.width, c.thumb.height), 2);
-  return [
-    `width:${Math.round(c.thumb.width * scale)}px`,
-    `height:${Math.round(c.thumb.height * scale)}px`,
-    `background-image:url(${c.sheetUrl})`,
-    `background-size:${Math.round(c.sheetWidth * scale)}px ${Math.round(c.sheetHeight * scale)}px`,
-    `background-position:-${Math.round(c.thumb.x * scale)}px -${Math.round(c.thumb.y * scale)}px`,
-    "background-repeat:no-repeat",
-  ].join(";");
-}
 
 const DASHED = "w-full justify-center border border-dashed border-border-strong text-muted-foreground hover:text-foreground";
 
@@ -206,7 +194,7 @@ function PanelEditor({ panel, index, total }: { panel: Panel; index: number; tot
             return (
               <li key={j} class="flex flex-col gap-3 rounded-md border border-border p-3">
                 <div class="flex items-center gap-2">
-                  {c && <span class="pg-sprite" style={spriteStyle(c, 40)} aria-hidden="true" />}
+                  {c && <span class="pg-sprite" style={spriteCropStyle(c, 40)} aria-hidden="true" />}
                   <span class="mono">{body.character}</span>
                   <span class="ml-auto flex items-center gap-1">
                     <Button variant="ghost" size="icon-sm" aria-label="Move character left" disabled={j === 0} onClick={() => moveBody(index, j, -1)}><ChevronLeft /></Button>
@@ -281,7 +269,7 @@ function PanelEditor({ panel, index, total }: { panel: Panel; index: number; tot
                     setPicker(false);
                   }}
                 >
-                  <span class="flex size-14 items-center justify-center overflow-hidden"><span class="pg-sprite" style={spriteStyle(c, 48)} aria-hidden="true" /></span>
+                  <span class="flex size-14 items-center justify-center overflow-hidden"><span class="pg-sprite" style={spriteCropStyle(c, 48)} aria-hidden="true" /></span>
                   <span>{c.id}</span>
                 </button>
               ))}

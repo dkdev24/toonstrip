@@ -7,16 +7,10 @@
  * (`selectFigures` in document order, cycles copied per panel), so the export
  * matches what is on screen.
  */
-import { layoutStrip, renderPanel, selectFigures, type PoseCycle, type Cast } from "@toonstrip/core";
+import { copyCycles, layoutStrip, renderPanel, selectFigures, type Cast, type PoseCycle } from "@toonstrip/core";
 import type { ComicStripDocument } from "@toonstrip/schema";
 
 const GUTTER = 10;
-
-function copyCycles(cycles: ReadonlyMap<string, PoseCycle>): Map<string, PoseCycle> {
-  const out = new Map<string, PoseCycle>();
-  for (const [k, v] of cycles) out.set(k, { ...v });
-  return out;
-}
 
 export interface ExportOptions {
   /** Container width the strip is laid out for, in CSS px. */

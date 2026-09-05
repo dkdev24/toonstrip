@@ -4,12 +4,8 @@
  * metric so a gesture never nearest-neighbour-matches a facial expression.
  */
 
-export interface Emotion {
-  /** Radians on the wheel, or a gesture sentinel above 2*PI. */
-  angle: number;
-  /** 0.0-1.0. */
-  intensity: number;
-}
+export type { Emotion } from "@toonstrip/schema";
+import type { Emotion } from "@toonstrip/schema";
 
 /** One weighted candidate emotion. Higher priority is tried first. */
 export interface EmotionOption extends Emotion {
@@ -21,8 +17,6 @@ export const EMOTION_NAMES = [
   "NEUTRAL", "WAVE", "POINTOTHER", "POINTSELF", "DOUBLEPOINT", "SHRUG",
   "3QRWALK", "SIDEWALK", "3QFWALK",
 ] as const;
-
-export type EmotionName = Exclude<(typeof EMOTION_NAMES)[number], null>;
 
 /** Points on the emotion wheel that have an angle. */
 export const NEMOTIONS = 8;

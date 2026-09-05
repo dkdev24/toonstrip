@@ -67,6 +67,11 @@ export interface ParsedPartName {
   variant: number;
 }
 
+/** Canonical ordering for a character's parts: kind, then emotion, then intensity, then variant. */
+export function comparePartOrder(a: ParsedPartName, b: ParsedPartName): number {
+  return a.kind.localeCompare(b.kind) || a.emotion.localeCompare(b.emotion) || a.intensity - b.intensity || a.variant - b.variant;
+}
+
 export function emotionIndex(name: string): number {
   return (EMOTION_NAMES as readonly (string | null)[]).indexOf(name);
 }

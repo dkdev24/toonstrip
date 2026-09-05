@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { ComicStrip } from "@toonstrip/vue";
-import { STRIPS } from "./strips.js";
+import { makeStrips } from "../../strips.js";
+
+const STRIPS = makeStrips("Vue");
 
 const which = ref<keyof typeof STRIPS>("intro");
 function toggle() {

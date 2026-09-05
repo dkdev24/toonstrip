@@ -10,13 +10,13 @@ import type { ComicStripDocument } from "@toonstrip/schema";
 
 interface Props {
   doc: ComicStripDocument;
-  packs?: string[];
-  min?: number;
-  max?: number;
   initial?: number;
   load?: "visible" | "load";
 }
-const { doc, packs = ["comic-chat"], min = 260, max = 1240, initial = 900, load = "visible" } = Astro.props;
+const min = 260;
+const max = 1240;
+const packs = ["comic-chat"];
+const { doc, initial = 900, load = "visible" } = Astro.props;
 const presets = [
   { label: "Phone", width: 390 },
   { label: "Tablet", width: 768 },

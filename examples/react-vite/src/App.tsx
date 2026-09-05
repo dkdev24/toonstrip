@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { ComicStrip } from "@toonstrip/react";
-import { STRIPS } from "./strips.js";
+import { makeStrips } from "../../strips.js";
+
+const STRIPS = makeStrips("React");
 
 export function App() {
   const [which, setWhich] = useState<keyof typeof STRIPS>("intro");

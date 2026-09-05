@@ -51,6 +51,11 @@ export function newCycle(): PoseCycle {
   return { face: -1, torso: -1 };
 }
 
+/** A snapshot copy, so a frozen per-panel record does not alias the live round-robin state. */
+export function copyCycles(cycles: ReadonlyMap<string, PoseCycle>): Map<string, PoseCycle> {
+  return new Map([...cycles].map(([id, cycle]) => [id, { ...cycle }]));
+}
+
 function rotate<T>(items: readonly T[], start: number): T[] {
   if (items.length === 0) return [];
   const from = ((start % items.length) + items.length) % items.length;

@@ -63,10 +63,10 @@ export const roster = signal<Roster>({ characters: [], backdrops: [], packNames:
 export const presets = signal<Preset[]>([]);
 export const toast = signal<string | null>(null);
 
-const past: Doc[] = [];
-const future: Doc[] = [];
-export const canUndo = signal(false);
-export const canRedo = signal(false);
+const past = signal<Doc[]>([]);
+const future = signal<Doc[]>([]);
+export const canUndo = computed(() => past.value.length > 0);
+export const canRedo = computed(() => future.value.length > 0);
 
 export const activeCharacters = computed(() => roster.value.characters.filter((c) => packs.value.includes(c.pack)));
 export const activeBackdrops = computed(() => roster.value.backdrops.filter((b) => packs.value.includes(b.pack)));
@@ -78,11 +78,17 @@ export function pretty(d: Doc): string {
 }
 
 function pushHistory(previous: Doc) {
-  past.push(previous);
-  if (past.length > HISTORY_LIMIT) past.shift();
-  future.length = 0;
-  canUndo.value = past.length > 0;
-  canRedo.value = false;
+  past.value = [...past.value, previous].slice(-HISTORY_LIMIT);
+  future.value = [];
+}
+
+/** Pop the most recent entry off `from`, push `current` onto `to`. */
+function travel(from: typeof past, to: typeof past, current: Doc): Doc | undefined {
+  const entry = from.value.at(-1);
+  if (entry === undefined) return undefined;
+  from.value = from.value.slice(0, -1);
+  to.value = [...to.value, current];
+  return entry;
 }
 
 /** Replace the document. Every mutation goes through here. */
@@ -101,31 +107,25 @@ export function setDoc(next: Doc, source: Source, options: { history?: boolean }
 }
 
 export function undo() {
-  const previous = past.pop();
-  if (!previous) return;
-  future.push(doc.value);
+  const previous = travel(past, future, doc.value);
+  if (previous === undefined) return;
   batch(() => {
     doc.value = previous;
     lastSource.value = "form";
     jsonText.value = pretty(previous);
     jsonProblems.value = [];
-    canUndo.value = past.length > 0;
-    canRedo.value = true;
   });
   autosave();
 }
 
 export function redo() {
-  const next = future.pop();
-  if (!next) return;
-  past.push(doc.value);
+  const next = travel(future, past, doc.value);
+  if (next === undefined) return;
   batch(() => {
     doc.value = next;
     lastSource.value = "form";
     jsonText.value = pretty(next);
     jsonProblems.value = [];
-    canUndo.value = true;
-    canRedo.value = future.length > 0;
   });
   autosave();
 }

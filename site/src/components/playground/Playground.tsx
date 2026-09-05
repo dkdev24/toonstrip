@@ -4,7 +4,6 @@
  * draggable and persisted. Narrow: Configure / JSON / Preview tabs plus a bottom-sheet
  * preview. No page scroll; each pane scrolls itself.
  */
-import type { ComponentChildren } from "preact";
 import { useEffect, useState } from "preact/hooks";
 import { ChevronsLeft, ChevronsRight } from "lucide-preact";
 import { boot, toast, undo, redo, type Roster, type Preset } from "../../lib/playground/state";
@@ -27,18 +26,6 @@ type Layout = [number, number];
 
 const DESKTOP = "(min-width: 900px)";
 
-function useMediaQuery(query: string): boolean {
-  const [matches, setMatches] = useState(() => (typeof window === "undefined" ? true : window.matchMedia(query).matches));
-  useEffect(() => {
-    const mq = window.matchMedia(query);
-    const on = () => setMatches(mq.matches);
-    on();
-    mq.addEventListener("change", on);
-    return () => mq.removeEventListener("change", on);
-  }, [query]);
-  return matches;
-}
-
 /** localStorage-backed state; every access is guarded so a blocked store is harmless. */
 function usePersisted<T>(key: string, initial: T): [T, (v: T) => void] {
   const [value, setValue] = useState<T>(() => {
@@ -58,15 +45,6 @@ function usePersisted<T>(key: string, initial: T): [T, (v: T) => void] {
   return [value, set];
 }
 
-function PaneBar({ title, children }: { title: string; children?: ComponentChildren }) {
-  return (
-    <div class="flex h-9 shrink-0 items-center gap-3 border-b border-border bg-muted pr-2 pl-4">
-      <span class="caption">{title}</span>
-      <span class="ml-auto flex items-center gap-1">{children}</span>
-    </div>
-  );
-}
-
 export default function Playground({ roster, presets }: Props) {
   const [ready, setReady] = useState(false);
   const [tab, setTab] = useState<Tab>("configure");
@@ -74,7 +52,15 @@ export default function Playground({ roster, presets }: Props) {
   const [jsonOpen, setJsonOpen] = usePersisted<boolean>("pg-json-open", true);
   const [vLayout, setVLayout] = usePersisted<Layout>("pg-split-v", [60, 40]);
   const [hLayout, setHLayout] = usePersisted<Layout>("pg-split-h", [50, 50]);
-  const desktop = useMediaQuery(DESKTOP);
+  const [desktop, setDesktop] = useState(() => (typeof window === "undefined" ? true : window.matchMedia(DESKTOP).matches));
+
+  useEffect(() => {
+    const mq = window.matchMedia(DESKTOP);
+    const on = () => setDesktop(mq.matches);
+    on();
+    mq.addEventListener("change", on);
+    return () => mq.removeEventListener("change", on);
+  }, []);
 
   useEffect(() => {
     boot(roster, presets);
@@ -95,7 +81,9 @@ export default function Playground({ roster, presets }: Props) {
 
   const configurePane = (
     <section aria-label="Configure" class="flex h-full min-h-0 flex-col">
-      <PaneBar title="Configure" />
+      <div class="flex h-9 shrink-0 items-center gap-3 border-b border-border bg-muted pr-2 pl-4">
+        <span class="caption">Configure</span>
+      </div>
       <div class="relative min-h-0 flex-1 overflow-auto p-4">
         <PanelForm />
       </div>

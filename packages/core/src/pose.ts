@@ -13,12 +13,7 @@ import { NEMOTIONS, isGesture, type Emotion, type EmotionOption } from "./emotio
 
 /** Normalize into (-PI, PI]. */
 export function normalizeAngle(value: number): number {
-  if (value > -Math.PI && value <= Math.PI) return value;
-  let t = value / (2 * Math.PI);
-  t = (t - Math.trunc(t)) * 2 * Math.PI;
-  if (t > Math.PI) return t - 2 * Math.PI;
-  if (t <= -Math.PI) return t + 2 * Math.PI;
-  return t;
+  return Math.atan2(Math.sin(value), Math.cos(value));
 }
 
 export function subtractAngles(a: number, b: number): number {

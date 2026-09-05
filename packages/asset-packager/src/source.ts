@@ -6,7 +6,7 @@
 
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { DEFAULT_SPEC, parsePartName, type AssetImageSpec, type PartKind } from "./spec.js";
+import { comparePartOrder, DEFAULT_SPEC, parsePartName, type AssetImageSpec, type PartKind } from "./spec.js";
 import type { Raster } from "./image.js";
 import type { Registration } from "./register.js";
 
@@ -140,10 +140,6 @@ export interface SourcePack {
   backdropSheets: (BackdropSheetDecl & { path: string })[];
 }
 
-function readJson<T>(path: string): T {
-  return JSON.parse(readFileSync(path, "utf8")) as T;
-}
-
 function directories(dir: string): string[] {
   if (!existsSync(dir)) return [];
   return readdirSync(dir, { withFileTypes: true })
@@ -167,7 +163,7 @@ export function readSource(dir: string): SourcePack {
   if (!existsSync(sourceJsonPath)) {
     throw new Error(`${sourceJsonPath}: source.json not found (run \`toonstrip-pack init\` to scaffold one)`);
   }
-  const json = readJson<SourceJson>(sourceJsonPath);
+  const json = JSON.parse(readFileSync(sourceJsonPath, "utf8")) as SourceJson;
   const spec: AssetImageSpec = { ...DEFAULT_SPEC, ...(json.spec ?? {}) };
 
   const charactersDir = join(dir, "characters");
@@ -195,13 +191,7 @@ export function readSource(dir: string): SourcePack {
       }
       parts.push({ ...parsed, file, path: join(charDir, file) });
     }
-    parts.sort(
-      (a, b) =>
-        a.kind.localeCompare(b.kind) ||
-        a.emotion.localeCompare(b.emotion) ||
-        a.intensity - b.intensity ||
-        a.variant - b.variant,
-    );
+    parts.sort(comparePartOrder);
     return {
       ...decl,
       id,

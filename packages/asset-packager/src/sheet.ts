@@ -37,7 +37,6 @@ function gridBoundaries(sheet: Raster, grid: Grid, decl: SheetDecl, transparent:
   const profiles = transparent ? alphaProfiles(sheet) : uniformityProfiles(sheet);
   const window = decl.gutterWindow ?? 0.2;
   return {
-    profiles,
     x: boundaries(sheet.width, grid.columns, profiles.columns, window),
     y: boundaries(sheet.height, grid.rows, profiles.rows, window),
   };

@@ -7,11 +7,6 @@ export type { CastManifest, PackedAvatar, PackedBackdrop, PackedPart, SheetRect,
 
 const PACK_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 
-/** Absolute path to this pack's root directory (where `pack.json` lives). */
-export function packRoot(): string {
-  return PACK_ROOT;
-}
-
 function readJson<T>(path: string): T {
   return JSON.parse(readFileSync(path, "utf8")) as T;
 }

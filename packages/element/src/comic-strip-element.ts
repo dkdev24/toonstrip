@@ -6,7 +6,7 @@
  * machinery stripped out: a `ComicStripDocument` here is authored data handed
  * over whole, not a stream of panels a game emits (dev plan §0's non-goals).
  */
-import { BALLOON_FONT, type Cast, layoutStrip, type PoseCycle, renderPanel, selectFigures, TITLE_FONT } from "@toonstrip/core";
+import { BALLOON_FONT, type Cast, copyCycles, layoutStrip, type PoseCycle, renderPanel, selectFigures, TITLE_FONT } from "@toonstrip/core";
 import { validateDocument, type ComicStripDocument, type Panel } from "@toonstrip/schema";
 import { describePanel } from "./describe.js";
 import { loadCastFromPacks } from "./load-pack.js";
@@ -17,10 +17,6 @@ interface Slot {
   canvas: HTMLCanvasElement;
   panel: Panel;
   painted: boolean;
-}
-
-function copyCycles(cycles: ReadonlyMap<string, PoseCycle>): Map<string, PoseCycle> {
-  return new Map([...cycles].map(([id, cycle]) => [id, { ...cycle }]));
 }
 
 function characterIdsOf(doc: ComicStripDocument): string[] {
@@ -109,23 +105,13 @@ export class ComicStripElement extends ElementBase {
     (document as Document & { fonts?: FontFaceSet }).fonts?.addEventListener("loadingdone", this.#onFontsLoaded);
   }
 
-  static get observedAttributes(): string[] {
-    return ["src"];
-  }
-
   connectedCallback(): void {
     this.#resizeObserver.observe(this);
-    const src = this.getAttribute("src");
-    if (src) this.#loadFromSrc(src);
   }
 
   disconnectedCallback(): void {
     this.#resizeObserver.disconnect();
     this.#visibilityObserver?.disconnect();
-  }
-
-  attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null): void {
-    if (name === "src" && newValue && newValue !== oldValue) this.#loadFromSrc(newValue);
   }
 
   /** The strip to render, as data (validated at the boundary). */
@@ -146,16 +132,6 @@ export class ComicStripElement extends ElementBase {
   set packs(packs: string[]) {
     this.#packs = [...packs];
     void this.#rebuild();
-  }
-
-  async #loadFromSrc(src: string): Promise<void> {
-    try {
-      const res = await fetch(src);
-      if (!res.ok) throw new Error(`fetch ${src} failed: ${res.status} ${res.statusText}`);
-      this.document = validateDocument(await res.json());
-    } catch (err) {
-      this.#fail(err instanceof Error ? err.message : String(err));
-    }
   }
 
   #fail(message: string): void {

@@ -8,14 +8,13 @@ import CodeBlock from "./CodeBlock.astro";
 interface Props {
   /** Packages to install, e.g. ["@toonstrip/astro", "@toonstrip/pack-comic-chat"]. */
   packages: string[];
-  dev?: boolean;
 }
-const { packages, dev = false } = Astro.props;
+const { packages } = Astro.props;
 const list = packages.join(" ");
 const commands = {
-  pnpm: `pnpm add ${dev ? "-D " : ""}${list}`,
-  npm: `npm install ${dev ? "--save-dev " : ""}${list}`,
-  yarn: `yarn add ${dev ? "-D " : ""}${list}`,
+  pnpm: `pnpm add ${list}`,
+  npm: `npm install ${list}`,
+  yarn: `yarn add ${list}`,
 } as const;
 const managers = Object.keys(commands) as (keyof typeof commands)[];
 ---

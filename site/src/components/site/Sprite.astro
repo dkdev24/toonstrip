@@ -5,6 +5,7 @@
  * pixels stay crisp (`image-rendering: auto`, never upscaled beyond 2×).
  */
 import type { RosterEntry } from "../../lib/roster";
+import { spriteCropStyle } from "../../lib/sprite-crop";
 
 interface Props {
   entry: RosterEntry;
@@ -12,17 +13,7 @@ interface Props {
   label?: boolean;
 }
 const { entry, size = 64, label = true } = Astro.props;
-const { thumb } = entry;
-const scale = Math.min(size / Math.max(thumb.width, thumb.height), 2);
-const w = Math.round(thumb.width * scale);
-const h = Math.round(thumb.height * scale);
-const style = [
-  `width:${w}px`,
-  `height:${h}px`,
-  `background-image:url(${entry.sheetUrl})`,
-  `background-size:${Math.round(entry.sheetWidth * scale)}px ${Math.round(entry.sheetHeight * scale)}px`,
-  `background-position:-${Math.round(thumb.x * scale)}px -${Math.round(thumb.y * scale)}px`,
-].join(";");
+const style = spriteCropStyle(entry, size);
 ---
 
 <figure class="sprite" title={`${entry.name} (${entry.pack})`}>

@@ -171,7 +171,7 @@ export function padToSquare(raster: Raster, keepBottom: boolean): Raster {
  * colour match everywhere) keeps a white shirt or a white eye white, because
  * those are not connected to the edge.
  */
-export function keyBackground(raster: Raster, tolerance = 28): number {
+export function keyBackground(raster: Raster, tolerance: number): number {
   const { width, height, data } = raster;
   const sample = (i: number) => [data[i]!, data[i + 1]!, data[i + 2]!] as const;
   const corners = [
@@ -259,18 +259,16 @@ export interface Edges {
  * edges count depends on the part: a torso is *supposed* to run off the bottom
  * of its canvas, so its bottom edge is not evidence of a bad slice.
  */
-export function inkAtEdge(raster: Raster, edges: Edges = { top: true, bottom: true, left: true, right: true }, ring = 1): boolean {
+export function inkAtEdge(raster: Raster, edges: Edges): boolean {
   const { width, height, data } = raster;
   const inked = (x: number, y: number) => data[(y * width + x) * 4 + 3]! > ALPHA_FLOOR;
-  for (let r = 0; r < ring; r++) {
-    for (let x = 0; x < width; x++) {
-      if (edges.top && inked(x, r)) return true;
-      if (edges.bottom && inked(x, height - 1 - r)) return true;
-    }
-    for (let y = 0; y < height; y++) {
-      if (edges.left && inked(r, y)) return true;
-      if (edges.right && inked(width - 1 - r, y)) return true;
-    }
+  for (let x = 0; x < width; x++) {
+    if (edges.top && inked(x, 0)) return true;
+    if (edges.bottom && inked(x, height - 1)) return true;
+  }
+  for (let y = 0; y < height; y++) {
+    if (edges.left && inked(0, y)) return true;
+    if (edges.right && inked(width - 1, y)) return true;
   }
   return false;
 }

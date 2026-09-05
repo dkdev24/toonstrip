@@ -1,22 +1,20 @@
 import { describe, expect, it } from "vitest";
-import { UNIT, MAX_COLUMNS, MIN_PANEL_SCALE, cellFor, columnsFor, layoutStrip } from "../src/layout.js";
+import { UNIT, MIN_PANEL_SCALE, layoutStrip } from "../src/layout.js";
 
-describe("columnsFor", () => {
+describe("layoutStrip", () => {
   it("gives one column for a narrow viewport", () => {
-    expect(columnsFor(300, 10)).toBe(1);
+    expect(layoutStrip(300, { gutter: 10 }).columns).toBe(1);
   });
 
   it("earns a second column once two shrunk panels fit", () => {
     const twoUp = 2 * UNIT.width * MIN_PANEL_SCALE + 10;
-    expect(columnsFor(twoUp, 10)).toBe(2);
+    expect(layoutStrip(twoUp, { gutter: 10 }).columns).toBe(2);
   });
 
-  it("never exceeds MAX_COLUMNS", () => {
-    expect(columnsFor(100_000, 10)).toBe(MAX_COLUMNS);
+  it("never exceeds the 3-column ceiling", () => {
+    expect(layoutStrip(100_000, { gutter: 10 }).columns).toBe(3);
   });
-});
 
-describe("layoutStrip", () => {
   it("fits a single panel down on a narrow viewport", () => {
     const layout = layoutStrip(300);
     expect(layout.columns).toBe(1);
@@ -32,13 +30,5 @@ describe("layoutStrip", () => {
   it("falls back to the native unit when available is 0", () => {
     const layout = layoutStrip(0);
     expect(layout.panelWidth).toBe(UNIT.width);
-  });
-});
-
-describe("cellFor", () => {
-  it("is row-major", () => {
-    expect(cellFor(0, 3)).toEqual({ row: 0, column: 0 });
-    expect(cellFor(2, 3)).toEqual({ row: 0, column: 2 });
-    expect(cellFor(3, 3)).toEqual({ row: 1, column: 0 });
   });
 });

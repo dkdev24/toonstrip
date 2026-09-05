@@ -33,7 +33,6 @@ export interface TemplateOptions {
 export interface TemplateResult {
   png: Buffer;
   grid: Grid;
-  labelBand: number;
   /** Rows of cell names — a character sheet's `layout`. */
   layout: (string | null)[][];
   /** The `source.json` fragment declaring this sheet. */
@@ -216,7 +215,6 @@ export function renderTemplate(options: TemplateOptions): Promise<TemplateResult
   return Promise.resolve({
     png: canvas.toBuffer("image/png"),
     grid,
-    labelBand,
     layout,
     declaration,
     prompt: promptFor(kind, grid, names),

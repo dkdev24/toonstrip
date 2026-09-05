@@ -30,9 +30,9 @@ type ButtonProps = ComponentProps<"button"> & {
 // forwardRef is required under Preact: Radix triggers with `asChild` pass a ref
 // through Slot, and a plain function component would receive it as its instance.
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
-  { className, class: cls, variant = "secondary", size = "dense", asChild = false, type = "button", ...props },
+  { class: cls, variant = "secondary", size = "dense", asChild = false, type = "button", ...props },
   ref,
 ) {
   const Comp = asChild ? (Slot as any) : "button";
-  return <Comp ref={ref} type={asChild ? undefined : type} className={cn(BASE, VARIANT[variant], SIZE[size], className, cls)} {...props} />;
+  return <Comp ref={ref} type={asChild ? undefined : type} className={cn(BASE, VARIANT[variant], SIZE[size], cls)} {...props} />;
 });
