@@ -18,26 +18,20 @@ to `main` deploys prod (output `site/dist`; root `pnpm build` is the build).
 
 ## Last Session
 
-2026-09-05: Fixed `site`'s Playwright suite, landed audit #12, then worked the upstream
-port. Checked #3/#14/#16/#19/#28 against the actual `grues-in-comic` repo instead of
+2026-09-05: Fixed `site`'s Playwright suite, landed audit #12, then completed the full
+upstream-port arc. Checked #3/#14/#16/#19/#28 against `grues-in-comic` instead of
 assuming portable: landed #14/#16/#19/#28 in `packages/core` (none needed a matching
-change there); ported #37 there too (verified with its own `gate`/`density`, zero diff,
-committed locally there as v0.33.8, not pushed). **#3 resolved: user confirmed leaving
-`measureBalloon`/`goalWidth`/`stackBalloons` untouched** — audit false positive, closed,
-not deferred. Published the publish cascade: `@toonstrip/core` 0.1.9, `element` 0.1.11,
-`astro` 0.1.13, verified clean-room. 42/46 audit items resolved. See `WORKLOG.md`
-v0.15.4–v0.15.8.
+change there); ported #37 there too (verified `gate`/`density`, zero diff). **#3 closed**
+(user confirmed leaving `measureBalloon`/`goalWidth`/`stackBalloons` untouched — audit
+false positive, not deferred). Published the full chain: `core` 0.1.9, `element` 0.1.11,
+`astro` 0.1.13. Propagated to `danielkimdev-astro` (bumped dep, verified with a real
+browser render — canvases have real drawn pixel content, no console errors). All three
+repos pushed. 42/46 audit items resolved. See `WORKLOG.md` v0.15.4–v0.15.9.
 
 ## Next Actions
 
-1. **Propagate to `danielkimdev-astro`**: bump `@toonstrip/astro` dep to 0.1.13, `npm
-   install`, `npm run build`, verify with a real browser render of `/blog/
-   grues-in-comic-beta/` (or equivalent), commit — per `UPSTREAM_SYNC.md` step 5. Push
-   needs confirmation (production Cloudflare Pages deploy).
-2. **Push toonstrip's local commits** (this session's audit + publish work) and
-   **`grues-in-comic`'s v0.33.8** — both pending confirmation.
-3. **S9 Korean locale** per `SITE_DEV_PLAN.md` §13 — unblocked.
-4. `PONYTAIL_AUDIT.md`'s #8/#46 need a human call, not blocked on anything.
+1. **S9 Korean locale** per `SITE_DEV_PLAN.md` §13 — unblocked.
+2. `PONYTAIL_AUDIT.md`'s #8/#46 need a human call, not blocked on anything.
 
 ## Open Issues
 

@@ -2139,3 +2139,28 @@ resolution — kept, not cut).
 internally consistent again. Next: propagate to `danielkimdev-astro` (bump `@toonstrip/
 astro` dependency, install, build, verify with a real browser render, commit) — pending
 push confirmation, per `UPSTREAM_SYNC.md`.
+
+## v0.15.9 — Propagated to `danielkimdev-astro`; upstream port session complete
+
+**Date:** 2026-09-05
+
+### Changes
+
+Bumped `danielkimdev-astro`'s `@toonstrip/astro` dependency to 0.1.13 (`npm install`,
+lockfile updated — the semver range already matched but the lockfile had 0.1.11 pinned).
+`npm run build` clean, 89 pages. Verified live in a real browser via the `agent-browser`
+skill: navigated to `/blog/grues-in-comic-beta/`, confirmed the `<comic-strip>` custom
+element hydrates (shadow DOM present, `data-live` set), all 4 panel canvases contain real
+drawn pixel content (60-75% non-blank each, not placeholder-blank), screenshot confirms
+correct panels/figures/balloons/dialogue text, no console errors. Committed and pushed
+(`74bb177`) — production Cloudflare Pages deploy triggered.
+
+### Status
+
+This session's upstream-port arc (started as "any other remaining items before the
+upstream port?") is complete: 42/46 `PONYTAIL_AUDIT.md` items resolved, full npm chain
+published and internally consistent (core 0.1.9, element 0.1.11, astro 0.1.13), both
+sibling repos (`grues-in-comic` v0.33.8, `danielkimdev-astro`) pushed with real
+verification at each step (typecheck/tests/gate/density in `grues-in-comic`; build +
+live browser render in `danielkimdev-astro`). Remaining open items: `PONYTAIL_AUDIT.md`
+#8/#46 (need a human call, unrelated to this arc), S9 Korean locale.
