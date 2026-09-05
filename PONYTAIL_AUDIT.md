@@ -13,10 +13,9 @@ existing dep), `yagni` (abstraction with one implementation), `shrink` (same log
 
 ## Progress
 
-**33 of 46 applied (4 partial — see notes). ~866 hand-written lines net removed and 5 deps
-fully dropped (2 more moved to devDeps, 4 demoted); ~1,304 hand-written lines, ~700 generated
-and remaining deps still on the table.** A row marked **done** in the table below is landed and
-the build is green; everything else is untouched.
+**34 of 46 applied (4 partial — see notes). ~700 generated lines and 7 deps fully dropped (2
+more moved to devDeps, 4 demoted); ~1,304 hand-written lines still on the table.** A row marked
+**done** in the table below is landed and the build is green; everything else is untouched.
 
 | Date | Item | What landed | Commit |
 |---|---|---|---|
@@ -54,6 +53,7 @@ the build is green; everything else is untouched.
 | 2026-09-05 | #39 (partial) | `AlphaStats.opaque`, `TemplateResult.labelBand`, `gridBoundaries`' `profiles` removed; unused `maxShift`/`tolerance`/`ring` defaults trimmed; `leftover`/`DOCK_DELTA`/`LARGE` kept — still read by tests or intentional | `6c48463` |
 | 2026-09-05 | #43 (partial) | `packRoot`, `defaultPackDir`, `PopoverAnchor`, `SheetTrigger`, `SheetClose` dropped; `MAX_HASH_LENGTH`, the `columns` getter, `Diagnostic`/`image.ts` re-exports kept — still used | `6c48463` |
 | 2026-09-05 | #45 | `spriteStyle`/`Sprite.astro` crop math shared via `site/src/lib/sprite-crop.ts` | `6c48463` |
+| 2026-09-05 | #1 | ajv+esbuild standalone-compile pipeline replaced with `scripts/embed-schema.mjs` (bakes `schema.json` into a TS literal) + a ~50-line hand-rolled recursive checker in `validate.ts`. `ComicStripValidationError.issues` shape (`instancePath`/`message`) verified byte-for-byte against ajv's old output for missing-required/bad-enum/additional-property/minLength cases | `f91aa64` |
 
 **Verified stale on re-check, not cut:** #6 (`pack-example` has a real external test importer,
 `core/test/pack-example.test.ts`), #7 (pack `types.ts` is deliberately schema-only per
@@ -64,9 +64,6 @@ needs a browser check, not just a green build), #46 (`sheetImage()` merge needs 
 in `draw.mjs` plus fixture-regen verification, `draw.mjs`'s current exports don't cover it).
 
 **Not attempted — flagged:**
-- #1: the ajv/esbuild schema rewrite (biggest single win, ~700 generated lines + 2 deps) — a
-  real behavior rewrite, not a mechanical cut; needs its own pass with the
-  `ComicStripValidationError.issues` contract kept intact.
 - #4: `@toonstrip/next` deprecation — a product decision (needs a migration note), not a
   cleanup.
 - #12: `json-position.ts` rewrite — blocked on fixing `site`'s Playwright suite (see caveat

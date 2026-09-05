@@ -17,26 +17,26 @@ to `main` deploys prod (output `site/dist`; root `pnpm build` is the build).
 
 ## Last Session
 
-2026-09-05: Worked `PONYTAIL_AUDIT.md` autonomously — 31 more items landed (33/46 total, 4
-partial), ~866 hand-written lines net removed, 5 deps dropped outright. Commits `5413998`
-(deps/dead-files + packager dedup) and `6c48463` (site/core/packager shrink). `pnpm
-build`/`pnpm test` green throughout, re-verified independently, not just trusted. A few
-"zero caller" claims turned out stale on re-check (kept, not cut) — see
-`PONYTAIL_AUDIT.md`'s Progress section for the full per-item ledger.
+2026-09-05: Worked `PONYTAIL_AUDIT.md` autonomously — 32 more items landed (34/46 total, 4
+partial), ~700 generated lines + 7 deps dropped, ~866 hand-written lines net removed.
+Commits `5413998`, `6c48463`, `232d49e` (dedup/dead-code) and `f91aa64` (#1: ajv+esbuild
+schema validator replaced with a hand-rolled recursive checker over an embedded
+`schema.json` literal — same `instancePath`/`message` contract, verified byte-for-byte
+against ajv's old output). `pnpm build`/`pnpm test` green throughout, re-verified
+independently. A few "zero caller" claims turned out stale on re-check (kept, not cut) —
+see `PONYTAIL_AUDIT.md`'s Progress section for the full per-item ledger.
 
 ## Next Actions
 
-1. **#1** — ajv/esbuild schema rewrite (biggest win left, ~700 generated lines + 2 deps).
-   Real behavior rewrite, not mechanical; keep `ComicStripValidationError.issues` intact.
-2. **Fix `site`'s Playwright suite** — 8/8 playground specs fail, pre-existing. Blocks
+1. **Fix `site`'s Playwright suite** — 8/8 playground specs fail, pre-existing. Blocks
    #12 (`json-position.ts` rewrite) from being verified by more than a green build.
-3. **Upstream port to `grues-in-comic`** per `UPSTREAM_SYNC.md`: #18 (`layout.ts`), #37
+2. **Upstream port to `grues-in-comic`** per `UPSTREAM_SYNC.md`: #18 (`layout.ts`), #37
    (`balloon.ts`), #38's `normalizeAngle` (`pose.ts`) landed toonstrip-side only; #3/#14/
    #16/#19/#28 never attempted (need ADR + gate/density + a publish cascade — your
    go-ahead required per that doc's Safety section).
-4. **#4** — `@toonstrip/next` deprecation is a product decision (migration note needed),
+3. **#4** — `@toonstrip/next` deprecation is a product decision (migration note needed),
    not a cleanup; still on the table.
-5. **S9 Korean locale** per `SITE_DEV_PLAN.md` §13 — unblocked, M8-M13 done.
+4. **S9 Korean locale** per `SITE_DEV_PLAN.md` §13 — unblocked, M8-M13 done.
 
 ## Open Issues
 
