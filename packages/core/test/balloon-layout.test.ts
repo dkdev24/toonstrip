@@ -1,7 +1,7 @@
 import { createCanvas } from "@napi-rs/canvas";
 import { describe, expect, it } from "vitest";
 import { BALLOON_FONT, balloonFont } from "../src/balloon.js";
-import { canvasMetrics, layoutBalloons, type BalloonInput, type Rect } from "../src/balloon-layout.js";
+import { layoutBalloons, type BalloonInput, type Rect } from "../src/balloon-layout.js";
 
 function ctx() {
   const c = createCanvas(400, 400).getContext("2d");
@@ -16,7 +16,7 @@ describe("layoutBalloons", () => {
     const c = ctx();
     const input: BalloonInput = {
       speaker: "alex", isBox: false, arrowX: 200, text: "Hello there.",
-      metrics: canvasMetrics(c, { balloon: "speech", text: "Hello there." }),
+      kind: "speech", ctx: c,
     };
     const result = layoutBalloons([input], FREE);
     expect(result.fits).toBe(true);
@@ -31,11 +31,11 @@ describe("layoutBalloons", () => {
     const inputs: BalloonInput[] = [
       {
         speaker: "alex", isBox: false, arrowX: 100, text: "Hi.",
-        metrics: canvasMetrics(c, { balloon: "speech", text: "Hi." }),
+        kind: "speech", ctx: c,
       },
       {
         speaker: "sam", isBox: false, arrowX: 300, text: "Hey.",
-        metrics: canvasMetrics(c, { balloon: "speech", text: "Hey." }),
+        kind: "speech", ctx: c,
       },
     ];
     const result = layoutBalloons(inputs, FREE);
@@ -47,12 +47,12 @@ describe("layoutBalloons", () => {
     const c = ctx();
     const build = (): BalloonInput => ({
       speaker: "alex", isBox: false, arrowX: 200, text: "Same text every time.",
-      metrics: canvasMetrics(c, { balloon: "speech", text: "Same text every time." }),
+      kind: "speech", ctx: c,
     });
     const a = layoutBalloons([build()], FREE);
     const b = layoutBalloons([build()], FREE);
-    // Compare geometry only — each build() creates fresh metrics closures,
-    // which are never reference-equal even when behaviorally identical.
+    // Compare geometry only — each result's `input` carries a live
+    // CanvasRenderingContext2D, not something `toEqual` should walk.
     const geometry = (r: typeof a) => r.fits
       ? r.balloons.map(({ box, lines, routeRgn }) => ({ box, lines, routeRgn }))
       : null;
@@ -71,14 +71,11 @@ describe("layoutBalloons", () => {
       {
         speaker: "dan", isBox: false, arrowX: 124,
         text: "Microsoft open-sourced Zork AND Comic Chat. Two ancient projects, dropped months apart.",
-        metrics: canvasMetrics(c, {
-          balloon: "thought",
-          text: "Microsoft open-sourced Zork AND Comic Chat. Two ancient projects, dropped months apart.",
-        }),
+        kind: "thought", ctx: c,
       },
       {
         speaker: "tiki", isBox: false, arrowX: 272, text: "Let me guess. You want to smash them together.",
-        metrics: canvasMetrics(c, { balloon: "speech", text: "Let me guess. You want to smash them together." }),
+        kind: "speech", ctx: c,
       },
     ];
     const result = layoutBalloons(inputs, free);
@@ -109,16 +106,11 @@ describe("layoutBalloons", () => {
       {
         speaker: "dan", isBox: false, arrowX: 124 * scale,
         text: "Microsoft open-sourced Zork AND Comic Chat. Two ancient projects, dropped months apart.",
-        metrics: canvasMetrics(c, {
-          balloon: "thought",
-          text: "Microsoft open-sourced Zork AND Comic Chat. Two ancient projects, dropped months apart.",
-        }, scale),
+        kind: "thought", ctx: c,
       },
       {
         speaker: "tiki", isBox: false, arrowX: 272 * scale, text: "Let me guess. You want to smash them together.",
-        metrics: canvasMetrics(
-          c, { balloon: "speech", text: "Let me guess. You want to smash them together." }, scale,
-        ),
+        kind: "speech", ctx: c,
       },
     ];
     const result = layoutBalloons(inputs, free, undefined, scale);
@@ -131,7 +123,7 @@ describe("layoutBalloons", () => {
     const tight: Rect = { left: 10, top: 10, right: 100, bottom: 60 };
     const input: BalloonInput = {
       speaker: "alex", isBox: false, arrowX: 50, text,
-      metrics: canvasMetrics(c, { balloon: "speech", text }),
+      kind: "speech", ctx: c,
     };
     const result = layoutBalloons([input], tight);
     expect(result.fits).toBe(true);

@@ -10,9 +10,7 @@ import type { Body, CameraPreset, Line, Panel } from "@toonstrip/schema";
 import { drawFigure, figureFor, newCycle, type Cast, type Figure, type PoseCycle } from "./figure.js";
 import type { EmotionOption } from "./emotion.js";
 import { balloonFont, COMIC_FONT_FAMILY, drawBalloon, measureBalloon, type BalloonBox } from "./balloon.js";
-import {
-  canvasMetrics, layoutBalloons, type BalloonInput, type Rect,
-} from "./balloon-layout.js";
+import { layoutBalloons, type BalloonInput, type Rect } from "./balloon-layout.js";
 import { UNIT } from "./layout.js";
 
 /** The bodiless caption channel — a line with no speaking body. */
@@ -110,28 +108,6 @@ export interface RenderOptions {
    * every panel with different bodies.
    */
   cycles?: Map<string, PoseCycle>;
-  /**
-   * Somewhere to record what this render placed. Purely an output: the
-   * renderer reads nothing from it and draws the same pixels whether or not
-   * it is passed. Useful for a visual-diff gate: the geometry that produced
-   * a change says *what* moved, which a pixel hash alone cannot.
-   */
-  trace?: PanelTrace;
-}
-
-/** What a render placed, in panel space. Filled in by {@link RenderOptions.trace}. */
-export interface PanelTrace {
-  bodies: Array<{ speaker: string; x: number; y: number; scale: number; mirror: boolean }>;
-  balloons: Array<{
-    speaker: string;
-    box: BalloonBox;
-    /** How the text broke — the count is enough to spot a re-wrap. */
-    lines: number;
-    /** Where the tail points, or `null` for a balloon that grows none. */
-    tail: { x: number; y: number } | null;
-  }>;
-  /** True when the balloon driver refused the panel and the stack fallback drew it. */
-  stacked: boolean;
 }
 
 /** A gesture sentinel angle per {@link Body.pose} value — outside the emotion wheel's metric. */
@@ -190,13 +166,6 @@ export function renderPanel(
   // above and drop its tail. Only when such a balloon exists.
   if (hasColumnBalloon) applyHeadroom(placed, height);
 
-  if (options.trace) {
-    options.trace.bodies = placed.map(({ speaker, x, y, scale, mirror }) =>
-      ({ speaker, x, y, scale, mirror }));
-    options.trace.balloons = [];
-    options.trace.stacked = false;
-  }
-
   // The figures are laid out in the dark and then not drawn, deliberately,
   // and in that order: balloons are placed *over their speakers*, so
   // skipping the layout would move every balloon in an unlit panel and the
@@ -213,7 +182,7 @@ export function renderPanel(
   // can never be covered by a balloon or a body.
   if (panel.roomTitle !== undefined) drawLocationTitle(ctx, panel.roomTitle, width, uiScale);
 
-  drawBalloons(ctx, panel, width, height, placed, uiScale, options.trace);
+  drawBalloons(ctx, panel, width, height, placed, uiScale);
 
   // The panel border last, so nothing overdraws it.
   ctx.strokeStyle = "#000";
@@ -226,23 +195,6 @@ export function renderPanel(
 export function isSpeaker(body: Body, speakers: readonly Line[]): boolean {
   if (body.requested) return true;
   return speakers.some((line) => line.speaker === body.character);
-}
-
-/**
- * Stage order and facing. Order is stable by insertion (no talk-to graph
- * exists to score a better one). Facing is scored: a body is charged for
- * each neighbour it does not face and each neighbour that does not face it;
- * reduced over a fixed row this means each body faces its **larger side** —
- * the leftmost faces right, the rightmost faces left, and the row turns
- * inward. An exact tie (the middle of an odd row) keeps the rightward default.
- */
-export function orderBodies<T>(bodies: readonly T[]): Array<{ body: T; flip: boolean }> {
-  const n = bodies.length;
-  return bodies.map((body, i) => {
-    const left = i;
-    const right = n - 1 - i;
-    return { body, flip: right < left };
-  });
 }
 
 /**
@@ -287,7 +239,10 @@ export function layoutAvatars(
   const n = bodies.length;
   if (n === 0) return [];
 
-  const ordered = orderBodies(bodies);
+  // Stage order is stable by insertion (no talk-to graph exists to score a
+  // better one); facing turns the row inward — the leftmost faces right, the
+  // rightmost faces left, an exact tie (an odd row's middle) keeps facing right.
+  const flip = bodies.map((_, i) => n - 1 - i < i);
   const scales = bodies.map((b) => fit(b.figure, height, shot.fill ?? 0, widthCap, shot.headFill));
   const widths = bodies.map((b, i) => b.figure.width * scales[i]!);
   const sumWidth = widths.reduce((a, w) => a + w, 0);
@@ -314,7 +269,7 @@ export function layoutAvatars(
       y: shot.headTop === undefined
         ? height - figure.height * scale * shot.reveal
         : height * shot.headTop,
-      mirror: ordered[i]!.flip,
+      mirror: flip[i]!,
     });
     x += w + margin;
   }
@@ -410,7 +365,7 @@ function drawBackdrop(
  */
 function drawBalloons(
   ctx: CanvasRenderingContext2D, panel: Panel, width: number, height: number,
-  placed: ReadonlyArray<PlacedBody>, scale: number, trace?: PanelTrace,
+  placed: ReadonlyArray<PlacedBody>, scale: number,
 ): void {
   ctx.font = balloonFont(scale);
   const heads = headGeometry(placed, scale);
@@ -425,12 +380,12 @@ function drawBalloons(
       ? null
       : (heads.anchors.get(balloon.speaker)?.x ?? null),
     text: balloon.text,
-    metrics: canvasMetrics(ctx, balloon, scale),
+    kind: balloon.balloon,
+    ctx,
   }));
 
   const laid = layoutBalloons(inputs, free, undefined, scale);
   if (!laid.fits) {
-    if (trace) trace.stacked = true;
     stackBalloons(ctx, panel, width, heads, scale);
     return;
   }
@@ -444,10 +399,6 @@ function drawBalloons(
       ? headEdgeTip(item.box, face)
       : (heads.anchors.get(balloon.speaker) ?? null);
     drawBalloon(ctx, balloon, item.box, item.lines, target, scale);
-    trace?.balloons.push({
-      speaker: balloon.speaker, box: item.box, lines: item.lines.length,
-      tail: target ? { x: target.x, y: target.y } : null,
-    });
   }
 }
 

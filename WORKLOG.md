@@ -2060,3 +2060,52 @@ v0.15.5's Playwright fix).
 ### Status
 
 Done. `PONYTAIL_AUDIT.md` #12 moved to the Progress table (36/46 applied).
+
+## v0.15.7 — Ponytail audit #14/#16/#19/#28 landed; #3 stopped on a real design question
+
+**Date:** 2026-09-05
+
+### Changes
+
+Landed four more upstream-shared `packages/core` cuts from `PONYTAIL_AUDIT.md`, each
+checked against the actual `grues-in-comic` sibling repo rather than assumed portable:
+
+- **#14**: `selectPose`/`selectBody`/`nearestGated` deleted from `pose.ts` (zero callers),
+  plus `ANGLE_TOLERANCE`/`NEMOTIONS`. Not portable — `grues-in-comic`'s pose selection
+  lives in a separate, untracked `art/src/pose.ts` package outside `UPSTREAM_SYNC.md`'s
+  file map.
+- **#16**: `PanelTrace`/`RenderOptions.trace` deleted from `render.ts` (zero callers, zero
+  test coverage). Not portable — `grues-in-comic`'s `trace` is real, wired-up
+  functionality in its render path.
+- **#19**: `BalloonMetrics` interface + `canvasMetrics` factory deleted from
+  `balloon-layout.ts`; `BalloonInput` carries `kind`/`ctx` directly now, 6 call sites
+  call the `balloon.ts` functions directly. `balloon-layout.test.ts` updated (9 sites).
+  Not portable — `grues-in-comic` never had this abstraction.
+- **#28**: `orderBodies` inlined into `layoutAvatars` in `render.ts`. Nothing to port —
+  `grues-in-comic`'s version is a genuinely different, non-trivial N-body implementation.
+
+`pnpm --filter @toonstrip/core build`/`test` green after each (30/30 throughout), root
+`pnpm build` green, `site`'s full Playwright suite (8/8) green.
+
+**#3 (`stackBalloons` fallback removal) stopped, not landed.** Investigation found the
+audit's framing was wrong on two counts: `measureBalloon`/`goalWidth` are public
+`@toonstrip/core` barrel exports with their own dedicated test coverage, not dead code;
+and the suggested fix ("`forceFitBalloon` covers `!balloon` for any index") would, taken
+literally, silently drop already-placed balloons in a multi-body panel — `forceFitBalloon`
+discards every input but one. Separately, `grues-in-comic`'s own `stackBalloons` is
+confirmed live there (a real pinned gate case, `mob4-p02`, falls back to it; the
+maintainer spent two recent sessions fixing bugs in that exact path). Needs a product
+decision — the intended fallback redesign, and whether breaking the public API is
+wanted — before any further work. See `PONYTAIL_AUDIT.md`'s #3 entry for full detail.
+
+**Also ported #37 (word-split regex, already landed toonstrip-side in `232d49e`) into
+`grues-in-comic`**: same 5-site pattern in its `web/src/comic/balloon.ts`. Verified there
+with `typecheck` (clean), `test` (391/391 green), `gate` (25/25 match golden, zero pixel
+diff) and `density` (baseline unchanged) — no divergence, no ADR needed. Not yet
+committed there, pending your OK (per `UPSTREAM_SYNC.md`'s Safety section).
+
+### Status
+
+41/46 audit items applied. `packages/core` changed (#14/#16/#19/#28) — the npm publish
+cascade (`@toonstrip/core`→`element`→`astro`) and `danielkimdev-astro`'s dependency bump
+are still pending your confirmation, per `UPSTREAM_SYNC.md`.

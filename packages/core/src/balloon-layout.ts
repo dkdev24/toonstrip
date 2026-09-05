@@ -41,20 +41,6 @@ export interface RouteRgn {
   bottom: number;
 }
 
-/** Measurement, injected so the driver itself never touches a canvas. */
-export interface BalloonMetrics {
-  /** The whole text on one line. */
-  oneLineWidth(text: string): number;
-  /** The floor a wrap may not go below. */
-  widestWord(text: string): number;
-  /** Reflow `text` into a box of exactly `boxWidth`. */
-  measure(text: string, boxWidth: number): { lines: string[]; width: number; height: number };
-  /** What fits in `boxHeight`, and the remainder. */
-  split(text: string, boxWidth: number, boxHeight: number): { text: string; rest: string | null };
-  /** Chrome each side, so the driver can tell when a span is too narrow to build. */
-  chrome: number;
-}
-
 /** One balloon offered to the driver, in the panel's draw order. */
 export interface BalloonInput {
   /** Speaker id, so the caller can match a laid-out box back to its line. */
@@ -68,27 +54,10 @@ export interface BalloonInput {
    */
   arrowX: number | null;
   text: string;
-  metrics: BalloonMetrics;
-}
-
-/**
- * The production {@link BalloonMetrics}: a real canvas, measuring in the
- * balloon's own chrome. `ctx.font` must already be set to
- * {@link "./balloon.js".balloonFont}`(scale)` — the same `scale` passed here
- * — the caller sets it once for the whole panel.
- */
-export function canvasMetrics(
-  ctx: CanvasRenderingContext2D, balloon: Pick<Line, "balloon" | "text">, scale = 1,
-): BalloonMetrics {
-  const as = (text: string): Pick<Line, "balloon" | "text"> =>
-    text === balloon.text ? balloon : { ...balloon, text };
-  return {
-    chrome: chromeFor(balloon, scale),
-    oneLineWidth: (text) => ctx.measureText(text).width,
-    widestWord: (text) => widestWord(ctx, text),
-    measure: (text, boxWidth) => measureAtWidth(ctx, as(text), boxWidth, scale),
-    split: (text, boxWidth, boxHeight) => splitHeight(ctx, as(text), boxWidth, boxHeight, scale),
-  };
+  /** The balloon kind, for {@link chromeFor}/{@link measureAtWidth}/{@link splitHeight}. */
+  kind: Line["balloon"];
+  /** `ctx.font` must already be set to {@link "./balloon.js".balloonFont}`(scale)` — the caller sets it once for the whole panel. */
+  ctx: CanvasRenderingContext2D;
 }
 
 /** A placed balloon: where it goes, how its text broke, what corridor it owns. */
@@ -266,9 +235,9 @@ function layoutBalloon(
 
   const span = brect.right - brect.left;
   // A span that cannot hold the widest single word is not a balloon.
-  if (span - input.metrics.chrome * 2 < input.metrics.widestWord(input.text)) return null;
+  if (span - chromeFor({ balloon: input.kind }, scale) * 2 < widestWord(input.ctx, input.text)) return null;
 
-  const measured = input.metrics.measure(input.text, span);
+  const measured = measureAtWidth(input.ctx, { balloon: input.kind, text: input.text }, span, scale);
   const box: BalloonBox = {
     x: brect.left, y: brect.top, width: measured.width, height: measured.height,
   };
@@ -308,7 +277,7 @@ function getCloudEstimate(
   input: BalloonInput, laid: readonly LaidBalloon[], freeRect: Rect, bounds: Rect,
   random: () => number, scale = 1,
 ): Rect {
-  const len = input.metrics.oneLineWidth(input.text);
+  const len = input.ctx.measureText(input.text).width;
   const area = AREA_FUDGE * len * 2 * (LINE_HEIGHT * scale);
   const maxWidth = bounds.right - bounds.left;
 
@@ -319,7 +288,7 @@ function getCloudEstimate(
     // The height this balloon could use if it grew down to the hook line.
     const potentialHeight = freeRect.bottom - lowestPreviousBottom(laid, freeRect.top)
       + MIN_HOOK_HEIGHT * scale;
-    const minWidth = Math.max(area / potentialHeight, input.metrics.widestWord(input.text));
+    const minWidth = Math.max(area / potentialHeight, widestWord(input.ctx, input.text));
     // Skewed toward maxWidth: a uniform roll picks "too narrow" as often as
     // "wide enough", and a narrow early balloon wraps to more lines, grows
     // taller, and squeezes whatever balloon comes after it down into the
@@ -453,8 +422,8 @@ function adjustRouteRgns(
  */
 function forceFitBalloon(input: BalloonInput, freeRect: Rect, scale = 1): LayoutResult {
   const width = freeRect.right - freeRect.left;
-  const split = input.metrics.split(input.text, width, freeRect.bottom - freeRect.top);
-  const measured = input.metrics.measure(split.text, width);
+  const split = splitHeight(input.ctx, { balloon: input.kind, text: input.text }, width, freeRect.bottom - freeRect.top, scale);
+  const measured = measureAtWidth(input.ctx, { balloon: input.kind, text: split.text }, width, scale);
   const box: BalloonBox = {
     x: freeRect.left, y: freeRect.top + TOP_BORDER * scale,
     width: measured.width, height: measured.height,

@@ -13,13 +13,18 @@ existing dep), `yagni` (abstraction with one implementation), `shrink` (same log
 
 ## Progress
 
-**36 of 46 applied (4 partial — see notes). ~700 generated lines and 7 deps fully dropped (2
+**41 of 46 applied (4 partial — see notes). ~700 generated lines and 7 deps fully dropped (2
 more moved to devDeps, 4 demoted), plus one published package (`@toonstrip/next`) deprecated;
-~1,263 hand-written lines still on the table.** A row marked **done** in the table below is
+~1,109 hand-written lines still on the table.** A row marked **done** in the table below is
 landed and the build is green; everything else is untouched.
 
 | Date | Item | What landed | Commit |
 |---|---|---|---|
+| 2026-09-05 | #14 † | Deleted `selectPose`, `selectBody`, `nearestGated` from `pose.ts` (zero callers repo-wide, confirmed via grep) plus the now-unused `ANGLE_TOLERANCE`/`NEMOTIONS`. ~68 lines removed. **Not portable to `grues-in-comic`**: its pose selection lives in a separate untracked package (`art/src/pose.ts`), out of `UPSTREAM_SYNC.md`'s documented file map — though the same three functions do appear to have zero callers there too, that's a note for that repo's own maintenance, not this port | (this commit) |
+| 2026-09-05 | #16 † | Deleted `PanelTrace`, `RenderOptions.trace`, and `drawBalloons`' `trace` param/write-sites from `render.ts` (zero callers, zero test coverage). **Not portable to `grues-in-comic`**: its `trace`/`PanelTrace` is real, wired-up functionality there (`trace.stacked`, `trace.bodies`, `trace.balloons` are actually populated in its render path) — toonstrip's copy is dead only because toonstrip never grew a consumer for it | (this commit) |
+| 2026-09-05 | #19 † | Deleted the `BalloonMetrics` interface + `canvasMetrics` factory from `balloon-layout.ts`; `BalloonInput` now carries `kind`/`ctx` directly, 6 call sites call `chromeFor`/`measureAtWidth`/`splitHeight`/`widestWord` directly. `packages/core/test/balloon-layout.test.ts` updated (9 construction sites). **Not portable to `grues-in-comic`**: it never had this injection abstraction — it already calls the `balloon.ts` functions directly, so there's nothing to converge | (this commit) |
+| 2026-09-05 | #28 † | Inlined `orderBodies` into its one caller `layoutAvatars` in `render.ts` — a plain `bodies.map((_, i) => n - 1 - i < i)`. **Nothing to port**: `grues-in-comic`'s `orderBodies` is a genuinely different, non-trivial N-body implementation (real flip-state computation), not the trivial wrapper toonstrip had; the two already diverged | (this commit) |
+| 2026-09-05 | #37 | `text.split(/\s+/).filter((w) => w.length > 0)` → `text.match(/\S+/g) ?? []`, five sites in `balloon.ts`. **Ported to `grues-in-comic`** (same 5-site pattern in its `web/src/comic/balloon.ts`) — `typecheck`/`test` (391 green) and `gate`/`density` both confirm zero diff, no ADR needed (no divergence, verified byte-identical tokenization) | `232d49e`, grues-in-comic (uncommitted, pending your OK) |
 | 2026-09-05 | #12 | `json-position.ts`'s hand-written JSON scanner replaced with a walk over `@codemirror/lang-json`'s own parse tree by JSON-pointer segment; ~41 lines net removed. Verified against `@toonstrip/schema`'s real validator output (missing-required, bad-enum, wrong-type-nested, additional-property cases) — every `instancePath` resolved to the same line as the old scanner. All 8 Playwright playground specs green, including the one exercising this path directly | (this commit) |
 | 2026-09-04 | #31 | Deleted `site/src/components/ui/scroll-area.tsx` (zero importers) and dropped `@radix-ui/react-scroll-area` from `site/package.json`; lockfile updated, `pnpm build` green, 23 pages built | `ee908f8` |
 | 2026-09-04 | #42 | Dropped the `codemirror` meta-package from `site/package.json`; all six `@codemirror/*` scoped packages the editor imports stay declared. `pnpm install` removed 3 packages, `pnpm build` green | (this commit) |
@@ -50,8 +55,7 @@ landed and the build is green; everything else is untouched.
 | 2026-09-05 | #24 | Dead `<comic-strip src>` attribute plumbing removed | `6c48463` |
 | 2026-09-05 | #33 (partial) | `Slider` array API, `SheetContent`'s unused sides, `WidthSlider`/`PackageManagerTabs` unused props trimmed; `collapse` and React wrapper's `className`/`style` kept — both still used | `6c48463` |
 | 2026-09-05 | #34 (partial) | `useMediaQuery`, `PaneBar` inlined; `tag-name.ts` kept — documents a real SSR isolation boundary | `6c48463` |
-| 2026-09-05 | #37 | `balloon.ts`'s five `.split(/\s+/).filter(...)` sites replaced with `.match(/\S+/g) ?? []` — **upstream port to `grues-in-comic` still pending** | (this commit) |
-| 2026-09-05 | #38 (partial) | `copyCycles` hoisted to `figure.ts`; `normalizeAngle` simplified to `atan2(sin,cos)`; `readJson` and the part-sort comparator de-duplicated. `fail()`/`touches()` kept — already minimal. **`normalizeAngle`'s upstream port pending** | `6c48463` |
+| 2026-09-05 | #38 (partial) | `copyCycles` hoisted to `figure.ts`; `normalizeAngle` simplified to `atan2(sin,cos)`; `readJson` and the part-sort comparator de-duplicated. `fail()`/`touches()` kept — already minimal. **`normalizeAngle`'s upstream port checked, not applicable**: `grues-in-comic`'s equivalent lives in its own untracked `art/src/pose.ts`, same as #14 — out of `UPSTREAM_SYNC.md`'s file map, no port needed | `6c48463` |
 | 2026-09-05 | #39 (partial) | `AlphaStats.opaque`, `TemplateResult.labelBand`, `gridBoundaries`' `profiles` removed; unused `maxShift`/`tolerance`/`ring` defaults trimmed; `leftover`/`DOCK_DELTA`/`LARGE` kept — still read by tests or intentional | `6c48463` |
 | 2026-09-05 | #43 (partial) | `packRoot`, `defaultPackDir`, `PopoverAnchor`, `SheetTrigger`, `SheetClose` dropped; `MAX_HASH_LENGTH`, the `columns` getter, `Diagnostic`/`image.ts` re-exports kept — still used | `6c48463` |
 | 2026-09-05 | #45 | `spriteStyle`/`Sprite.astro` crop math shared via `site/src/lib/sprite-crop.ts` | `6c48463` |
@@ -66,12 +70,36 @@ landed and the build is green; everything else is untouched.
 needs a browser check, not just a green build), #46 (`sheetImage()` merge needs new shared code
 in `draw.mjs` plus fixture-regen verification, `draw.mjs`'s current exports don't cover it).
 
-**Not attempted — flagged:**
-- #3, #14, #16, #19, #28 (†, upstream-shared `packages/core` files): applying the toonstrip-side
-  edit is safe, but `UPSTREAM_SYNC.md` requires a manual port into `grues-in-comic` (with an ADR
-  for #3's behavioral change, `gate`/`density` re-runs) and then a publish cascade through
-  `@toonstrip/core`→`element`→`astro` — the publish/push steps need your confirmation per that
-  doc's Safety section, so these were left for a dedicated session.
+**#3 — attempted, stopped, needs a product decision (2026-09-05):** not the safe cleanup the
+audit described. Two problems surfaced on inspection:
+1. `measureBalloon`/`goalWidth` (and their constants) are re-exported from `packages/core/src/
+   index.ts`'s public barrel and have their own dedicated 6-test `describe` block in
+   `balloon.test.ts` testing them as general-purpose text measurement, independent of the
+   stacked-balloon path. Deleting them is an API break, not a cleanup — `AREA_FUDGE`/
+   `ONE_LINE_THRESHOLD` also turned out to have a second, surviving caller (`getCloudEstimate`)
+   the audit's "loses its last caller" framing missed.
+2. The suggested fix — "let `forceFitBalloon` cover the `!balloon` case for any index" — is
+   underspecified. `inputs.length === 1` already forces `i === 0` on the loop's only iteration,
+   so that guard clause is a genuine no-op simplification; but extending it to a mid-panel
+   failure in a *multi*-balloon panel means `forceFitBalloon` (which discards every other input
+   and returns a one-balloon result) would silently drop the balloons already placed. Making
+   that correct means redesigning the fallback, not refactoring it.
+3. Separately, in `grues-in-comic`: `docs/PITFALLS.md` documents a real pinned gate case
+   (`mob4-p02`) that falls back to `stackBalloons` today, and the maintainer spent two recent
+   sessions (v0.33.6/v0.33.7 there) fixing bugs *in* that exact fallback path, explicitly
+   reverting a related toonstrip fix because it regressed a baseline. The fallback is live and
+   deliberately maintained there — not a candidate for deletion regardless of what toonstrip
+   decides.
+
+Untouched: `stackBalloons`, `speakerCorridor`, `clearOfFaces`, `HeadGeometry.faces`,
+`measureBalloon`, `goalWidth`, `TARGET_ASPECT`, `WIDTH_BIAS`, `LayoutResult`, the
+`layoutBalloons` guard. Needs your call before any further work: the intended fallback
+redesign (force-fit only the failing balloon vs. some other approach) and whether breaking the
+public `measureBalloon`/`goalWidth` API is actually wanted.
+
+**#14, #16, #19, #28 — landed toonstrip-side, verified not portable to `grues-in-comic`
+(2026-09-05):** see the Progress table above for the per-item reasoning (each checked against
+the actual sibling repo, not assumed) — none needed a matching change there.
 
 **#42's verification caveat resolved (2026-09-05):** `site`'s Playwright suite (`pnpm test:e2e`)
 was never a code bug — Astro 7's `astro preview` always forks a detached background daemon and

@@ -18,22 +18,25 @@ to `main` deploys prod (output `site/dist`; root `pnpm build` is the build).
 
 ## Last Session
 
-2026-09-05: Fixed `site`'s Playwright suite (all 8 playground specs — Astro 7's `astro
-preview` daemonizes and exits immediately, which broke Playwright's `webServer`; a stale
-daemon from an unrelated project was also squatting on the default port). Then landed
-audit #12: `json-position.ts`'s hand-written JSON scanner replaced with a walk over
-`@codemirror/lang-json`'s own parse tree (already a dep, no new one added), verified
-byte-for-byte against real `@toonstrip/schema` validation output and the live Playwright
-suite. 36/46 audit items now done. Also caught up public `CHANGELOG.md` (0.15.1–0.15.4)
-and republished `@toonstrip/astro`. See `WORKLOG.md` v0.15.4–v0.15.6.
+2026-09-05: Fixed `site`'s Playwright suite, landed audit #12, then worked the upstream
+port. Checked #3/#14/#16/#19/#28 against the actual `grues-in-comic` repo instead of
+assuming portable: landed #14/#16/#19/#28 in `packages/core` (none needed a matching
+change there — dead/different/absent on that side); ported #37 there too (verified with
+its own `gate`/`density`, zero diff). **#3 stopped, needs your call**: the audit's
+framing was wrong (public API export with real tests, an underspecified fallback
+redesign that risks dropping balloons) and `grues-in-comic`'s `stackBalloons` is
+confirmed live/maintained there. 41/46 audit items done. See `WORKLOG.md` v0.15.4–v0.15.7.
 
 ## Next Actions
 
-1. **Upstream port to `grues-in-comic`** per `UPSTREAM_SYNC.md`: #18/#37/#38 landed
-   toonstrip-side only; #3/#14/#16/#19/#28 never attempted — needs your go-ahead before
-   the publish cascade (`UPSTREAM_SYNC.md`'s Safety section).
-2. **S9 Korean locale** per `SITE_DEV_PLAN.md` §13 — unblocked.
-3. `PONYTAIL_AUDIT.md`'s #8/#46 need a human call, not blocked on anything.
+1. **#3 needs a product decision** (`PONYTAIL_AUDIT.md`): intended fallback redesign, and
+   whether breaking `measureBalloon`/`goalWidth`'s public API is wanted.
+2. **Publish cascade pending your OK**: `packages/core` changed (#14/#16/#19/#28) —
+   bump+publish `@toonstrip/core`→`element`→`astro` in order, then propagate to
+   `danielkimdev-astro` (bump dep, install, build, browser-verify) per `UPSTREAM_SYNC.md`.
+   `grues-in-comic`'s #37 port is made but uncommitted there, same pending-OK reason.
+3. **S9 Korean locale** per `SITE_DEV_PLAN.md` §13 — unblocked.
+4. `PONYTAIL_AUDIT.md`'s #8/#46 need a human call, not blocked on anything.
 
 ## Open Issues
 
@@ -45,6 +48,3 @@ and republished `@toonstrip/astro`. See `WORKLOG.md` v0.15.4–v0.15.6.
   through; don't assume failure from stale metadata.
 - `toonstrip pack validate` misses a missing torso (checks NEUTRAL only, source-side
   validator does catch it).
-- This machine runs multiple Astro projects sharing one global `astro preview` daemon
-  lock/default port (4321); a manual preview here needs its own `--port` + `preview
-  stop` cleanup. `site`'s e2e suite already handles this itself (port 43210).
