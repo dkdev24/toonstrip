@@ -5,7 +5,8 @@
  * size (a resample would smear the exact magenta and lose it).
  */
 
-import { alphaBox, alphaStats, createCanvas, loadImage, takeMarker, toCanvas, type AlphaStats, type Box, type Raster } from "./image.js";
+import { alphaBox, alphaStats, loadImage, readPng, takeMarker, type AlphaStats, type Box, type Raster } from "./image.js";
+import { resizeRaster } from "./grid.js";
 import type { AssetImageSpec } from "./spec.js";
 import type { SourceBackdrop, SourcePart } from "./source.js";
 
@@ -30,14 +31,6 @@ export interface MeasuredBackdrop {
   stats: AlphaStats;
 }
 
-function rasterOf(source: { width: number; height: number }, draw: (ctx: ReturnType<ReturnType<typeof createCanvas>["getContext"]>) => void): Raster {
-  const canvas = createCanvas(source.width, source.height);
-  const ctx = canvas.getContext("2d");
-  draw(ctx);
-  const { data } = ctx.getImageData(0, 0, source.width, source.height);
-  return { width: source.width, height: source.height, data: data as unknown as Uint8ClampedArray };
-}
-
 /** A private copy, so measuring never mutates a raster a sheet slice shares. */
 function clone(raster: Raster): Raster {
   return { width: raster.width, height: raster.height, data: new Uint8ClampedArray(raster.data) };
@@ -46,25 +39,13 @@ function clone(raster: Raster): Raster {
 export async function measurePart(part: SourcePart, spec: AssetImageSpec): Promise<MeasuredPart> {
   // A sheet cell arrives already sliced, keyed and squared; a per-pose part is
   // decoded from its own file. Everything after this point is identical.
-  const nativeRaster = part.image
-    ? clone(part.image)
-    : await (async () => {
-        const image = await loadImage(part.path);
-        return rasterOf({ width: image.width, height: image.height }, (ctx) =>
-          ctx.drawImage(image, 0, 0),
-        );
-      })();
+  const nativeRaster = part.image ? clone(part.image) : await readPng(part.path);
   const native = { width: nativeRaster.width, height: nativeRaster.height };
   const marker = takeMarker(nativeRaster);
 
   const scaleX = spec.cell / native.width;
   const scaleY = spec.cell / native.height;
-  const cellRaster =
-    native.width === spec.cell && native.height === spec.cell
-      ? nativeRaster
-      : rasterOf({ width: spec.cell, height: spec.cell }, (ctx) =>
-          ctx.drawImage(toCanvas(nativeRaster), 0, 0, spec.cell, spec.cell),
-        );
+  const cellRaster = resizeRaster(nativeRaster, spec.cell);
 
   const box = alphaBox(cellRaster);
   return {
@@ -88,8 +69,6 @@ export async function measureBackdrop(
   }
   const image = await loadImage(backdrop.path);
   const native = { width: image.width, height: image.height };
-  const raster = rasterOf({ width: spec.backdropSize, height: spec.backdropSize }, (ctx) =>
-    ctx.drawImage(image, 0, 0, spec.backdropSize, spec.backdropSize),
-  );
+  const raster = await readPng(backdrop.path, spec.backdropSize);
   return { backdrop, native, raster, stats: alphaStats(raster, null) };
 }

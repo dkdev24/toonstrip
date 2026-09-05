@@ -25,7 +25,6 @@
         localStorage.setItem("theme", theme);
       } catch {}
       buttons.forEach((b) => b.setAttribute("aria-label", label(theme)));
-      window.dispatchEvent(new CustomEvent("theme-change", { detail: { theme } }));
     }),
   );
 </script>

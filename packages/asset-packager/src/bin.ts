@@ -1,17 +1,17 @@
 #!/usr/bin/env node
-import { mkdirSync, writeFileSync } from "node:fs";
-import { dirname } from "node:path";
+import { existsSync, mkdirSync, writeFileSync } from "node:fs";
+import { basename, dirname, join } from "node:path";
 import { analyze } from "./analyze.js";
 import { buildPack } from "./build.js";
-import { initSource } from "./init.js";
 import { renderTemplate, type TemplateKind } from "./template.js";
+import { promptChecklist, sourceJsonScaffold } from "./templates.js";
 import type { Diagnostic } from "./validate.js";
 
 function usage(): never {
   console.error(`Usage:
   toonstrip-pack init <source-dir> [--name <pack-name>]
   toonstrip-pack validate <source-dir>
-  toonstrip-pack build <source-dir> --out <pack-dir> [--preview <joins.png>] [--npm] [--force]
+  toonstrip-pack build <source-dir> --out <pack-dir> [--preview <joins.png>] [--force]
   toonstrip-pack template --out <ref.png> [--kind character|backdrop] [--ids a,b,c]
                           [--columns N] [--rows N] [--cell 512] [--label-band 0.1]
 
@@ -41,12 +41,24 @@ const [command, target] = argv;
 async function main(): Promise<number> {
   if (command === "init") {
     if (!target || target.startsWith("--")) usage();
-    const result = initSource(target, flag(argv, "name"));
-    console.log(`scaffolded ${result.dir}`);
-    for (const file of result.files) console.log(`  + ${file}`);
-    for (const file of result.skipped) console.log(`  = ${file} (already there, left alone)`);
+    const packName = flag(argv, "name") ?? basename(target);
+    const put = (relative: string, contents: string) => {
+      const path = join(target, relative);
+      if (existsSync(path)) {
+        console.log(`  = ${relative} (already there, left alone)`);
+        return;
+      }
+      mkdirSync(join(path, ".."), { recursive: true });
+      writeFileSync(path, contents);
+      console.log(`  + ${relative}`);
+    };
+    mkdirSync(join(target, "characters", "example"), { recursive: true });
+    mkdirSync(join(target, "backdrops"), { recursive: true });
+    console.log(`scaffolded ${target}`);
+    put("source.json", sourceJsonScaffold(packName));
+    put("POSES.md", promptChecklist());
     console.log(`\nNext: read POSES.md, then drop face-NEUTRAL.png and torso-NEUTRAL.png into`);
-    console.log(`${result.dir}/characters/<id>/`);
+    console.log(`${target}/characters/<id>/`);
     return 0;
   }
 
@@ -95,7 +107,6 @@ async function main(): Promise<number> {
     const result = await buildPack({
       source: target,
       out,
-      npm: argv.includes("--npm"),
       force: argv.includes("--force"),
       preview: flag(argv, "preview"),
     });

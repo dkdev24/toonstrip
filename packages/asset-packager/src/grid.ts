@@ -9,7 +9,7 @@
  */
 
 import { ALPHA_FLOOR } from "./spec.js";
-import { createCanvas, type Box, type Raster } from "./image.js";
+import { createCanvas, toCanvas, type Box, type Raster } from "./image.js";
 
 export interface Grid {
   columns: number;
@@ -226,11 +226,7 @@ export function keyBackground(raster: Raster, tolerance = 28): number {
 /** Rescales a raster to a square `edge`, so a grid's cells share one size. */
 export function resizeRaster(raster: Raster, edge: number): Raster {
   if (raster.width === edge && raster.height === edge) return raster;
-  const source = createCanvas(raster.width, raster.height);
-  const sourceCtx = source.getContext("2d");
-  const image = sourceCtx.createImageData(raster.width, raster.height);
-  image.data.set(raster.data);
-  sourceCtx.putImageData(image, 0, 0);
+  const source = toCanvas(raster);
 
   const canvas = createCanvas(edge, edge);
   const ctx = canvas.getContext("2d");
@@ -308,17 +304,6 @@ export function flatness(raster: Raster): number {
   return 1 - Math.min(1, deviation / pixels / 60);
 }
 
-/** Mean of a profile slice — how uniform (i.e. how blank) a whole cell is. */
-export function meanUniformity(profile: Float64Array, from: number, to: number): number {
-  let sum = 0;
-  let n = 0;
-  for (let i = Math.max(0, from); i < Math.min(profile.length, to); i++) {
-    sum += profile[i]!;
-    n++;
-  }
-  return n === 0 ? 0 : sum / n;
-}
-
 /**
  * A perceptual signature for one backdrop cell.
  *
@@ -337,11 +322,7 @@ export interface SceneSignature {
 export function sceneSignature(raster: Raster, edge = 16): SceneSignature {
   const canvas = createCanvas(edge + 1, edge);
   const ctx = canvas.getContext("2d");
-  const source = createCanvas(raster.width, raster.height);
-  const sourceCtx = source.getContext("2d");
-  const image = sourceCtx.createImageData(raster.width, raster.height);
-  image.data.set(raster.data);
-  sourceCtx.putImageData(image, 0, 0);
+  const source = toCanvas(raster);
   ctx.drawImage(source, 0, 0, edge + 1, edge);
   const { data } = ctx.getImageData(0, 0, edge + 1, edge);
 
@@ -379,34 +360,6 @@ export function sameScene(a: SceneSignature, b: SceneSignature): { same: boolean
   return { same: distance <= Math.round(a.bits * 0.04) && colour < 36, distance };
 }
 
-/** 64-bit average hash of a raster. Kept for coarse comparisons. */
-export function averageHash(raster: Raster): bigint {
-  const canvas = createCanvas(8, 8);
-  const ctx = canvas.getContext("2d");
-  const source = createCanvas(raster.width, raster.height);
-  const sourceCtx = source.getContext("2d");
-  const image = sourceCtx.createImageData(raster.width, raster.height);
-  image.data.set(raster.data);
-  sourceCtx.putImageData(image, 0, 0);
-  ctx.drawImage(source, 0, 0, 8, 8);
-  const { data } = ctx.getImageData(0, 0, 8, 8);
-
-  const grey: number[] = [];
-  for (let i = 0; i < 64; i++) {
-    grey.push(0.299 * data[i * 4]! + 0.587 * data[i * 4 + 1]! + 0.114 * data[i * 4 + 2]!);
-  }
-  const mean = grey.reduce((a, b) => a + b, 0) / 64;
-  let hash = 0n;
-  for (let i = 0; i < 64; i++) hash |= (grey[i]! >= mean ? 1n : 0n) << BigInt(i);
-  return hash;
-}
-
 export function hamming(a: bigint, b: bigint): number {
-  let x = a ^ b;
-  let count = 0;
-  while (x > 0n) {
-    if (x & 1n) count++;
-    x >>= 1n;
-  }
-  return count;
+  return (a ^ b).toString(2).replaceAll("0", "").length;
 }

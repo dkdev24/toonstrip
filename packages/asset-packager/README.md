@@ -34,9 +34,6 @@ npx toonstrip pack validate ./my-pack
 npx toonstrip render strip.json --out strip.png --pack ./my-pack
 ```
 
-Add `--npm` to also write the loader skeleton (`package.json`, `src/index.ts`)
-that makes the output directory an installable package.
-
 ## Sheet input
 
 When the art comes from an image model, generate a grid in one pass instead of a

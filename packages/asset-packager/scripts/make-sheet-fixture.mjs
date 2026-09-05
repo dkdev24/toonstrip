@@ -19,90 +19,48 @@
  * Run: node scripts/make-sheet-fixture.mjs
  */
 import { createCanvas } from "@napi-rs/canvas";
-import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { drawFace as drawFaceShared, drawTorso as drawTorsoShared, write as writeFile } from "./draw.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "fixtures", "source-sheets");
 const CELL = 512;
 const LABEL_BAND = 0.1;
 
 function write(relative, buffer) {
-  const path = join(ROOT, relative);
-  mkdirSync(dirname(path), { recursive: true });
-  writeFileSync(path, buffer);
+  writeFile(ROOT, relative, buffer);
 }
 
 function drawFace(ctx, edge, { skin, hair, mouth, brow }) {
-  const cx = edge / 2;
-  const chin = edge * 0.86;
-  const rx = edge * 0.33;
-  const ry = edge * 0.34;
-  const cy = chin - ry;
-
-  ctx.lineWidth = 5;
-  ctx.strokeStyle = "#101010";
-  ctx.fillStyle = skin;
-  ctx.beginPath();
-  ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.stroke();
-
-  ctx.fillStyle = hair;
-  ctx.beginPath();
-  ctx.ellipse(cx, cy - ry * 0.35, rx * 0.98, ry * 0.55, 0, Math.PI, Math.PI * 2);
-  ctx.fill();
-
-  ctx.fillStyle = "#101010";
-  for (const side of [-1, 1]) {
-    ctx.beginPath();
-    ctx.ellipse(cx + side * rx * 0.35, cy - ry * 0.05, 11, 13, 0, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.moveTo(cx + side * rx * 0.15, cy - ry * 0.3);
-    ctx.lineTo(cx + side * rx * 0.55, cy - ry * 0.3 - brow);
-    ctx.stroke();
-  }
-  ctx.beginPath();
-  ctx.moveTo(cx - rx * 0.3, cy + ry * 0.4);
-  ctx.quadraticCurveTo(cx, cy + ry * 0.4 + mouth, cx + rx * 0.3, cy + ry * 0.4);
-  ctx.stroke();
-
-  // Neck stub: its base is the join the convention finds.
-  ctx.fillStyle = skin;
-  ctx.fillRect(cx - rx * 0.22, chin - ry * 0.12, rx * 0.44, edge * 0.09);
-  ctx.strokeRect(cx - rx * 0.22, chin - ry * 0.12, rx * 0.44, edge * 0.09);
+  drawFaceShared(ctx, edge, {
+    skin,
+    hair,
+    mouth,
+    brow,
+    lineWidth: 5,
+    lineJoin: "miter",
+    chinRatio: 0.86,
+    rxRatio: 0.33,
+    ryRatio: 0.34,
+    eyeRx: 11,
+    eyeRy: 13,
+    neckHeightRatio: 0.09,
+  });
 }
 
 function drawTorso(ctx, edge, { shirt, arms }) {
-  const cx = edge / 2;
-  const neck = edge * 0.09;
-  const half = edge * 0.4;
-
-  ctx.lineWidth = 5;
-  ctx.strokeStyle = "#101010";
-  ctx.fillStyle = shirt;
-  ctx.beginPath();
-  ctx.moveTo(cx - half * 0.35, neck);
-  ctx.lineTo(cx + half * 0.35, neck);
-  ctx.lineTo(cx + half, neck + edge * 0.26);
-  ctx.lineTo(cx + half * 0.8, edge * 1.05);
-  ctx.lineTo(cx - half * 0.8, edge * 1.05);
-  ctx.lineTo(cx - half, neck + edge * 0.26);
-  ctx.closePath();
-  ctx.fill();
-  ctx.stroke();
-
-  ctx.lineWidth = 20;
-  ctx.lineCap = "round";
-  for (const [side, lift] of arms) {
-    const shoulderX = cx + side * half * 0.85;
-    const shoulderY = neck + edge * 0.22;
-    ctx.beginPath();
-    ctx.moveTo(shoulderX, shoulderY);
-    ctx.lineTo(shoulderX + side * edge * 0.06, shoulderY + edge * 0.2 - lift * edge * 0.32);
-    ctx.stroke();
-  }
+  drawTorsoShared(ctx, edge, {
+    shirt,
+    arms,
+    outlineLineWidth: 5,
+    outlineLineJoin: "miter",
+    armLineWidth: 20,
+    neckRatio: 0.09,
+    halfWidthRatio: 0.4,
+    shoulderDropRatio: 0.26,
+    bottomRatio: 1.05,
+    liftRatio: 0.32,
+  });
 }
 
 function drawScene(ctx, edge, { sky, ground, feature, featureColor, horizon = 0.62 }, width = edge) {

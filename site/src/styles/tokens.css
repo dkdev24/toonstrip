@@ -54,7 +54,6 @@
   --space-48: 3rem;
   --space-64: 4rem;
   --space-96: 6rem;
-  --space-128: 8rem;
 
   /* Layout */
   --container: 72rem;
@@ -70,7 +69,6 @@
   /* Motion (DESIGN.md §7) */
   --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
   --dur-fast: 120ms;
-  --dur-base: 200ms;
 }
 
 /* Dark — the toggle wins over the system preference in both directions. */
@@ -99,6 +97,5 @@
 @media (prefers-reduced-motion: reduce) {
   :root {
     --dur-fast: 0ms;
-    --dur-base: 0ms;
   }
 }

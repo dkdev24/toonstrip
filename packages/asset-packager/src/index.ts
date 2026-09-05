@@ -5,18 +5,8 @@
  * output format.
  */
 
-export * from "./spec.js";
-export * from "./diagnostic.js";
-export * from "./grid.js";
-export * from "./sheet.js";
-export * from "./register.js";
-export * from "./template.js";
-export * from "./source.js";
-export * from "./measure.js";
-export * from "./analyze.js";
-export * from "./validate.js";
-export * from "./pack.js";
-export * from "./build.js";
-export * from "./init.js";
-export { renderJoinPreview } from "./preview.js";
-export type { Box, Raster, AlphaStats } from "./image.js";
+export { analyze, type Analysis } from "./analyze.js";
+export { buildPack, type BuildOptions, type BuildResult } from "./build.js";
+export { renderTemplate, type TemplateOptions, type TemplateKind, type TemplateResult } from "./template.js";
+export type { Diagnostic } from "./validate.js";
+export type { SourceJson } from "./source.js";

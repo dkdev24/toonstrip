@@ -11,10 +11,8 @@
 
 import { EMOTION_NAMES, EMOTION_ANGLES } from "@toonstrip/core";
 
-export const SPEC_VERSION = 1;
-
 /** Part kinds a source directory may contain. */
-export const PART_KINDS = ["face", "torso", "body"] as const;
+export const PART_KINDS = ["face", "torso"] as const;
 export type PartKind = (typeof PART_KINDS)[number];
 
 export interface AssetImageSpec {
@@ -45,7 +43,6 @@ export const DEFAULT_SPEC: AssetImageSpec = {
 export const FILL_WINDOW: Record<PartKind, { min: number; max: number }> = {
   face: { min: 0.5, max: 0.98 },
   torso: { min: 0.55, max: 1.0 },
-  body: { min: 0.4, max: 1.0 },
 };
 
 /** Alpha at or below this counts as background when finding a drawing's box. */
@@ -61,8 +58,7 @@ export const MARKER_COLOR = { r: 255, g: 0, b: 255 } as const;
 export const MAX_FRINGE_RATIO = 0.35;
 
 /** Filename form: `<kind>-<EMOTION>[@<intensity>][-<variant>].png`. */
-export const PART_FILENAME =
-  /^(face|torso|body)-([A-Z0-9]+)(?:@(\d*\.?\d+))?(?:-(\d+))?\.png$/;
+export const PART_FILENAME = /^(face|torso)-([A-Z0-9]+)(?:@(\d*\.?\d+))?(?:-(\d+))?\.png$/;
 
 export interface ParsedPartName {
   kind: PartKind;

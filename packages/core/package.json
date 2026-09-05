@@ -16,10 +16,10 @@
     "example:render-fixture": "node --experimental-strip-types examples/render-fixture.ts"
   },
   "dependencies": {
-    "@toonstrip/schema": "workspace:*",
-    "@napi-rs/canvas": "^0.1.65"
+    "@toonstrip/schema": "workspace:*"
   },
   "devDependencies": {
+    "@napi-rs/canvas": "^0.1.65",
     "@toonstrip/pack-comic-chat": "workspace:*",
     "@toonstrip/pack-example": "workspace:*",
     "typescript": "^5.6.3",

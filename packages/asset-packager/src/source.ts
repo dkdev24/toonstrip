@@ -4,7 +4,7 @@
  * produces. `pack.json` and the rect tables are outputs, never inputs.
  */
 
-import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { DEFAULT_SPEC, parsePartName, type AssetImageSpec, type PartKind } from "./spec.js";
 import type { Raster } from "./image.js";
@@ -146,8 +146,9 @@ function readJson<T>(path: string): T {
 
 function directories(dir: string): string[] {
   if (!existsSync(dir)) return [];
-  return readdirSync(dir)
-    .filter((entry) => statSync(join(dir, entry)).isDirectory())
+  return readdirSync(dir, { withFileTypes: true })
+    .filter((e) => e.isDirectory())
+    .map((e) => e.name)
     .sort();
 }
 
@@ -230,9 +231,4 @@ export function readSource(dir: string): SourcePack {
   }));
 
   return { dir, json, spec, characters, backdrops, backdropSheets };
-}
-
-/** Parts of one kind, in the order they will appear in the manifest. */
-export function partsOfKind(character: SourceCharacter, kind: PartKind): SourcePart[] {
-  return character.parts.filter((p) => p.kind === kind);
 }

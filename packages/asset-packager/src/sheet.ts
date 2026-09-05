@@ -15,14 +15,14 @@
  * `spec.cell`) comes back as a diagnostic naming the cell.
  */
 
-import { loadImage, type Raster } from "./image.js";
+import type { Raster } from "./image.js";
 import {
   alphaProfiles, boundaries, cellBox, centreSquare, cropRaster, flatness, gridFor, inkAtEdge,
   keyBackground, padToSquare, resizeRaster, sameScene, sceneSignature, uniformityProfiles,
   type Grid, type SceneSignature,
 } from "./grid.js";
 import { register, NO_SHIFT } from "./register.js";
-import { alphaBox, alphaStats, createCanvas } from "./image.js";
+import { alphaBox, alphaStats, readPng } from "./image.js";
 import { parsePartName, type AssetImageSpec } from "./spec.js";
 import type { Diagnostic } from "./diagnostic.js";
 import type {
@@ -31,16 +31,6 @@ import type {
 
 /** How much a pose may differ in size from NEUTRAL before it reads as drift. */
 const SCALE_TOLERANCE = 0.12;
-
-
-async function rasterOf(path: string): Promise<Raster> {
-  const image = await loadImage(path);
-  const canvas = createCanvas(image.width, image.height);
-  const ctx = canvas.getContext("2d");
-  ctx.drawImage(image, 0, 0);
-  const { data } = ctx.getImageData(0, 0, image.width, image.height);
-  return { width: image.width, height: image.height, data: data as unknown as Uint8ClampedArray };
-}
 
 /** Cell boundaries on both axes, gutters found near where they were expected. */
 function gridBoundaries(sheet: Raster, grid: Grid, decl: SheetDecl, transparent: boolean) {
@@ -96,7 +86,7 @@ export async function sliceBackdropSheet(
   spec: AssetImageSpec,
 ): Promise<SlicedBackdrops> {
   const diagnostics: Diagnostic[] = [];
-  const sheet = await rasterOf(decl.path);
+  const sheet = await readPng(decl.path);
   const ids = decl.ids ?? [];
   if (ids.length === 0) {
     return {
@@ -204,7 +194,7 @@ export async function sliceCharacterSheet(
     };
   }
 
-  const sheet = await rasterOf(decl.path);
+  const sheet = await readPng(decl.path);
   const grid: Grid = {
     rows: layout.length,
     columns: Math.max(...layout.map((row) => row.length)),
@@ -286,7 +276,7 @@ export async function sliceCharacterSheet(
   // Register every cell against its kind's NEUTRAL cell: one pass, one scale,
   // so a pose drawn a few pixels high gets corrected rather than inheriting a
   // wrong join. This is what a folder of separate files cannot do.
-  for (const kind of ["face", "torso", "body"] as const) {
+  for (const kind of ["face", "torso"] as const) {
     const ofKind = cells.filter((c) => c.part.kind === kind);
     const reference = ofKind.find((c) => c.part.emotion === "NEUTRAL");
     if (!reference) continue;

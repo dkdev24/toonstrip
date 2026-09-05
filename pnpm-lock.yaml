@@ -150,9 +150,6 @@ importers:
       '@toonstrip/element':
         specifier: workspace:*
         version: link:../element
-      '@toonstrip/schema':
-        specifier: workspace:*
-        version: link:../schema
     devDependencies:
       astro:
         specifier: ^7.2.9
@@ -191,13 +188,13 @@ importers:
 
   packages/core:
     dependencies:
-      '@napi-rs/canvas':
-        specifier: ^0.1.65
-        version: 0.1.100
       '@toonstrip/schema':
         specifier: workspace:*
         version: link:../schema
     devDependencies:
+      '@napi-rs/canvas':
+        specifier: ^0.1.65
+        version: 0.1.100
       '@toonstrip/pack-comic-chat':
         specifier: workspace:*
         version: link:../pack-comic-chat
@@ -220,15 +217,9 @@ importers:
         specifier: workspace:*
         version: link:../schema
     devDependencies:
-      axe-core:
-        specifier: ^4.10.0
-        version: 4.13.0
       jsdom:
         specifier: ^25.0.1
         version: 25.0.1
-      playwright:
-        specifier: ^1.48.0
-        version: 1.62.1
       typescript:
         specifier: ^5.6.3
         version: 5.9.3
@@ -244,10 +235,10 @@ importers:
       '@toonstrip/react':
         specifier: workspace:*
         version: link:../react
+    devDependencies:
       '@toonstrip/schema':
         specifier: workspace:*
         version: link:../schema
-    devDependencies:
       '@types/react':
         specifier: ^18.3.12
         version: 18.3.31
@@ -302,10 +293,10 @@ importers:
       '@toonstrip/element':
         specifier: workspace:*
         version: link:../element
+    devDependencies:
       '@toonstrip/schema':
         specifier: workspace:*
         version: link:../schema
-    devDependencies:
       '@types/react':
         specifier: ^18.3.12
         version: 18.3.31
@@ -352,10 +343,10 @@ importers:
       '@toonstrip/element':
         specifier: workspace:*
         version: link:../element
+    devDependencies:
       '@toonstrip/schema':
         specifier: workspace:*
         version: link:../schema
-    devDependencies:
       '@vue/test-utils':
         specifier: ^2.4.6
         version: 2.5.0(@vue/compiler-dom@3.5.42)(@vue/server-renderer@3.5.42)(vue@3.5.42(typescript@5.9.3))
@@ -455,9 +446,6 @@ importers:
       astro:
         specifier: ^7.2.9
         version: 7.2.9(@astrojs/markdown-remark@7.2.4)(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.3)(@types/node@24.13.3)(jiti@2.7.0)
-      class-variance-authority:
-        specifier: ^0.7.1
-        version: 0.7.1
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -2577,9 +2565,6 @@ packages:
   ci-info@4.4.0:
     resolution: {integrity: sha512-77PSwercCZU2Fc4sX94eF8k8Pxte6JAwL4/ICZLFjJLqegs7kCuAsqqj/70NQF6TvDpgFjkubQB2FW2ZZddvQg==}
     engines: {node: '>=8'}
-
-  class-variance-authority@0.7.1:
-    resolution: {integrity: sha512-Ka+9Trutv7G8M6WT6SeiRWz792K5qEqIGEGzXKhAE6xOWAY6pPH8U+9IY3oCMv6kqTmLsv7Xh/2w2RigkePMsg==}
 
   client-only@0.0.1:
     resolution: {integrity: sha512-IV3Ou0jSMzZrd3pZ48nLkT9DA7Ag1pnPzaiQhpW7c3RbcqqzvzzVu+L8gfqMp/8IM2MQtSiqaCxrrcfu8I8rMA==}
@@ -6331,10 +6316,6 @@ snapshots:
       readdirp: 5.1.1
 
   ci-info@4.4.0: {}
-
-  class-variance-authority@0.7.1:
-    dependencies:
-      clsx: 2.1.1
 
   client-only@0.0.1: {}
 

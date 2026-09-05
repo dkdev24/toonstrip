@@ -27,14 +27,15 @@ const [command, subcommand, arg] = argv;
 
 if (command === "pack" && subcommand === "validate") {
   if (!arg) usage();
-  const result = validatePack(arg);
-  if (result.ok) {
-    console.log(`OK: ${arg} is a valid pack`);
-    process.exit(0);
-  }
-  console.error(`FAIL: ${arg} is not a valid pack`);
-  for (const error of result.errors) console.error(`  - ${error}`);
-  process.exit(1);
+  validatePack(arg).then((result) => {
+    if (result.ok) {
+      console.log(`OK: ${arg} is a valid pack`);
+      process.exit(0);
+    }
+    console.error(`FAIL: ${arg} is not a valid pack`);
+    for (const error of result.errors) console.error(`  - ${error}`);
+    process.exit(1);
+  });
 } else if (command === "render") {
   const input = subcommand;
   const out = flag(argv, "out");

@@ -3,8 +3,7 @@
  * No-flash theme resolver. Render first inside <head>, before stylesheets.
  * Same contract as danielkimdev.com (DESIGN.md §9):
  *   localStorage `theme` = 'light' | 'dark'  →  <html data-theme="...">
- *   fallback: prefers-color-scheme. The toggle sets both and dispatches
- *   window 'theme-change' with { detail: { theme } }.
+ *   fallback: prefers-color-scheme. The toggle sets both.
  */
 ---
 

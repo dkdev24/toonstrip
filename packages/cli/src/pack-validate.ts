@@ -8,7 +8,7 @@
  */
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { readPngDimensions } from "./png-dimensions.js";
+import { loadImage } from "@napi-rs/canvas";
 
 const REQUIRED_EMOTIONS = ["NEUTRAL"];
 
@@ -46,7 +46,7 @@ function fail(errors: string[], message: string): void {
   errors.push(message);
 }
 
-export function validatePack(dir: string): ValidationResult {
+export async function validatePack(dir: string): Promise<ValidationResult> {
   const errors: string[] = [];
   const packJsonPath = join(dir, "pack.json");
 
@@ -105,7 +105,8 @@ export function validatePack(dir: string): ValidationResult {
       continue;
     }
     try {
-      const dims = readPngDimensions(filePath);
+      const image = await loadImage(filePath);
+      const dims = { width: image.width, height: image.height };
       if (dims.width !== backdrop.width || dims.height !== backdrop.height) {
         fail(
           errors,

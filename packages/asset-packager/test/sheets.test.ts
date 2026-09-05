@@ -182,7 +182,7 @@ describe("the sheet fixture", () => {
     const out = tmp();
     const result = await buildPack({ source: FIXTURE, out });
     expect(result.ok).toBe(true);
-    expect(validatePack(out).errors).toEqual([]);
+    expect((await validatePack(out)).errors).toEqual([]);
 
     const pack = JSON.parse(readFileSync(join(out, "pack.json"), "utf8"));
     expect(pack.backdrops).toHaveLength(9);

@@ -34,12 +34,6 @@ export async function readPng(path: string, edge?: number): Promise<Raster> {
   return { width, height, data: data as unknown as Uint8ClampedArray };
 }
 
-/** Native (pre-rescale) dimensions of a PNG. */
-export async function pngSize(path: string): Promise<{ width: number; height: number }> {
-  const image = await loadImage(path);
-  return { width: image.width, height: image.height };
-}
-
 /** Tight box around every pixel above {@link ALPHA_FLOOR}, or null if empty. */
 export function alphaBox(raster: Raster): Box | null {
   const { width, height, data } = raster;

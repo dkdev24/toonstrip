@@ -168,15 +168,6 @@ function validateCharacter(
       message: `${label}: only one face pose, so every line of dialogue renders the same expression`,
     });
   }
-  if (of("body").length > 0) {
-    out.push({
-      level: "warning",
-      message:
-        `${label}: body-*.png files are packed but not composited — the renderer draws face+torso ` +
-        `(COMPLEX) figures only`,
-    });
-  }
-
   for (const [kind, anchor] of Object.entries(character.anchors ?? {})) {
     if (!anchor) continue;
     const sample = of(kind as PartKind)[0];

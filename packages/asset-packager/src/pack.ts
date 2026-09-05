@@ -165,7 +165,7 @@ export async function packCharacter(
   }
 
   const joins: Partial<Record<PartKind, JoinPoint>> = {};
-  for (const kind of ["face", "torso", "body"] as const) {
+  for (const kind of ["face", "torso"] as const) {
     const join = resolveJoin(character, parts, kind, spec);
     if (join) joins[kind] = join;
   }
@@ -189,7 +189,7 @@ export async function packCharacter(
     sheetHeight: Math.max(height, 1),
     faces: byKind("face"),
     torsos: byKind("torso"),
-    bodies: byKind("body"),
+    bodies: [],
   };
 
   return { id: character.id, avatar, sheet: await canvas.encode("png"), joins, rects };

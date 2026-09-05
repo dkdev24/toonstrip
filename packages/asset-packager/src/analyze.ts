@@ -27,6 +27,25 @@ export interface Analysis {
   report: ValidationReport;
 }
 
+/** Slices one sheet, turning a missing file or a thrown error into a diagnostic. */
+async function expandSheet<T extends { diagnostics: Diagnostic[] }>(
+  path: string,
+  file: string,
+  notFoundMessage: string,
+  sliceFailedMessage: (err: Error) => string,
+  slice: () => Promise<T>,
+): Promise<{ diagnostics: Diagnostic[]; result: T | null }> {
+  if (!existsSync(path)) {
+    return { diagnostics: [{ level: "error", file, message: notFoundMessage }], result: null };
+  }
+  try {
+    const result = await slice();
+    return { diagnostics: result.diagnostics, result };
+  } catch (err) {
+    return { diagnostics: [{ level: "error", file, message: sliceFailedMessage(err as Error) }], result: null };
+  }
+}
+
 /**
  * Slices every declared sheet into `source`, in place. Returns the slicer's
  * diagnostics; missing sheet files are reported, not thrown.
@@ -38,20 +57,18 @@ export async function expandSheets(source: SourcePack): Promise<Diagnostic[]> {
     const sheet = character.sheet;
     if (!sheet) continue;
     const path = `${source.dir}/${sheet.file}`;
-    if (!existsSync(path)) {
-      diagnostics.push({
-        level: "error",
-        file: sheet.file,
-        message: `character "${character.id}": sheet file not found`,
-      });
-      continue;
-    }
-    try {
-      const sliced = await sliceCharacterSheet(character, { ...sheet, path }, source.spec);
-      diagnostics.push(...sliced.diagnostics);
+    const { diagnostics: sliceDiagnostics, result } = await expandSheet(
+      path,
+      sheet.file,
+      `character "${character.id}": sheet file not found`,
+      (err) => `character "${character.id}": could not slice sheet (${err.message})`,
+      () => sliceCharacterSheet(character, { ...sheet, path }, source.spec),
+    );
+    diagnostics.push(...sliceDiagnostics);
+    if (result) {
       // Per-pose files override the cell of the same name.
       const own = new Set(character.parts.map((p) => p.file));
-      character.parts.push(...sliced.parts.filter((p) => !own.has(p.file)));
+      character.parts.push(...result.parts.filter((p) => !own.has(p.file)));
       character.parts.sort(
         (a, b) =>
           a.kind.localeCompare(b.kind) ||
@@ -59,31 +76,21 @@ export async function expandSheets(source: SourcePack): Promise<Diagnostic[]> {
           a.intensity - b.intensity ||
           a.variant - b.variant,
       );
-    } catch (err) {
-      diagnostics.push({
-        level: "error",
-        file: sheet.file,
-        message: `character "${character.id}": could not slice sheet (${(err as Error).message})`,
-      });
     }
   }
 
   for (const sheet of source.backdropSheets) {
-    if (!existsSync(sheet.path)) {
-      diagnostics.push({ level: "error", file: sheet.file, message: `backdrop sheet not found` });
-      continue;
-    }
-    try {
-      const sliced = await sliceBackdropSheet(sheet, source.spec);
-      diagnostics.push(...sliced.diagnostics);
+    const { diagnostics: sliceDiagnostics, result } = await expandSheet(
+      sheet.path,
+      sheet.file,
+      `backdrop sheet not found`,
+      (err) => `could not slice backdrop sheet (${err.message})`,
+      () => sliceBackdropSheet(sheet, source.spec),
+    );
+    diagnostics.push(...sliceDiagnostics);
+    if (result) {
       const own = new Set(source.backdrops.map((b) => b.id));
-      source.backdrops.push(...sliced.backdrops.filter((b) => !own.has(b.id)));
-    } catch (err) {
-      diagnostics.push({
-        level: "error",
-        file: sheet.file,
-        message: `could not slice backdrop sheet (${(err as Error).message})`,
-      });
+      source.backdrops.push(...result.backdrops.filter((b) => !own.has(b.id)));
     }
   }
 

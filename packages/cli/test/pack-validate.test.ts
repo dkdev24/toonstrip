@@ -8,14 +8,14 @@ import { validatePack } from "../src/pack-validate.js";
 const REAL_PACK_DIR = fileURLToPath(new URL("../../pack-comic-chat", import.meta.url));
 
 describe("validatePack", () => {
-  it("accepts the real pack-comic-chat pack", () => {
-    const result = validatePack(REAL_PACK_DIR);
+  it("accepts the real pack-comic-chat pack", async () => {
+    const result = await validatePack(REAL_PACK_DIR);
     expect(result.errors).toEqual([]);
     expect(result.ok).toBe(true);
   });
 
-  it("rejects a directory with no pack.json", () => {
-    const result = validatePack(tmpdir());
+  it("rejects a directory with no pack.json", async () => {
+    const result = await validatePack(tmpdir());
     expect(result.ok).toBe(false);
     expect(result.errors[0]).toMatch(/pack\.json not found/);
   });
@@ -27,7 +27,7 @@ describe("validatePack", () => {
       rmSync(dir, { recursive: true, force: true });
     });
 
-    it("fails when a character is missing its NEUTRAL face", () => {
+    it("fails when a character is missing its NEUTRAL face", async () => {
       dir = mkdtempSync(join(tmpdir(), "toonstrip-pack-"));
       mkdirSync(join(dir, "characters", "bob"), { recursive: true });
       writeFileSync(
@@ -48,7 +48,7 @@ describe("validatePack", () => {
       );
       writeFileSync(join(dir, "characters", "bob", "sheet.png"), Buffer.from([0]));
 
-      const result = validatePack(dir);
+      const result = await validatePack(dir);
       expect(result.ok).toBe(false);
       expect(result.errors.some((e) => e.includes("NEUTRAL"))).toBe(true);
     });

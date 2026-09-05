@@ -12,8 +12,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "test": "vitest run",
-    "lint": "tsc -p tsconfig.json --noEmit",
-    "verify:demo": "node scripts/verify-demo.mjs"
+    "lint": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
     "@toonstrip/core": "workspace:*",
@@ -22,9 +21,7 @@
   "devDependencies": {
     "typescript": "^5.6.3",
     "vitest": "^2.1.4",
-    "jsdom": "^25.0.1",
-    "playwright": "^1.48.0",
-    "axe-core": "^4.10.0"
+    "jsdom": "^25.0.1"
   },
   "publishConfig": {
     "access": "public"

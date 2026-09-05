@@ -20,7 +20,7 @@
    (.is-bare) and to Radix portals, which render under <body>. Layered, so every
    utility class still wins. */
 @layer base {
-  :is(.is-bare, [data-spike], [data-radix-popper-content-wrapper], [role="dialog"]) :is(button, input:not([type="checkbox"], [type="radio"]), select, textarea) {
+  :is(.is-bare, [data-radix-popper-content-wrapper], [role="dialog"]) :is(button, input:not([type="checkbox"], [type="radio"]), select, textarea) {
     font: inherit;
     color: inherit;
     background: none;
@@ -30,14 +30,14 @@
     border-radius: 0;
     appearance: none;
   }
-  :is(.is-bare, [data-spike], [data-radix-popper-content-wrapper], [role="dialog"]) button:not(:disabled) {
+  :is(.is-bare, [data-radix-popper-content-wrapper], [role="dialog"]) button:not(:disabled) {
     cursor: pointer;
   }
-  :is(.is-bare, [data-spike]) :is(fieldset, ul, ol, dl, p) {
+  :is(.is-bare) :is(fieldset, ul, ol, dl, p) {
     margin: 0;
     padding: 0;
   }
-  :is(.is-bare, [data-spike]) fieldset {
+  :is(.is-bare) fieldset {
     border: 0;
     min-inline-size: 0;
   }

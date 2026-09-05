@@ -31,10 +31,7 @@ export default defineConfig({
     // compat: true aliases react/react-dom to preact/compat so the copied shadcn/ui
     // components (Radix) run on Preact (PLAYGROUND_UI_PLAN.md §2).
     preact({ compat: true }),
-    sitemap({
-      // The component kitchen sink is a design check, not a page for visitors.
-      filter: (page) => !page.includes("/kitchen-sink"),
-    }),
+    sitemap(),
   ],
 
   // Tailwind v4 is scoped to the playground island via playground-ui.css @source rules.

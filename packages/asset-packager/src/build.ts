@@ -9,7 +9,6 @@
  *       backdrops/<id>.png
  *       NOTICE
  *       README.md
- *       package.json, tsconfig.json, src/{index,types}.ts   # --npm only
  */
 
 import { mkdirSync, writeFileSync } from "node:fs";
@@ -18,14 +17,7 @@ import { analyze, type Analysis } from "./analyze.js";
 import { packCharacter, type PackedCharacter } from "./pack.js";
 import { renderJoinPreview } from "./preview.js";
 import { toCanvas } from "./image.js";
-import {
-  PACK_INDEX_TS,
-  PACK_TSCONFIG,
-  PACK_TYPES_TS,
-  noticeFile,
-  packagePackageJson,
-  readmeFile,
-} from "./templates.js";
+import { noticeFile, readmeFile } from "./templates.js";
 import type { Diagnostic } from "./validate.js";
 
 export interface BuildOptions {
@@ -33,8 +25,6 @@ export interface BuildOptions {
   source: string;
   /** Output pack directory. Created if missing; existing files are overwritten. */
   out: string;
-  /** Also write the installable npm package skeleton. */
-  npm?: boolean;
   /** Write a join-preview PNG here. */
   preview?: string;
   /** Build even when validation reported errors. Off by default. */
@@ -121,13 +111,6 @@ export async function buildPack(options: BuildOptions): Promise<BuildResult> {
     readmeFile(source.json, packed.map((p) => p.id), backdrops.map((b) => b.id)),
     files,
   );
-
-  if (options.npm) {
-    write(options.out, "package.json", packagePackageJson(source.json), files);
-    write(options.out, "tsconfig.json", PACK_TSCONFIG, files);
-    write(options.out, "src/types.ts", PACK_TYPES_TS, files);
-    write(options.out, "src/index.ts", PACK_INDEX_TS, files);
-  }
 
   if (options.preview && packed.length > 0) {
     const png = await renderJoinPreview(packed);

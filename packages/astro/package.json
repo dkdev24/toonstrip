@@ -18,8 +18,7 @@
     "astro": "^7.0.0"
   },
   "dependencies": {
-    "@toonstrip/element": "workspace:*",
-    "@toonstrip/schema": "workspace:*"
+    "@toonstrip/element": "workspace:*"
   },
   "devDependencies": {
     "astro": "^7.2.9",

@@ -97,7 +97,7 @@ describe("the fixture source pack", () => {
     expect(result.files).toContain("characters/nib/sheet.png");
     expect(result.files).toContain("backdrops/yard.png");
 
-    const validated = validatePack(out);
+    const validated = await validatePack(out);
     expect(validated.errors).toEqual([]);
     expect(validated.ok).toBe(true);
   });
@@ -144,14 +144,6 @@ describe("the fixture source pack", () => {
     const flush = await packCharacter(character, parts, { ...source.spec, joinOverlap: 0 });
     expect(sunk.avatar.torsos[0]!.cy - flush.avatar.torsos[0]!.cy).toBe(4);
     expect(sunk.avatar.faces[0]!.cy).toBe(flush.avatar.faces[0]!.cy);
-  });
-
-  it("writes the npm skeleton only when asked", async () => {
-    const plain = await buildPack({ source: FIXTURE, out: tmp() });
-    expect(plain.files).not.toContain("package.json");
-    const packaged = await buildPack({ source: FIXTURE, out: tmp(), npm: true });
-    expect(packaged.files).toContain("package.json");
-    expect(packaged.files).toContain("src/index.ts");
   });
 
   it("records emotion angles the renderer's wheel understands", async () => {
