@@ -1846,3 +1846,64 @@ Site/repo 0.10.0. M0–M9 of `TOONSTRIP_DEV_PLAN.md` done. npm packages unchange
 Site/repo 0.15.1. M0–M15 of `TOONSTRIP_DEV_PLAN.md` done. 11 packages on npm (schema
 0.1.3, core 0.1.7, element 0.1.8, astro 0.1.11, cli 0.2.1, packs 0.1.1, react/vue/next
 0.1.0, asset-packager 0.2.0). Next: S9 Korean locale per `SITE_DEV_PLAN.md` §13.
+
+---
+
+## v0.15.2 — `PONYTAIL_AUDIT.md` worked (35/46), `@toonstrip/next` deprecated and published
+
+**Date:** 2026-09-05
+
+### Changes
+
+Worked the repo-wide over-engineering audit (`PONYTAIL_AUDIT.md`, 46 ranked findings from
+the prior session) autonomously: 35 of 46 items landed (4 partial), skipping/flagging the
+rest with reasons. ~700 generated lines and 7 deps fully dropped (2 more moved to
+devDeps, 4 demoted), ~866 hand-written lines net removed, one published package
+deprecated. Commits `5413998`, `6c48463`, `232d49e` (dead-code/dedup across
+site/core/packager/CLI — see `PONYTAIL_AUDIT.md`'s Progress table for the full per-item
+ledger), `f91aa64` (#1: `@toonstrip/schema`'s ajv+esbuild standalone-compile validator
+replaced with `scripts/embed-schema.mjs` baking `schema.json` into a TS literal plus a
+~50-line hand-rolled recursive checker — same `instancePath`/`message` contract,
+verified byte-for-byte against ajv's old output), and `9668530`/`68e61db` (#4:
+`@toonstrip/next` deprecated — `@toonstrip/react`'s `<ComicStrip>` now carries its own
+`"use client"` directive and `@toonstrip/cli` exports `renderPlaceholder` directly;
+`next` kept as a backward-compatible re-export shim, not deleted, since it was already
+published; `examples/next-app` migrated to the new imports and verified end-to-end,
+including a real browser check of the SSR placeholder).
+
+Published the #4 fix: `@toonstrip/react` and `@toonstrip/cli` first (so `next`'s
+`workspace:*` deps resolve to real versions), then `@toonstrip/next`. First attempt used
+plain `npm publish`, which does not understand pnpm's `workspace:*` protocol and shipped
+it as a literal, unresolvable string — `react@0.1.1` and `cli@0.2.2` went out broken.
+Caught it via `npm view <pkg>@<version> dependencies`, which also revealed this same
+defect was already live and pre-existing on `react@0.1.0` and `vue@0.1.0` (from an
+earlier session) — not introduced today, but from the same root cause: publishing with
+plain `npm` instead of `pnpm publish` in a pnpm workspace. Fixed by re-publishing with
+`pnpm publish` (which correctly rewrites `workspace:*` to the real resolved version) as
+`react@0.1.2` and `cli@0.2.3`, then `next@0.1.1`; deprecated the two broken versions via
+`npm deprecate` with a message pointing to the fix. Verified the whole chain with a real
+`npm install @toonstrip/next @toonstrip/react @toonstrip/cli` in a clean, non-workspace
+directory — no `workspace:*` strings anywhere, correct versions resolved.
+
+That clean-room check surfaced a second, separate, pre-existing bug:
+`@toonstrip/element@0.1.8` (live on npm, unchanged today) predates its own SSR guard —
+the fix (`ElementBase = typeof HTMLElement !== "undefined" ? HTMLElement : class {}`)
+landed in commit `f6d25ba` (M12/M13) but element's version was never bumped/published
+after. Any real npm install of `@toonstrip/next` (or `react`/`vue`) crashes with
+`HTMLElement is not defined` server-side, because the monorepo's own dev/test always
+passes (workspace linking uses local dist, which has the fix) while the published
+package chain does not. Not fixed this session — flagged in `HANDOFF.md` for a
+follow-up publish, since it wasn't part of what was asked and deserves its own
+confirmation.
+
+`react@0.1.0`/`vue@0.1.0`'s pre-existing `workspace:*` breakage was reported but also
+left unfixed pending a decision on scope (only `react`/`cli`/`next` were asked for).
+
+### Status
+
+Site/repo 0.15.2. Same 11 packages on npm; versions moved: cli 0.2.3, react 0.1.2, next
+0.1.1 (all correctly resolved). `@toonstrip/element@0.1.8` and `@toonstrip/vue@0.1.0` are
+known-broken/known-unsafe for real consumers — see `HANDOFF.md`'s Open Issues. 11/46
+`PONYTAIL_AUDIT.md` items remain (schema republish not needed — its ajv removal is
+local-only until `@toonstrip/schema` itself is republished, which wasn't requested
+either).

@@ -1,6 +1,6 @@
 {
   "name": "@toonstrip/cli",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Command-line tool for toonstrip: validate asset packs and render a Comic Strip Document to PNG.",
   "license": "MIT",
   "type": "module",
