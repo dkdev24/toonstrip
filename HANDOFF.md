@@ -4,9 +4,9 @@ Cross-session context memory. Update this file at the end of every session.
 
 ## Current Version
 
-**0.15.2** (npm: schema 0.1.3, core 0.1.7, element 0.1.8 (**SSR-unsafe**), astro 0.1.11,
-packs 0.1.1, vue 0.1.0 (**`workspace:*`-broken**), asset-packager 0.2.0, cli 0.2.3,
-react 0.1.2, next 0.1.1 — see Open Issues)
+**0.15.3** (npm, all internally consistent: schema 0.1.3, core 0.1.8, element 0.1.10,
+astro 0.1.11 (**still on old element — see Open Issues**), packs 0.1.1, asset-packager
+0.2.0, cli 0.2.4, react 0.1.3, vue 0.1.2, next 0.1.2)
 
 ## Project Status
 
@@ -18,33 +18,33 @@ to `main` deploys prod (output `site/dist`; root `pnpm build` is the build).
 
 ## Last Session
 
-2026-09-05: Worked `PONYTAIL_AUDIT.md` autonomously (35/46 landed) and published the #4
-fix (`@toonstrip/next` deprecated for `react`/`cli` directly) as `react@0.1.2`,
-`cli@0.2.3`, `next@0.1.1`. Full detail — including a publish mistake (plain `npm publish`
-doesn't rewrite pnpm's `workspace:*`) and two pre-existing bugs it surfaced — is in
-`WORKLOG.md`'s v0.15.2 entry; read that before publishing anything else in this repo.
+2026-09-05: Worked `PONYTAIL_AUDIT.md` autonomously (35/46 landed), published the #4 fix
+(`@toonstrip/next` deprecated for `react`/`cli` directly) — then hit two publish
+incidents: a `workspace:*`-rewrite mistake (plain `npm publish` vs. `pnpm publish`) and a
+self-caused core/cli/element regression (published a consumer depending on a `core`
+export that wasn't published yet). Both resolved — full chain (`core`→`cli`/`element`→
+`vue`/`react`→`next`) republished in order, verified with a clean-room `npm install` that
+actually exercises code, not just imports it. **Read `WORKLOG.md`'s v0.15.2/v0.15.3
+entries in full before publishing anything else here.**
 
 ## Next Actions
 
-1. **Publish `@toonstrip/element`** with its already-committed SSR guard (Open Issues,
-   the real blocker for #4's SSR story) and **fix `vue@0.1.0`'s `workspace:*`** — both
-   need your go-ahead (irreversible); both via `pnpm publish`, not plain `npm publish`.
+1. **Publish `@toonstrip/astro`** fixed (see Open Issues) — needs your go-ahead
+   (irreversible), version bump + `pnpm publish` + its own verification pass.
 2. **Fix `site`'s Playwright suite** — 8/8 playground specs fail, pre-existing. Blocks
    #12 from being verified by more than a green build.
-3. **Upstream port to `grues-in-comic`** per `UPSTREAM_SYNC.md`: #18/#37/#38's
-   `normalizeAngle` landed toonstrip-side only; #3/#14/#16/#19/#28 never attempted.
-4. **S9 Korean locale** per `SITE_DEV_PLAN.md` §13 — unblocked, M8-M13 done.
+3. **Upstream port to `grues-in-comic`** per `UPSTREAM_SYNC.md`: #18/#37/#38 landed
+   toonstrip-side only; #3/#14/#16/#19/#28 never attempted.
+4. **S9 Korean locale** per `SITE_DEV_PLAN.md` §13 — unblocked.
 
 ## Open Issues
 
-- **`@toonstrip/element@0.1.8` predates its own SSR guard** (fix landed in `f6d25ba`,
-  never republished) — `ComicStripElement extends HTMLElement` throws server-side in any
-  real npm install; the monorepo's own dev/test always passes (workspace linking uses
-  local dist). Found via a clean-room `npm install` outside the workspace.
-- **`@toonstrip/vue@0.1.0` (live) shipped a literal `"workspace:*"` dependency string** —
-  broken for any real install (same root cause as #4's publish mistake — `npm publish`
-  instead of `pnpm publish`). `react` was fixed the same way at 0.1.2; `vue` isn't yet.
-- `toonstrip pack validate` misses a missing torso (checks NEUTRAL only); the source-side
-  validator does catch it.
-- `site`'s 8 playground e2e specs all fail (pre-existing); other Playwright scripts are
-  manual-only (`NOTES.md` M1–M5).
+- **`@toonstrip/astro@0.1.11` depends on guard-less `element@0.1.8`** — throws
+  server-side during Astro's own SSR, same class of issue `react`/`vue` had.
+- **Publishing needs care here**: `workspace:*` deps require `pnpm publish`, never plain
+  `npm publish`; a new `@toonstrip/core` export must publish *before* any consumer
+  depending on it. Verify with a clean-room `npm install` that calls the code, not just
+  imports it.
+- `toonstrip pack validate` misses a missing torso (checks NEUTRAL only, source-side
+  validator does catch it); `site`'s 8 playground e2e specs all fail (pre-existing,
+  `NOTES.md` M1–M5 covers manual-only Playwright scripts).

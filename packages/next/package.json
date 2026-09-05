@@ -1,6 +1,6 @@
 {
   "name": "@toonstrip/next",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "[DEPRECATED] @toonstrip/react's <ComicStrip> now carries its own 'use client' directive and @toonstrip/cli exports renderPlaceholder directly — import from those instead. See docs/next.md for the migration.",
   "license": "MIT",
   "type": "module",

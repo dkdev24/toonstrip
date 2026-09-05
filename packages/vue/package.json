@@ -1,6 +1,6 @@
 {
   "name": "@toonstrip/vue",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "<ComicStrip>, a thin Vue wrapper around @toonstrip/element's <comic-strip> custom element.",
   "license": "MIT",
   "type": "module",

@@ -1907,3 +1907,65 @@ known-broken/known-unsafe for real consumers — see `HANDOFF.md`'s Open Issues.
 `PONYTAIL_AUDIT.md` items remain (schema republish not needed — its ajv removal is
 local-only until `@toonstrip/schema` itself is republished, which wasn't requested
 either).
+
+---
+
+## v0.15.3 — Fix element/vue's `workspace:*` bug, then a self-caused core/cli/element regression
+
+**Date:** 2026-09-05
+
+### Changes
+
+Fixing v0.15.2's flagged Open Issues (`@toonstrip/element@0.1.8` predating its own SSR
+guard, `@toonstrip/vue@0.1.0`'s broken literal `workspace:*` dependency) surfaced a second,
+more serious incident, this one self-inflicted in this same session.
+
+`@toonstrip/element@0.1.9` was published (fixing the SSR guard, per v0.15.2). But
+v0.15.2's ponytail-audit work had already hoisted a `copyCycles` helper into
+`@toonstrip/core`'s public exports (batch 3, commit `6c48463`) and pointed
+`@toonstrip/cli`/`@toonstrip/element`'s own source at it — without publishing a new
+`@toonstrip/core` first. `@toonstrip/core` was still live at `0.1.7`, which does not have
+that export. Result: **`@toonstrip/element@0.1.9` and the already-live
+`@toonstrip/cli@0.2.3` both crashed immediately on import for every consumer** —
+`SyntaxError: The requested module '@toonstrip/core' does not provide an export named
+'copyCycles'` — not an SSR-specific issue, a total module-load failure. `@toonstrip/vue@0.1.1`
+(published moments earlier, depending on the broken `element@0.1.9`) inherited the same
+crash transitively. All three were immediately deprecated via `npm deprecate` with a
+message pointing at the pending fix, as soon as caught.
+
+Fixed by publishing the correct dependency chain in order, verifying real code execution
+(not just successful `import`) at each link before moving to the next:
+
+- `@toonstrip/core` 0.1.7 → **0.1.8** (has `copyCycles`; also carries the rest of the
+  ponytail audit's core-side changes — `#18` layout.ts, `#37` balloon.ts, `#38`'s
+  `normalizeAngle`, `#39`'s dead-field removals, `#23`'s type-only `Emotion` re-export)
+- `@toonstrip/cli` 0.2.3 → **0.2.4**, `@toonstrip/element` 0.1.9 → **0.1.10** (both
+  repointed at core 0.1.8; verified by actually calling `renderDocument` and importing
+  `element` with no DOM present, not just checking the import succeeded)
+- `@toonstrip/vue` 0.1.1 → **0.1.2**, `@toonstrip/react` 0.1.2 → **0.1.3** (both repointed
+  at the fixed element 0.1.10 — this is also what finally gives `react` real SSR safety,
+  since it had been pointing at the original guard-less `element@0.1.8` all along)
+- `@toonstrip/next` 0.1.1 → **0.1.2** (repointed at the fixed `react`/`cli`)
+
+Verified the whole tree with a real `npm install` of all six packages in a clean,
+non-workspace directory, then actually exercised the code (not just imports): `element`/
+`react`/`vue`/`next` all import with no DOM present, `cli.renderDocument` renders a real
+PNG, `next/server`'s `renderPlaceholder` produces a real placeholder. All green.
+
+**Deprecated, broken, superseded:** `react@0.1.1`, `cli@0.2.2` (v0.15.2's incident),
+`cli@0.2.3`, `element@0.1.9`, `vue@0.1.1` (this incident). `react@0.1.0`/`vue@0.1.0`
+(pre-existing, from an earlier session) were superseded but not separately deprecated
+under their own notice beyond what v0.15.2 already did for `react@0.1.0`.
+
+**Not done, flagged:** `@toonstrip/astro@0.1.11` (live) still depends on the original
+guard-less `element@0.1.8` — same SSR-crash exposure as `react`/`vue` had, for Astro's own
+(SSR-first) consumers. Not fixed this session; wasn't part of what was asked, and Astro
+integration testing needs its own verification pass before publishing a fix.
+
+### Status
+
+Site/repo 0.15.3. 11 packages on npm, all internally consistent: schema 0.1.3
+(unchanged), core 0.1.8, element 0.1.10, astro 0.1.11 (**still on old element — flagged**),
+cli 0.2.4, react 0.1.3, vue 0.1.2, next 0.1.2, packs 0.1.1, asset-packager 0.2.0. Full
+clean-room verification passed: no `workspace:*` strings anywhere, real code paths
+exercised (render a PNG, import with no DOM), not just successful imports.
