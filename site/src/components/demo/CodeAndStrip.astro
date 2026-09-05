@@ -9,6 +9,9 @@ import { ComicStrip } from "@toonstrip/astro";
 import type { ComicStripDocument } from "@toonstrip/schema";
 import CodeBlock from "../site/CodeBlock.astro";
 import { playgroundUrl } from "../../lib/share";
+import { getLangFromUrl, useTranslations } from "../../i18n/utils";
+
+const t = useTranslations(getLangFromUrl(Astro.url));
 
 interface Props {
   doc: ComicStripDocument;
@@ -35,16 +38,16 @@ const href = playgroundUrl(doc, packs);
 
 <figure class:list={["code-and-strip", `code-and-strip--${layout}`]}>
   <div class="code-and-strip__bar">
-    <figcaption class="caption">{title ?? "Example"}</figcaption>
-    <a class="code-and-strip__open" href={href}>Open in playground →</a>
+    <figcaption class="caption">{title ?? t("codeAndStrip.exampleCaption")}</figcaption>
+    <a class="code-and-strip__open" href={href}>{t("codeAndStrip.openInPlayground")} →</a>
   </div>
   <div class="code-and-strip__frame">
     <div class="code-and-strip__code">
       {collapse && panelCount > 1 ? (
         <details class="code-and-strip__details">
           <summary>
-            <span class="code-and-strip__summary-closed">Show all {panelCount} panels</span>
-            <span class="code-and-strip__summary-open">Show first panel only</span>
+            <span class="code-and-strip__summary-closed">{t("codeAndStrip.showAllPanels", { count: panelCount })}</span>
+            <span class="code-and-strip__summary-open">{t("codeAndStrip.showFirstPanelOnly")}</span>
           </summary>
           <CodeBlock code={full} lang="json" title="strip.json" class="code-and-strip__block" />
         </details>

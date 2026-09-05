@@ -1,0 +1,78 @@
+{
+  "nav": {
+    "docs": "Docs",
+    "playground": "Playground",
+    "changelog": "Changelog",
+    "githubAria": "toonstrip on GitHub",
+    "primaryAria": "Primary",
+    "skipToContent": "Skip to content"
+  },
+  "footer": {
+    "license": "MIT License",
+    "github": "GitHub",
+    "npm": "npm",
+    "notice": "The default asset pack includes Microsoft Comic Chat character and backdrop art, redistributed under the MIT License. COMIC CHAT is a trademark of Microsoft Corporation; toonstrip is independent and not affiliated with or endorsed by Microsoft. See",
+    "noticeLinkLabel": "NOTICE",
+    "noticeSuffix": "."
+  },
+  "lang": {
+    "switchTo": "한국어",
+    "switchToAria": "Switch to Korean"
+  },
+  "docsFallback": {
+    "title": "Not translated yet",
+    "body": "This page hasn't been translated into Korean yet. Here's the English version."
+  },
+  "docs": {
+    "sidebarAria": "Docs navigation",
+    "navAria": "Docs",
+    "menu": "Docs menu",
+    "previous": "Previous",
+    "next": "Next",
+    "editOnGithub": "Edit this page on GitHub",
+    "onThisPage": "On this page",
+    "tocAria": "Table of contents",
+    "indexTitle": "Docs",
+    "indexCaption": "Documentation",
+    "indexLead": "Start with the install, then write a strip. Everything is shown as code next to the strip it produces.",
+    "section": {
+      "Start": "Start",
+      "Authoring": "Authoring",
+      "Integrate": "Integrate",
+      "Reference": "Reference"
+    }
+  },
+  "changelog": {
+    "title": "Changelog",
+    "description": "Release notes for the toonstrip packages and this site, newest first.",
+    "versionsAria": "Versions",
+    "thisSiteRuns": "This site runs",
+    "atomFeed": "Atom feed",
+    "koNoteTitle": "English only",
+    "koNote": "Release notes are written in English only."
+  },
+  "notFound": {
+    "title": "Not found",
+    "description": "That page doesn't exist.",
+    "body": "There's no panel here."
+  },
+  "codeAndStrip": {
+    "openInPlayground": "Open in playground",
+    "exampleCaption": "Example",
+    "showAllPanels": "Show all {count} panels",
+    "showFirstPanelOnly": "Show first panel only"
+  },
+  "playground": {
+    "description": "Edit a Comic Strip Document three ways: form, JSON, and the live strip. Then share it by URL or copy the embed snippet."
+  },
+  "widthSlider": {
+    "containerWidth": "Container width",
+    "presetsAria": "Width presets",
+    "presetPhone": "Phone",
+    "presetTablet": "Tablet",
+    "presetDesktop": "Desktop",
+    "presetFill": "Fill",
+    "columnUnit": "column",
+    "columnUnitPlural": "columns"
+  }
+}

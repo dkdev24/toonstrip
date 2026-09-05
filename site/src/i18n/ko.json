@@ -1,0 +1,78 @@
+{
+  "nav": {
+    "docs": "문서",
+    "playground": "플레이그라운드",
+    "changelog": "변경 이력",
+    "githubAria": "GitHub에서 toonstrip 보기",
+    "primaryAria": "주 메뉴",
+    "skipToContent": "본문으로 건너뛰기"
+  },
+  "footer": {
+    "license": "MIT 라이선스",
+    "github": "GitHub",
+    "npm": "npm",
+    "notice": "기본 에셋 팩에는 Microsoft Comic Chat의 캐릭터와 배경 아트가 포함되어 있으며, MIT 라이선스 조건에 따라 재배포됩니다. COMIC CHAT은 Microsoft Corporation의 상표이며, toonstrip은 Microsoft와 무관한 독립 프로젝트로 Microsoft의 후원이나 승인을 받지 않았습니다. 자세한 내용은",
+    "noticeLinkLabel": "NOTICE",
+    "noticeSuffix": " 문서를 참고하세요."
+  },
+  "lang": {
+    "switchTo": "English",
+    "switchToAria": "영어로 전환"
+  },
+  "docsFallback": {
+    "title": "아직 번역되지 않았습니다",
+    "body": "이 페이지는 아직 한국어로 번역되지 않아 영어 원문을 보여드립니다."
+  },
+  "docs": {
+    "sidebarAria": "문서 탐색",
+    "navAria": "문서",
+    "menu": "문서 메뉴",
+    "previous": "이전",
+    "next": "다음",
+    "editOnGithub": "GitHub에서 이 페이지 편집하기",
+    "onThisPage": "이 페이지 목차",
+    "tocAria": "목차",
+    "indexTitle": "문서",
+    "indexCaption": "문서",
+    "indexLead": "설치부터 시작해서 스트립을 직접 작성해 보세요. 모든 예제는 결과 스트립과 나란히 코드로 보여드립니다.",
+    "section": {
+      "Start": "시작하기",
+      "Authoring": "작성하기",
+      "Integrate": "연동하기",
+      "Reference": "레퍼런스"
+    }
+  },
+  "changelog": {
+    "title": "변경 이력",
+    "description": "toonstrip 패키지와 이 사이트의 릴리스 노트입니다. 최신 순으로 정렬되어 있습니다.",
+    "versionsAria": "버전",
+    "thisSiteRuns": "현재 사이트에 적용된 버전",
+    "atomFeed": "Atom 피드",
+    "koNoteTitle": "영어 전용",
+    "koNote": "릴리스 노트는 영어로만 제공됩니다."
+  },
+  "notFound": {
+    "title": "페이지를 찾을 수 없습니다",
+    "description": "존재하지 않는 페이지입니다.",
+    "body": "이 위치에는 패널이 없습니다."
+  },
+  "codeAndStrip": {
+    "openInPlayground": "플레이그라운드에서 열기",
+    "exampleCaption": "예시",
+    "showAllPanels": "전체 {count}개 패널 보기",
+    "showFirstPanelOnly": "첫 패널만 보기"
+  },
+  "playground": {
+    "description": "코믹 스트립 문서를 폼, JSON, 실시간 스트립이라는 세 가지 방식으로 편집하고, URL로 공유하거나 임베드 코드를 복사할 수 있습니다."
+  },
+  "widthSlider": {
+    "containerWidth": "컨테이너 너비",
+    "presetsAria": "너비 프리셋",
+    "presetPhone": "휴대폰",
+    "presetTablet": "태블릿",
+    "presetDesktop": "데스크톱",
+    "presetFill": "채우기",
+    "columnUnit": "컬럼",
+    "columnUnitPlural": "컬럼"
+  }
+}

@@ -4,8 +4,8 @@ description: How the strip decides on one, two, or three columns, and what happe
 order: 6
 section: Integrate
 ---
-import WidthSlider from "../../components/demo/WidthSlider.astro";
-import hero from "../strips/hero.json";
+import WidthSlider from "../../../components/demo/WidthSlider.astro";
+import hero from "../../strips/hero.json";
 
 A strip is a grid of canvases, one per panel, and the column count is computed from the
 container's width every time it changes. Nothing is stored; a `ResizeObserver` on the

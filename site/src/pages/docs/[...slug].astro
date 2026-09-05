@@ -1,16 +1,17 @@
 ---
 import { getCollection, render } from "astro:content";
 import Docs from "../../layouts/Docs.astro";
+import { docLang, docSlug } from "../../lib/docs-nav";
 
 export async function getStaticPaths() {
-  const entries = await getCollection("docs");
-  return entries.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+  const entries = await getCollection("docs", (e) => docLang(e) === "en");
+  return entries.map((entry) => ({ params: { slug: docSlug(entry) }, props: { entry } }));
 }
 
 const { entry } = Astro.props;
 const { Content, headings } = await render(entry);
 ---
 
-<Docs entry={entry} headings={headings}>
+<Docs entry={entry} headings={headings} lang="en">
   <Content />
 </Docs>

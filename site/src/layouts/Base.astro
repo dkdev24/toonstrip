@@ -3,24 +3,35 @@ import { Font } from "astro:assets";
 import Header from "../components/site/Header.astro";
 import Footer from "../components/site/Footer.astro";
 import ThemeScript from "../components/site/ThemeScript.astro";
+import { getAltLocale, getLocalizedPath, useTranslations, type Lang } from "../i18n/utils";
 import "../styles/global.css";
 
 interface Props {
   title: string;
   description: string;
+  lang?: Lang;
   /** Wide layout (docs, playground) vs the default reading container. */
   wide?: boolean;
   /** Playground: no footer, main fills the viewport. */
   bare?: boolean;
 }
 
-const { title, description, wide = false, bare = false } = Astro.props;
+const { title, description, lang = "en", wide = false, bare = false } = Astro.props;
+const t = useTranslations(lang);
 const canonical = new URL(Astro.url.pathname, Astro.site);
-const fullTitle = Astro.url.pathname === "/" ? "toonstrip — comic strips from data, drawn live on your page" : `${title} · toonstrip`;
+const alt = getAltLocale(lang);
+const altHref = new URL(getLocalizedPath(Astro.url.pathname, alt), Astro.site);
+const enHref = new URL(getLocalizedPath(Astro.url.pathname, "en"), Astro.site);
+const isRoot = Astro.url.pathname === "/" || Astro.url.pathname === "/ko/";
+const fullTitle = isRoot
+  ? lang === "ko"
+    ? "toonstrip — 데이터로 그리는, 실시간으로 반응하는 코믹 스트립"
+    : "toonstrip — comic strips from data, drawn live on your page"
+  : `${title} · toonstrip`;
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang={lang}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -31,26 +42,31 @@ const fullTitle = Astro.url.pathname === "/" ? "toonstrip — comic strips from 
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="sitemap" href="/sitemap-index.xml" />
     <link rel="alternate" type="application/atom+xml" title="toonstrip changelog" href="/changelog.xml" />
+    <link rel="alternate" hreflang="en" href={enHref} />
+    <link rel="alternate" hreflang="ko" href={lang === "ko" ? canonical : altHref} />
+    <link rel="alternate" hreflang="x-default" href={enHref} />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="toonstrip" />
+    <meta property="og:locale" content={lang === "ko" ? "ko_KR" : "en_US"} />
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     <meta property="og:image" content={new URL("/og.png", Astro.site)} />
     <meta name="twitter:card" content="summary_large_image" />
-    <Font cssVariable="--font-body" preload />
+    <Font cssVariable="--font-body" preload={lang === "en"} />
     <Font cssVariable="--font-display" preload />
     <Font cssVariable="--font-mono" />
     <Font cssVariable="--font-korean" />
+    <Font cssVariable="--font-body-ko" preload={lang === "ko"} />
     <slot name="head" />
   </head>
   <body class:list={[{ "is-bare": bare }]}>
-    <a class="skip-link" href="#main">Skip to content</a>
-    <Header />
+    <a class="skip-link" href="#main">{t("nav.skipToContent")}</a>
+    <Header lang={lang} />
     <main id="main" class:list={[{ container: !bare, "container--wide": wide && !bare }]}>
       <slot />
     </main>
-    {!bare && <Footer />}
+    {!bare && <Footer lang={lang} />}
   </body>
 </html>
 

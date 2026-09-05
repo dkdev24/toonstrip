@@ -1,0 +1,85 @@
+---
+/**
+ * Language toggle (SITE_DEV_PLAN.md §13.4). A real navigation link (works
+ * without JS) to the current page's counterpart in the other locale. Every
+ * route has a counterpart — the KO docs route renders an EN fallback with a
+ * "not translated yet" callout rather than 404ing — so this always mirrors
+ * the current path, no explicit-href escape hatch needed (unlike the parent
+ * site's blog, which can have posts translated only one way).
+ */
+import { getAltLocale, getLocalizedPath, useTranslations, type Lang } from "../../i18n/utils";
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const alt = getAltLocale(lang);
+const t = useTranslations(lang);
+const targetPath = getLocalizedPath(Astro.url.pathname, alt);
+---
+
+<a
+  class="lang-toggle"
+  href={targetPath}
+  hreflang={alt}
+  lang={alt}
+  aria-label={t("lang.switchToAria")}
+  data-lang-target={alt}
+>
+  <svg class="icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+    <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="9"></circle>
+      <path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"></path>
+    </g>
+  </svg>
+  <span>{t("lang.switchTo")}</span>
+</a>
+
+<style>
+  .lang-toggle {
+    display: inline-grid;
+    place-items: center;
+    grid-auto-flow: column;
+    gap: var(--space-4);
+    height: 36px;
+    padding: 0 var(--space-12);
+    border-radius: var(--radius-pill);
+    color: var(--ink-2);
+    text-decoration: none;
+    /*
+      This anchor carries lang="ko" (a11y) on EN pages, which would make the
+      :lang(ko) rule swap --font-body-ko in and pull the Pretendard webfont
+      just to render "한국어". Pin a stack with no webfont — Latin via the
+      page's own --font-body, Korean via system fonts.
+    */
+    font-family: var(--font-body), "Helvetica Neue", Helvetica, Arial, "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif;
+    font-size: var(--text-small);
+    font-weight: 500;
+    white-space: nowrap;
+    transition: background var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
+  }
+  .lang-toggle:hover {
+    background: var(--paper-sunken);
+    color: var(--ink);
+  }
+  .lang-toggle .icon {
+    flex: none;
+  }
+  @media (max-width: 480px) {
+    .lang-toggle span {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLAnchorElement>(".lang-toggle").forEach((el) => {
+    el.addEventListener("click", () => {
+      try {
+        localStorage.setItem("lang", el.dataset.langTarget ?? "");
+      } catch {
+        /* storage blocked — navigation still proceeds */
+      }
+    });
+  });
+</script>

@@ -4,6 +4,13 @@ import Base from "../layouts/Base.astro";
 import Playground from "../components/playground/Playground";
 import { loadRoster } from "../lib/roster";
 import type { ComicStripDocument } from "@toonstrip/schema";
+import { useTranslations, type Lang } from "../i18n/utils";
+
+interface Props {
+  lang?: Lang;
+}
+const { lang = "en" } = Astro.props;
+const t = useTranslations(lang);
 import "../styles/playground-ui.css";
 import "../styles/playground.css";
 import hero from "../content/strips/hero.json";
@@ -44,7 +51,7 @@ const presets = [
 ];
 ---
 
-<Base title="Playground" description="Edit a Comic Strip Document three ways — form, JSON, and the live strip — then share it by URL or copy the embed snippet." bare>
-  <h1 class="visually-hidden">Playground</h1>
+<Base title={t("nav.playground")} description={t("playground.description")} lang={lang} bare>
+  <h1 class="visually-hidden">{t("nav.playground")}</h1>
   <Playground roster={roster} presets={presets} client:load />
 </Base>

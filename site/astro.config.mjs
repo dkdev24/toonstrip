@@ -23,6 +23,18 @@ export default defineConfig({
   // Output lands in site/dist; the root wrangler.toml points Pages at it.
   output: "static",
 
+  // SITE_DEV_PLAN.md §13.1: English (default) at root with no /en/ prefix;
+  // Korean under /ko/. Pages are hand-duplicated under src/pages/ko/, not
+  // Astro's automatic i18n routing — this block mainly drives the sitemap
+  // integration's locale awareness below.
+  i18n: {
+    defaultLocale: "en",
+    locales: ["en", "ko"],
+    routing: {
+      prefixDefaultLocale: false,
+    },
+  },
+
   integrations: [
     // Both packs are served so docs and the playground can show either.
     toonstrip({ packs: ["@toonstrip/pack-comic-chat", "@toonstrip/pack-example"] }),
@@ -31,7 +43,13 @@ export default defineConfig({
     // compat: true aliases react/react-dom to preact/compat so the copied shadcn/ui
     // components (Radix) run on Preact (PLAYGROUND_UI_PLAN.md §2).
     preact({ compat: true }),
-    sitemap(),
+    // Emits hreflang alternates so EN/KO pages cross-reference each other for SEO.
+    sitemap({
+      i18n: {
+        defaultLocale: "en",
+        locales: { en: "en", ko: "ko" },
+      },
+    }),
   ],
 
   // Tailwind v4 is scoped to the playground island via playground-ui.css @source rules.
@@ -97,6 +115,18 @@ export default defineConfig({
       weights: [400, 700],
       subsets: ["korean"],
       fallbacks: ["Apple SD Gothic Neo", "Malgun Gothic", "sans-serif"],
+      display: "swap",
+    },
+    {
+      // SITE_DEV_PLAN.md §13.4: UI body text on /ko/ pages, distinct from the
+      // balloon-canvas font above. Served via Fontsource (not on Google Fonts).
+      // Preloaded only on KO pages (Base.astro), never alongside DM Sans.
+      provider: fontProviders.fontsource(),
+      name: "Pretendard",
+      cssVariable: "--font-body-ko",
+      weights: [400, 500, 700],
+      subsets: ["latin", "korean"],
+      fallbacks: ["Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", "sans-serif"],
       display: "swap",
     },
     {

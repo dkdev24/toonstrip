@@ -1,25 +1,31 @@
 ---
 import Base from "../../layouts/Base.astro";
-import { docsNav, docHref } from "../../lib/docs-nav";
+import { docsNav } from "../../lib/docs-nav";
+import { useTranslations, type Lang, type TranslationKey } from "../../i18n/utils";
 
-const { sections } = await docsNav();
+interface Props {
+  lang?: Lang;
+}
+const { lang = "en" } = Astro.props;
+const t = useTranslations(lang);
+const { sections } = await docsNav(lang);
 ---
 
-<Base title="Docs" description="Install toonstrip, embed a strip in Astro or plain HTML, write a Comic Strip Document, and build asset packs.">
+<Base title={t("docs.indexTitle")} description="Install toonstrip, embed a strip in Astro or plain HTML, write a Comic Strip Document, and build asset packs." lang={lang}>
   <div class="prose">
-    <p class="caption">Documentation</p>
-    <h1>Docs</h1>
-    <p class="lead">Start with the install, then write a strip. Everything is shown as code next to the strip it produces.</p>
+    <p class="caption">{t("docs.indexCaption")}</p>
+    <h1>{t("docs.indexTitle")}</h1>
+    <p class="lead">{t("docs.indexLead")}</p>
   </div>
   <div class="docs-index">
     {sections.map((s) => (
       <section class="docs-index__section">
-        <h2>{s.name}</h2>
+        <h2>{t(`docs.section.${s.name}` as TranslationKey)}</h2>
         <ul>
           {s.entries.map((e) => (
             <li>
-              <a href={docHref(e)}>{e.data.title}</a>
-              <p>{e.data.description}</p>
+              <a href={e.href}>{e.title}</a>
+              <p>{e.description}</p>
             </li>
           ))}
         </ul>

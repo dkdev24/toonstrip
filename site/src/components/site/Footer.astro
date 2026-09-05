@@ -1,20 +1,24 @@
 ---
 import { coreVersion } from "../../lib/version";
+import { useTranslations, type Lang } from "../../i18n/utils";
+
+interface Props {
+  lang?: Lang;
+}
+const { lang = "en" } = Astro.props;
+const t = useTranslations(lang);
 ---
 
 <footer class="site-footer">
   <div class="container site-footer__inner">
     <p>
-      <strong>toonstrip</strong> <span class="mono">v{coreVersion}</span> · MIT License ·
-      <a href="https://github.com/dkdev24/toonstrip">GitHub</a> ·
-      <a href="https://www.npmjs.com/org/toonstrip">npm</a> ·
+      <strong>toonstrip</strong> <span class="mono">v{coreVersion}</span> · {t("footer.license")} ·
+      <a href="https://github.com/dkdev24/toonstrip">{t("footer.github")}</a> ·
+      <a href="https://www.npmjs.com/org/toonstrip">{t("footer.npm")}</a> ·
       <a href="https://danielkimdev.com">danielkimdev.com</a>
     </p>
     <p class="site-footer__notice">
-      The default asset pack includes Microsoft Comic Chat character and backdrop art,
-      redistributed under the MIT License. COMIC CHAT is a trademark of Microsoft
-      Corporation; toonstrip is independent and not affiliated with or endorsed by
-      Microsoft. See <a href="https://github.com/dkdev24/toonstrip/blob/main/NOTICE">NOTICE</a>.
+      {t("footer.notice")} <a href="https://github.com/dkdev24/toonstrip/blob/main/NOTICE">{t("footer.noticeLinkLabel")}</a>{t("footer.noticeSuffix")}
     </p>
   </div>
 </footer>

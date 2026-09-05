@@ -7,6 +7,7 @@
  */
 import { ComicStrip } from "@toonstrip/astro";
 import type { ComicStripDocument } from "@toonstrip/schema";
+import { getLangFromUrl, useTranslations } from "../../i18n/utils";
 
 interface Props {
   doc: ComicStripDocument;
@@ -17,22 +18,23 @@ const min = 260;
 const max = 1240;
 const packs = ["comic-chat"];
 const { doc, initial = 900, load = "visible" } = Astro.props;
+const t = useTranslations(getLangFromUrl(Astro.url));
 const presets = [
-  { label: "Phone", width: 390 },
-  { label: "Tablet", width: 768 },
-  { label: "Desktop", width: 1240 },
-  { label: "Fill", width: 0 },
+  { label: t("widthSlider.presetPhone"), width: 390 },
+  { label: t("widthSlider.presetTablet"), width: 768 },
+  { label: t("widthSlider.presetDesktop"), width: 1240 },
+  { label: t("widthSlider.presetFill"), width: 0 },
 ];
 ---
 
-<div class="width-slider" data-width-slider data-min={min} data-max={max}>
+<div class="width-slider" data-width-slider data-min={min} data-max={max} data-col-singular={t("widthSlider.columnUnit")} data-col-plural={t("widthSlider.columnUnitPlural")}>
   <div class="width-slider__controls">
     <label class="width-slider__label">
-      <span class="caption">Container width</span>
+      <span class="caption">{t("widthSlider.containerWidth")}</span>
       <input type="range" min={min} max={max} value={initial} step="10" data-width-range aria-describedby="width-readout" />
     </label>
     <output class="width-slider__readout mono" id="width-readout" data-width-readout aria-live="polite">{initial} px</output>
-    <div class="width-slider__presets" role="group" aria-label="Width presets">
+    <div class="width-slider__presets" role="group" aria-label={t("widthSlider.presetsAria")}>
       {presets.map((p) => (
         <button class="chip" type="button" data-width-preset={p.width}>{p.label}</button>
       ))}
@@ -59,10 +61,12 @@ const presets = [
     const container = root.querySelector<HTMLElement>("[data-width-container]")!;
     const stage = container.parentElement!;
     const presets = root.querySelectorAll<HTMLButtonElement>("[data-width-preset]");
+    const colSingular = root.dataset.colSingular ?? "column";
+    const colPlural = root.dataset.colPlural ?? "columns";
 
     function describe(width: number) {
       const { columns } = layoutStrip(width, { gutter: GUTTER });
-      readout.textContent = `${Math.round(width)} px · ${columns} column${columns === 1 ? "" : "s"}`;
+      readout.textContent = `${Math.round(width)} px · ${columns} ${columns === 1 ? colSingular : colPlural}`;
     }
     function apply(width: number, fromPreset?: HTMLButtonElement) {
       const stageInner = stage.clientWidth - parseFloat(getComputedStyle(stage).paddingLeft) * 2;

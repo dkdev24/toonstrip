@@ -4,11 +4,11 @@ description: The emotion wheel, rendered face by face, and the three gestures th
 order: 3
 section: Authoring
 ---
-import CodeAndStrip from "../../components/demo/CodeAndStrip.astro";
-import Callout from "../../components/site/Callout.astro";
-import emotions from "../strips/emotions.json";
-import intensity from "../strips/intensity.json";
-import poses from "../strips/poses.json";
+import CodeAndStrip from "../../../components/demo/CodeAndStrip.astro";
+import Callout from "../../../components/site/Callout.astro";
+import emotions from "../../strips/emotions.json";
+import intensity from "../../strips/intensity.json";
+import poses from "../../strips/poses.json";
 
 A body's `emotion` is a point on a wheel: `angle` in radians, `intensity` from 0 to 1. The
 renderer finds the nearest face the character's pack declares and draws that. Because it is

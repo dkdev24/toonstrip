@@ -1,10 +1,10 @@
 import type { APIRoute } from "astro";
-import { docsNav, docHref } from "../lib/docs-nav";
+import { docsNav } from "../lib/docs-nav";
 import { coreVersion } from "../lib/version";
 
-/** llms.txt: an index for agents integrating toonstrip. */
+/** llms.txt: an index for agents integrating toonstrip. EN docs only (SITE_DEV_PLAN.md §13.3). */
 export const GET: APIRoute = async ({ site }) => {
-  const { sections } = await docsNav();
+  const { sections } = await docsNav("en");
   const base = site?.origin ?? "https://toonstrip.danielkimdev.com";
   const lines = [
     "# toonstrip",
@@ -16,7 +16,7 @@ export const GET: APIRoute = async ({ site }) => {
   ];
   for (const s of sections) {
     lines.push(`## ${s.name}`, "");
-    for (const e of s.entries) lines.push(`- [${e.data.title}](${base}${docHref(e)}): ${e.data.description}`);
+    for (const e of s.entries) lines.push(`- [${e.title}](${base}${e.href}): ${e.description}`);
     lines.push("");
   }
   lines.push("## Other", "", `- [Playground](${base}/playground/): edit a document and see it render`, `- [Changelog](${base}/changelog/)`, `- [Repository](https://github.com/dkdev24/toonstrip)`, `- [npm](https://www.npmjs.com/org/toonstrip)`, "");

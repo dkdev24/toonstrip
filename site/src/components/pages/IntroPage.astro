@@ -1,0 +1,432 @@
+---
+/** Intro page — SITE_DEV_PLAN.md §4, §13.1. Shared by the EN and KO route wrappers. */
+import { ComicStrip } from "@toonstrip/astro";
+import type { ComicStripDocument } from "@toonstrip/schema";
+import Base from "../../layouts/Base.astro";
+import CodeBlock from "../site/CodeBlock.astro";
+import PackageManagerTabs from "../site/PackageManagerTabs.astro";
+import Sprite from "../site/Sprite.astro";
+import WidthSlider from "../demo/WidthSlider.astro";
+import { coreVersion } from "../../lib/version";
+import { loadRoster } from "../../lib/roster";
+import { playgroundUrl } from "../../lib/share";
+import { localizedStrip } from "../../lib/strips";
+import { getLocalizedPath, type Lang } from "../../i18n/utils";
+import heroEn from "../../content/strips/hero.json";
+import quickstartEn from "../../content/strips/quickstart.json";
+import tldrEn from "../../content/strips/tldr.json";
+import tutorialEn from "../../content/strips/tutorial.json";
+import transcriptEn from "../../content/strips/transcript.json";
+import cmsEn from "../../content/strips/cms.json";
+import staticPngEn from "../../content/strips/static-png.json";
+
+interface Props {
+  lang?: Lang;
+}
+const { lang = "en" } = Astro.props;
+const ko = lang === "ko";
+
+const hero = localizedStrip("hero", lang, heroEn as ComicStripDocument);
+const quickstart = localizedStrip("quickstart", lang, quickstartEn as ComicStripDocument);
+const tldr = localizedStrip("tldr", lang, tldrEn as ComicStripDocument);
+const tutorial = localizedStrip("tutorial", lang, tutorialEn as ComicStripDocument);
+const transcript = localizedStrip("transcript", lang, transcriptEn as ComicStripDocument);
+const cms = localizedStrip("cms", lang, cmsEn as ComicStripDocument);
+const staticPng = localizedStrip("static-png", lang, staticPngEn as ComicStripDocument);
+
+const roster = loadRoster(["@toonstrip/pack-comic-chat", "@toonstrip/pack-example"]);
+const comicChat = roster.characters.filter((c) => c.pack === "comic-chat");
+const example = roster.characters.filter((c) => c.pack === "example");
+
+const useCases: { title: string; text: string; doc: ComicStripDocument; code?: string }[] = ko
+  ? [
+      { title: "긴 글 맨 위의 요약", text: "네 컷 만에 4천 단어짜리 글이 하려는 말을 전달합니다. 본문은 그대로 두고, 스트립이 요약 역할을 합니다.", doc: tldr },
+      { title: "튜토리얼과 FAQ를 대화로", text: "질문과 답을 정의 목록보다 두 얼굴이 마주 보는 대화로 읽을 때 더 빨리 읽힙니다.", doc: tutorial },
+      { title: "대화 다시 보여주기", text: "채팅 스레드나 인터뷰 발췌를 재현할 때, 방 제목을 채널 이름으로 쓰면 됩니다. 대사는 그대로 말풍선에 대응됩니다.", doc: transcript },
+      { title: "어디서든 오는 데이터", text: "문서는 그냥 JSON입니다. 직접 손으로 쓰거나, 스크립트로 생성하거나, CMS 필드에 저장하거나, 직접 호출하는 LLM으로 만들어도 됩니다. toonstrip은 그것을 렌더링만 합니다.", doc: cms },
+      { title: "필요할 때는 정적 PNG로", text: "npm README, 이메일, 소셜 카드, OG 이미지는 캔버스를 실행할 수 없습니다. CLI가 같은 문서를 같은 레이아웃과 아트로 PNG에 렌더링하므로, JSON 파일 하나로 둘 다 처리됩니다.", doc: staticPng, code: "npx toonstrip render strip.json --out strip.png --width 1200" },
+    ]
+  : [
+      { title: "TL;DR at the top of a long post", text: "Three panels that say what four thousand words say. The post stays; the strip is the summary.", doc: tldrEn as ComicStripDocument },
+      { title: "Tutorials and FAQs as dialogue", text: "A question and an answer read faster with two faces than with a definition list.", doc: tutorialEn as ComicStripDocument },
+      { title: "Replaying a conversation", text: "A chat thread or interview excerpt, with the room title as the channel name. Lines map straight to balloons.", doc: transcriptEn as ComicStripDocument },
+      { title: "Data from anywhere", text: "The document is JSON. Write it by hand, generate it from a script, store it in a CMS field, or have an LLM you call yourself produce it. toonstrip only renders.", doc: cmsEn as ComicStripDocument },
+      { title: "A static PNG when you need one", text: "npm READMEs, emails, social cards, and OG images can't run a canvas. The CLI renders the same document to a PNG with the same layout and art, so one JSON file feeds both.", doc: staticPngEn as ComicStripDocument, code: "npx toonstrip render strip.json --out strip.png --width 1200" },
+    ];
+
+const configSnippet = `// astro.config.mjs
+import { defineConfig } from "astro/config";
+import { toonstrip } from "@toonstrip/astro";
+
+export default defineConfig({
+  integrations: [toonstrip({ packs: ["@toonstrip/pack-comic-chat"] })],
+});`;
+
+const pageSnippet = `---
+import { ComicStrip } from "@toonstrip/astro";
+---
+<ComicStrip
+  document={{
+    version: 1,
+    panels: [{
+      backdrop: "field",
+      bodies: [{ character: "dan", emotion: { angle: 0, intensity: 0.8 }, pose: "wave" }],
+      speakers: [{ speaker: "dan", balloon: "speech", text: "Hello from toonstrip!" }],
+    }],
+  }}
+  packs={["comic-chat"]}
+  client:visible
+/>`;
+
+const description = ko
+  ? "호출자가 넘긴 데이터로 코믹 스트립을 렌더링하는, 프레임워크에 바로 얹을 수 있는 라이브러리입니다. Astro를 지원하며 MIT 라이선스입니다."
+  : "A framework-embeddable library that renders comic strips from caller-supplied data as live, responsive canvas widgets. Astro-ready, MIT.";
+---
+
+<Base title="toonstrip" description={description} lang={lang}>
+  <!-- 1. Hero -->
+  <section class="hero">
+    <p class="caption">toonstrip <span class="mono">v{coreVersion}</span> · MIT · {ko ? "Astro 연동" : "Astro integration"}</p>
+    <h1 class="hero__title">{ko ? "데이터로 그리는, 실시간으로 반응하는 코믹 스트립." : "Comic strips from data, drawn live on your page."}</h1>
+    <p class="lead">
+      {ko
+        ? "패널, 캐릭터, 대사를 JSON으로 작성하면, toonstrip이 실제 캔버스 위에 그려 줍니다. 페이지 크기에 맞춰 다시 배치되고, 스크린 리더에도 그대로 읽힙니다. 따로 이미지를 만들어 동기화할 필요가 없습니다."
+        : "Write panels, characters, and lines as JSON. toonstrip renders them on real canvases that reflow with the page and read aloud to screen readers. No image exports to keep in sync."}
+    </p>
+    <p class="hero__actions">
+      <a class="button button--primary" href={getLocalizedPath("/playground/", lang)}>{ko ? "플레이그라운드 열기" : "Open the playground"}</a>
+      <a class="button button--secondary" href={getLocalizedPath("/docs/", lang)}>{ko ? "문서 보기" : "Read the docs"}</a>
+    </p>
+  </section>
+  <section class="hero-strip" aria-label={ko ? "너비 조절이 가능한 예시 스트립" : "Example strip, with a width control"}>
+    <WidthSlider doc={hero as ComicStripDocument} load="load" initial={1100} />
+    <p class="hero-strip__hint">
+      {ko ? "슬라이더를 움직여 보세요. 이 스트립은 이미지가 아니라 각 패널이 각각 하나의 캔버스이며, 컬럼 수는 컨테이너 너비에서 나옵니다." : "Drag the slider. The strip is not an image: each panel is a canvas, and the column count comes from the container width."}
+      {" "}<a href={playgroundUrl(hero as ComicStripDocument)}>{ko ? "이 스트립을 플레이그라운드에서 수정하기 →" : "Edit this strip in the playground →"}</a>
+    </p>
+  </section>
+
+  <!-- 2. The 30-second install -->
+  <section class="section" id="install">
+    <div class="section__intro">
+      <p class="caption">{ko ? "30초 설치" : "30-second install"}</p>
+      <h2>{ko ? "세 단계, 스트립 하나." : "Three steps, one strip."}</h2>
+      <p>{ko ? "패키지 두 개를 설치하고, 통합을 등록한 다음, 컴포넌트를 페이지에 넣으면 끝입니다. 오른쪽 패널이 이 코드가 실제로 렌더링하는 결과입니다." : "Install two packages, register the integration, drop the component in a page. The panel on the right is exactly what the snippet renders."}</p>
+    </div>
+    <div class="install">
+      <div class="install__steps">
+        <PackageManagerTabs packages={["@toonstrip/astro", "@toonstrip/pack-comic-chat"]} />
+        <CodeBlock code={configSnippet} lang="js" title="astro.config.mjs" />
+        <CodeBlock code={pageSnippet} lang="astro" title="src/pages/index.astro" />
+      </div>
+      <div class="stage install__result">
+        <ComicStrip document={quickstart as ComicStripDocument} packs={["comic-chat"]} client:visible />
+        <p class="caption" style="margin: var(--space-12) 0 0">{ko ? "결과" : "Result"}</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. How it works -->
+  <section class="section" id="how">
+    <div class="section__intro">
+      <p class="caption">{ko ? "작동 방식" : "How it works"}</p>
+      <h2>{ko ? "데이터는 당신이 쓰고, 아트는 팩이 제공하며, 렌더링은 실시간으로 이뤄집니다." : "You write data. A pack supplies the art. It renders live."}</h2>
+    </div>
+    <div class="grid grid--3">
+      <div class="card">
+        <div class="card__media">
+          <pre class="how__json">{`{ "backdrop": "field",
+  "camera": "medium",
+  "bodies": [{ "character": "dan",
+               "emotion": { "angle": 0, "intensity": 0.8 } }],
+  "speakers": [{ "speaker": "dan", "balloon": "speech",
+                 "text": "Hello!" }] }`}</pre>
+        </div>
+        <h3>{ko ? "데이터를 작성합니다" : "You write data"}</h3>
+        <p>{ko ? <>'코믹 스트립 문서'(Comic Strip Document)입니다. 패널, 등장인물, 감정, 대사를 담은 순수 JSON이며, 스키마도 공개되어 있습니다. 작성하는 데 TypeScript는 필요 없습니다.</> : <>A <em>Comic Strip Document</em>: panels, who is on stage, what they feel, what they say. Plain JSON with a published schema. No TypeScript required to produce it.</>}</p>
+      </div>
+      <div class="card">
+        <div class="card__media how__sprites">
+          {comicChat.slice(0, 6).map((c) => <Sprite entry={c} size={48} label={false} />)}
+        </div>
+        <h3>{ko ? "팩이 아트를 제공합니다" : "A pack supplies the art"}</h3>
+        <p>{ko ? "캐릭터, 포즈, 표정, 배경은 에셋 팩에서 옵니다. 기본으로 15개 캐릭터와 3개 배경이 제공되며, 스프라이트 시트와 JSON 매니페스트만 있으면 직접 추가할 수 있습니다." : "Characters, poses, expressions, and backdrops come from an asset pack. Fifteen characters and three backdrops ship by default; add your own with a sprite sheet and a JSON manifest."}</p>
+      </div>
+      <div class="card">
+        <div class="card__media how__live">
+          <span class="how__tag">canvas</span>
+          <span class="how__tag">devicePixelRatio</span>
+          <span class="how__tag">ResizeObserver</span>
+          <span class="how__tag">role="img"</span>
+        </div>
+        <h3>{ko ? "실시간으로 렌더링됩니다" : "It renders live"}</h3>
+        <p>{ko ? "각 패널은 독립된 캔버스로, 어떤 배율에서도 선명하며, 컨테이너 크기가 바뀌면 다시 배치되고, 대사 자체로부터 보조 기술에 설명됩니다." : "Each panel is its own canvas, sharp at any zoom, re-laid out when the container resizes, and described to assistive tech from the dialogue itself."}</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. Use cases -->
+  <section class="section" id="use-cases">
+    <div class="section__intro">
+      <p class="caption">{ko ? "활용 사례" : "Use cases"}</p>
+      <h2>{ko ? "문단보다 스트립이 나은 순간." : "Where a strip beats a paragraph."}</h2>
+      <p>{ko ? "아래 스트립은 모두 직접 작성한 JSON이며, 실시간으로 렌더링됩니다. 아무거나 플레이그라운드에서 열어 보세요." : "Every strip below is hand-written JSON, rendered live. Open any of them in the playground."}</p>
+    </div>
+    <div class="use-cases">
+      {useCases.map((u) => (
+        <article class="use-case">
+          <div class="stage use-case__strip">
+            <ComicStrip document={u.doc} packs={["comic-chat"]} client:visible />
+          </div>
+          <div class="use-case__text">
+            <h3>{u.title}</h3>
+            <p>{u.text}</p>
+            <a href={playgroundUrl(u.doc)}>{ko ? "플레이그라운드에서 열기 →" : "Open in playground →"}</a>
+            {u.code && <div class="use-case__code"><CodeBlock code={u.code} lang="sh" /></div>}
+          </div>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <!-- 5. Bring your own characters -->
+  <section class="section" id="packs">
+    <div class="section__intro">
+      <p class="caption">{ko ? "에셋 팩" : "Asset packs"}</p>
+      <h2>{ko ? "원하는 캐릭터를 직접 가져오세요." : "Bring your own characters."}</h2>
+      <p>
+        {ko
+          ? "기본 팩은 MIT 라이선스로 재배포되는 원작 Microsoft Comic Chat 캐릭터 구성입니다. 두 번째 팩은 캐릭터 하나와 배경 하나로만 이루어져 있는데, 팩 규격이 기본 아트에 묶여 있지 않다는 것을 보여주는 가장 작은 예시입니다."
+          : "The default pack is the original Microsoft Comic Chat roster, redistributed under MIT. The second pack is one original character and one backdrop: the smallest proof that the pack contract is not tied to the default art."}
+      </p>
+    </div>
+    <div class="roster">
+      <div class="roster__pack">
+        <p class="caption">comic-chat · {comicChat.length}{ko ? "명" : " characters"} · {roster.backdrops.filter((b) => b.pack === "comic-chat").length}{ko ? "개 배경" : " backdrops"}</p>
+        <div class="roster__grid">{comicChat.map((c) => <Sprite entry={c} />)}</div>
+      </div>
+      <div class="roster__pack">
+        <p class="caption">example · {example.length}{ko ? "명" : " character"} · 1{ko ? "개 배경" : " backdrop"}</p>
+        <div class="roster__grid">{example.map((c) => <Sprite entry={c} />)}</div>
+        <p style="margin-top: var(--space-16)"><a class="button button--secondary" href={getLocalizedPath("/docs/asset-packs/", lang)}>{ko ? "캐릭터 추가하는 법" : "How to add a character"}</a></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. Why not an image? -->
+  <section class="section" id="why">
+    <div class="section__intro">
+      <p class="caption">{ko ? "이미지로는 안 되는 이유" : "Why not an image?"}</p>
+      <h2>{ko ? "PNG가 못 하는 것을 라이브 캔버스는 해냅니다." : "What a live canvas gives you that a PNG can't."}</h2>
+    </div>
+    <div class="compare">
+      <table>
+        <thead>
+          <tr><th scope="col"><span class="visually-hidden">{ko ? "속성" : "Property"}</span></th><th scope="col">{ko ? "사전 렌더링된 PNG" : "Pre-rendered PNG"}</th><th scope="col">{ko ? "내보낸 SVG" : "Exported SVG"}</th><th scope="col">toonstrip</th></tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row">{ko ? "컨테이너에 맞춰 재배치" : "Reflows to the container"}</th><td>{ko ? "안 됨. 레이아웃 고정." : "No. One fixed layout."}</td><td>{ko ? "크기만 바뀌고 재배치는 안 됨." : "Scales, doesn't reflow."}</td><td>{ko ? "컬럼 수가 너비를 따라갑니다." : "Column count follows width."}</td></tr>
+          <tr><th scope="row">{ko ? "어떤 디스플레이에서도 선명함" : "Sharp on any display"}</th><td>{ko ? "내보낸 크기에서만." : "Only at export size."}</td><td>{ko ? "예." : "Yes."}</td><td>{ko ? "예, DPR을 인식하는 백업 스토어." : "Yes, DPR-aware backing store."}</td></tr>
+          <tr><th scope="row">{ko ? "스크린 리더 지원" : "Screen readers"}</th><td>{ko ? "직접 작성했다면 alt 텍스트 하나." : "One alt text, if you wrote it."}</td><td>{ko ? "내보내기 방식에 따라 다름." : "Depends on the export."}</td><td>{ko ? "모든 패널이 자기 대사로부터 설명됩니다." : "Every panel described from its own lines."}</td></tr>
+          <tr><th scope="row">{ko ? "대사 한 줄 수정" : "Change one line of dialogue"}</th><td>{ko ? "다시 렌더링, 다시 업로드." : "Re-render, re-upload."}</td><td>{ko ? "다시 내보내기." : "Re-export."}</td><td>{ko ? "JSON만 고치면 됩니다." : "Edit the JSON."}</td></tr>
+          <tr><th scope="row">{ko ? "3패널 스트립의 페이지 용량" : "Page weight for a 3-panel strip"}</th><td>{ko ? "큰 이미지 한 장." : "One large image."}</td><td>{ko ? "텍스트가 많은 벡터." : "Text-heavy vector."}</td><td>{ko ? "참조하는 스프라이트만." : "Only the sprites it references."}</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 7. Where it came from -->
+  <section class="section origin" id="origin">
+    <div class="section__intro">
+      <p class="caption">{ko ? "시작한 곳" : "Where it came from"}</p>
+      <h2>{ko ? "더 크고 별난 프로젝트에서 분리되어 나왔습니다." : "Extracted from a bigger, weirder project."}</h2>
+      <p>
+        {ko
+          ? <>toonstrip은 <a href="https://grues.danielkimdev.com">Grues in Comic</a>의 코믹 렌더링 절반에서 시작했습니다. 이 프로젝트는 고전 Zork 스타일 인터랙티브 픽션을 플레이하고, 그 진행 과정을 Comic Chat 스타일 스트립으로 실시간 렌더링합니다. 패널, 포즈, 말풍선은 원작 Comic Chat 엔진 자체의 텍스트 to 감정 로직을 그대로 이식한 것이며, 실행 중에 LLM은 관여하지 않습니다.</>
+          : <>toonstrip started as the comic-rendering half of <a href="https://grues.danielkimdev.com">Grues in Comic</a>, a project that plays classic Zork-style interactive fiction and renders the playthrough live as a Comic Chat-style strip. Panels, poses, and speech balloons are driven by the original Comic Chat engine's own text-to-affect logic, ported as-is with no runtime LLM involved.</>}
+      </p>
+      <p>
+        {ko
+          ? "그 렌더링 엔진(패널, 캐릭터, 포즈, 감정, 말풍선, 배경)은 게임이나 Zork 결합 없이도 그 자체로 쓸모가 있다는 것이 드러났습니다. toonstrip은 그 절반을 떼어내 일반화한 것입니다. 같은 캔버스 렌더러와 같은 기본 Comic Chat 에셋 팩을 쓰지만, 직접 넘긴 데이터로 움직입니다."
+          : "That rendering engine (panels, characters, poses, emotions, balloons, backdrops) turned out to be useful on its own, with no game and no Zork coupling attached. toonstrip is that half, pulled out and generalized: same canvas renderer and the same default Comic Chat asset pack, but driven by plain data you supply yourself."}
+      </p>
+    </div>
+    <figure class="origin-shot">
+      <img
+        src="/grues-in-comic-screenshot.webp"
+        alt={ko ? "Grues in Comic: Zork 장면을 담은 두 패널짜리 Comic Chat 스타일 스트립이 게임 텍스트 콘솔 위에 놓여 있다." : "Grues in Comic: a two-panel Comic Chat-style strip of a Zork scene above the game's text console."}
+        width="806"
+        height="650"
+        loading="lazy"
+        decoding="async"
+      />
+      <figcaption>{ko ? "같은 엔진으로 Zork 플레이스루를 렌더링하는 Grues in Comic." : "Grues in Comic, rendering a Zork playthrough with the same engine."}</figcaption>
+    </figure>
+  </section>
+</Base>
+
+<style>
+  .hero {
+    padding-top: var(--space-32);
+    max-width: 46rem;
+  }
+  .hero__title {
+    font-size: var(--text-hero);
+    line-height: 1.05;
+    margin-bottom: var(--space-24);
+  }
+  .hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-12);
+    margin-top: var(--space-32);
+  }
+  .hero-strip {
+    margin-top: var(--space-48);
+  }
+  .hero-strip__hint {
+    font-size: var(--text-small);
+    color: var(--ink-2);
+    max-width: 60ch;
+  }
+
+  .install {
+    display: grid;
+    gap: var(--space-24);
+    align-items: start;
+  }
+  @media (min-width: 900px) {
+    .install {
+      grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    }
+  }
+  .install__result {
+    position: sticky;
+    top: calc(var(--header-height) + var(--space-24));
+  }
+
+  .how__json {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    font-size: 0.75rem;
+    line-height: 1.5;
+    color: var(--ink-2);
+    white-space: pre;
+    overflow: hidden;
+  }
+  .how__sprites {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-8);
+    align-items: center;
+    min-height: 96px;
+  }
+  .how__live {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-8);
+    align-content: center;
+    min-height: 96px;
+  }
+  .how__tag {
+    font-family: var(--font-mono);
+    font-size: var(--text-caption);
+    padding: var(--space-4) var(--space-8);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-sm);
+    background: var(--paper-raised);
+  }
+
+  .use-cases {
+    display: grid;
+    gap: var(--space-48);
+  }
+  .use-case {
+    display: grid;
+    gap: var(--space-16);
+  }
+  .use-case__text {
+    display: grid;
+    gap: var(--space-4) var(--space-32);
+    align-items: baseline;
+  }
+  @media (min-width: 900px) {
+    .use-case__text {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) auto;
+    }
+  }
+  .use-case__text h3 {
+    margin: 0;
+  }
+  .use-case__code {
+    grid-column: 1 / -1;
+  }
+  .use-case__text p {
+    margin: 0;
+    color: var(--ink-2);
+    font-size: var(--text-small);
+  }
+
+  .roster {
+    display: grid;
+    gap: var(--space-32);
+  }
+  @media (min-width: 900px) {
+    .roster {
+      grid-template-columns: minmax(0, 3fr) minmax(0, 1fr);
+    }
+  }
+  .roster__grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-16);
+  }
+
+  .compare th[scope="row"] {
+    font-family: var(--font-body);
+    font-size: var(--text-small);
+    font-weight: 500;
+    text-transform: none;
+    letter-spacing: 0;
+    color: var(--ink);
+    border-bottom: 1px solid var(--rule);
+  }
+  .compare td:last-child {
+    font-weight: 500;
+    color: var(--ink);
+  }
+  @media (min-width: 900px) {
+    .origin {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: var(--space-48);
+      align-items: start;
+    }
+    .origin .section__intro {
+      max-width: none;
+      margin-bottom: 0;
+    }
+    .origin .origin-shot {
+      margin-top: 0;
+    }
+  }
+  .origin-shot {
+    margin: var(--space-32) 0 0;
+    max-width: 512px;
+  }
+  .origin-shot img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-sm);
+    background: var(--paper-raised);
+  }
+  .origin-shot figcaption {
+    margin-top: var(--space-8);
+    font-size: var(--text-caption);
+    color: var(--ink-2);
+  }
+</style>

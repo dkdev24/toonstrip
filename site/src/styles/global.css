@@ -28,6 +28,16 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* SITE_DEV_PLAN.md §13.4: Korean UI body copy swaps to Pretendard and gets
+   more generous line-height and keep-all wrapping (no mid-word breaks). */
+:lang(ko) {
+  font-family: var(--font-body-ko);
+}
+body:lang(ko) {
+  line-height: 1.7;
+  word-break: keep-all;
+}
+
 main {
   flex: 1 0 auto;
 }

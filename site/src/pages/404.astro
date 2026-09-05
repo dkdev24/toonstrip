@@ -1,10 +1,21 @@
 ---
 import Base from "../layouts/Base.astro";
+import { useTranslations, getLocalizedPath, type Lang } from "../i18n/utils";
+
+interface Props {
+  lang?: Lang;
+}
+const { lang = "en" } = Astro.props;
+const t = useTranslations(lang);
 ---
 
-<Base title="Not found" description="That page doesn't exist.">
+<Base title={t("notFound.title")} description={t("notFound.description")} lang={lang}>
   <div class="prose">
-    <h1>Not found</h1>
-    <p class="lead">There is no panel here. Try the <a href="/docs/">docs</a> or the <a href="/playground/">playground</a>.</p>
+    <h1>{t("notFound.title")}</h1>
+    <p class="lead">{t("notFound.body")}</p>
+    <p>
+      <a href={getLocalizedPath("/docs/", lang)}>{t("nav.docs")}</a> ·
+      <a href={getLocalizedPath("/playground/", lang)}>{t("nav.playground")}</a>
+    </p>
   </div>
 </Base>

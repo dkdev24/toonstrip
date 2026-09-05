@@ -6,33 +6,40 @@
  */
 import type { MarkdownHeading } from "astro";
 import Base from "./Base.astro";
-import { docsNav, docHref, type DocEntry } from "../lib/docs-nav";
+import Callout from "../components/site/Callout.astro";
+import { docsNav, docSlug, type DocEntry } from "../lib/docs-nav";
+import { useTranslations, type Lang, type TranslationKey } from "../i18n/utils";
 
 interface Props {
   entry: DocEntry;
   headings: MarkdownHeading[];
+  lang: Lang;
+  /** True when `entry` is the EN fallback shown for an untranslated KO page. */
+  fallback?: boolean;
 }
-const { entry, headings } = Astro.props;
-const { sorted, sections } = await docsNav();
-const index = sorted.findIndex((e) => e.id === entry.id);
+const { entry, headings, lang, fallback = false } = Astro.props;
+const t = useTranslations(lang);
+const slug = docSlug(entry);
+const { sorted, sections } = await docsNav(lang);
+const index = sorted.findIndex((e) => e.slug === slug);
 const prev = index > 0 ? sorted[index - 1] : null;
 const next = index < sorted.length - 1 ? sorted[index + 1] : null;
 const toc = headings.filter((h) => h.depth === 2 || h.depth === 3);
 const editUrl = `https://github.com/dkdev24/toonstrip/edit/main/site/src/content/docs/${entry.id}.mdx`;
 ---
 
-<Base title={entry.data.title} description={entry.data.description} wide>
+<Base title={entry.data.title} description={entry.data.description} lang={lang} wide>
   <div class="docs">
-    <aside class="docs__sidebar" aria-label="Docs navigation">
+    <aside class="docs__sidebar" aria-label={t("docs.sidebarAria")}>
       <details class="docs__nav-disclosure" open>
-        <summary>Docs menu</summary>
-        <nav aria-label="Docs">
+        <summary>{t("docs.menu")}</summary>
+        <nav aria-label={t("docs.navAria")}>
           {sections.map((s) => (
             <div class="docs__section">
-              <p class="caption">{s.name}</p>
+              <p class="caption">{t(`docs.section.${s.name}` as TranslationKey)}</p>
               <ul>
                 {s.entries.map((e) => (
-                  <li><a href={docHref(e)} aria-current={e.id === entry.id ? "page" : undefined}>{e.data.title}</a></li>
+                  <li><a href={e.href} aria-current={e.slug === slug ? "page" : undefined}>{e.title}</a></li>
                 ))}
               </ul>
             </div>
@@ -45,20 +52,25 @@ const editUrl = `https://github.com/dkdev24/toonstrip/edit/main/site/src/content
       <p class="caption">{entry.data.section}</p>
       <h1>{entry.data.title}</h1>
       <p class="lead">{entry.data.description}</p>
+      {fallback && (
+        <Callout kind="note" title={t("docsFallback.title")}>
+          <p>{t("docsFallback.body")}</p>
+        </Callout>
+      )}
       <slot />
       <footer class="docs__footer">
-        <p class="docs__edit"><a href={editUrl}>Edit this page on GitHub</a></p>
+        <p class="docs__edit"><a href={editUrl}>{t("docs.editOnGithub")}</a></p>
         <nav class="docs__pager" aria-label="Previous and next">
-          {prev ? <a class="docs__pager-link" href={docHref(prev)}><span class="caption">Previous</span><span>{prev.data.title}</span></a> : <span />}
-          {next ? <a class="docs__pager-link docs__pager-link--next" href={docHref(next)}><span class="caption">Next</span><span>{next.data.title}</span></a> : <span />}
+          {prev ? <a class="docs__pager-link" href={prev.href}><span class="caption">{t("docs.previous")}</span><span>{prev.title}</span></a> : <span />}
+          {next ? <a class="docs__pager-link docs__pager-link--next" href={next.href}><span class="caption">{t("docs.next")}</span><span>{next.title}</span></a> : <span />}
         </nav>
       </footer>
     </article>
 
     {toc.length > 1 && (
-      <aside class="docs__toc" aria-label="Table of contents">
-        <nav aria-label="On this page" data-toc>
-          <p class="caption">On this page</p>
+      <aside class="docs__toc" aria-label={t("docs.tocAria")}>
+        <nav aria-label={t("docs.onThisPage")} data-toc>
+          <p class="caption">{t("docs.onThisPage")}</p>
           <ul>
             {toc.map((h) => (
               <li class:list={[`toc-depth-${h.depth}`]}><a href={`#${h.slug}`}>{h.text}</a></li>
