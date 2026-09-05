@@ -13,20 +13,73 @@ existing dep), `yagni` (abstraction with one implementation), `shrink` (same log
 
 ## Progress
 
-**2 of 46 applied. ~33 lines and 2 dependencies cut; ~2,367 hand-written lines, ~700 generated
-and 7 deps still on the table.** A row marked **done** in the table below is landed and the
-build is green; everything else is untouched.
+**33 of 46 applied (4 partial — see notes). ~866 hand-written lines net removed and 5 deps
+fully dropped (2 more moved to devDeps, 4 demoted); ~1,304 hand-written lines, ~700 generated
+and remaining deps still on the table.** A row marked **done** in the table below is landed and
+the build is green; everything else is untouched.
 
 | Date | Item | What landed | Commit |
 |---|---|---|---|
 | 2026-09-04 | #31 | Deleted `site/src/components/ui/scroll-area.tsx` (zero importers) and dropped `@radix-ui/react-scroll-area` from `site/package.json`; lockfile updated, `pnpm build` green, 23 pages built | `ee908f8` |
 | 2026-09-04 | #42 | Dropped the `codemirror` meta-package from `site/package.json`; all six `@codemirror/*` scoped packages the editor imports stay declared. `pnpm install` removed 3 packages, `pnpm build` green | (this commit) |
+| 2026-09-05 | #29 | `class-variance-authority` replaced with two `Record` lookups in `button.tsx`; dep dropped | `5413998` |
+| 2026-09-05 | #41 | `@toonstrip/schema` dropped from astro, demoted to devDeps in react/vue/next | `5413998` |
+| 2026-09-05 | #40 | `@napi-rs/canvas` moved to devDeps in core | `5413998` |
+| 2026-09-05 | #44 | Dead `theme-change` CustomEvent dispatch removed (no listeners) | `5413998` |
+| 2026-09-05 | #11 (partial) | `kitchen-sink.astro` + sitemap filter deleted; `collapse` prop kept — used by 7 docs, audit's "only user" claim was stale | `5413998` |
+| 2026-09-05 | #5 | `element/demo/` + `verify-demo.mjs` deleted, `playwright`/`axe-core` devDeps dropped | `5413998` |
+| 2026-09-05 | #32 | Dead CSS selectors/tokens removed from site styles | `5413998` |
+| 2026-09-05 | #2 | `--npm` pack-skeleton emitter deleted | `5413998` |
+| 2026-09-05 | #13 | `asset-packager` `index.ts` barrel narrowed to used exports | `5413998` |
+| 2026-09-05 | #10 | `make-fixture.mjs`/`make-sheet-fixture.mjs` share `scripts/draw.mjs` | `5413998` |
+| 2026-09-05 | #21 | `body` part-kind pipeline cut, `bodies: []` emitted directly | `5413998` |
+| 2026-09-05 | #22 | `rasterOf` duplicates replaced with shared `readPng`/`resizeRaster` | `5413998` |
+| 2026-09-05 | #25 | `init.ts` folded into `bin.ts` | `5413998` |
+| 2026-09-05 | #26 | Hand-rolled PNG IHDR parser replaced with `@napi-rs/canvas`'s `loadImage` | `5413998` |
+| 2026-09-05 | #36 | `directories()` uses `readdirSync(dir, { withFileTypes: true })` | `5413998` |
+| 2026-09-05 | #30 | `grid.ts`'s inlined `toCanvas` duplicates replaced with the shared helper | `5413998` |
+| 2026-09-05 | #27 | `expandSheets`' two near-identical loops merged into one helper | `5413998` |
+| 2026-09-05 | #35 | Hand-rolled bigint popcount replaced with a bit-string diff | `5413998` |
+| 2026-09-05 | #9 (partial) | `examples/react-vite` + `vue-vite` share `examples/strips.ts`; full app merge left for a product call | `6c48463` |
+| 2026-09-05 | #15 | 3 copies of `copy-pack-assets.mjs` merged into `examples/copy-pack-assets.mjs` | `6c48463` |
+| 2026-09-05 | #17 | Undo/redo rewritten as `past`/`future` signals + one `travel()` | `6c48463` |
+| 2026-09-05 | #18 | `layout.ts`: `cellFor`, `maxColumns`, `columnsFor` abstraction inlined — **toonstrip side only, upstream port to `grues-in-comic` still pending** | `6c48463` |
+| 2026-09-05 | #20 | `className`/`cls` double-prop dance dropped across `site` `ui/*` | `6c48463` |
+| 2026-09-05 | #23 | `emotion.ts`'s `Emotion` re-exported from `@toonstrip/schema`, dead `EmotionName` removed | `6c48463` |
+| 2026-09-05 | #24 | Dead `<comic-strip src>` attribute plumbing removed | `6c48463` |
+| 2026-09-05 | #33 (partial) | `Slider` array API, `SheetContent`'s unused sides, `WidthSlider`/`PackageManagerTabs` unused props trimmed; `collapse` and React wrapper's `className`/`style` kept — both still used | `6c48463` |
+| 2026-09-05 | #34 (partial) | `useMediaQuery`, `PaneBar` inlined; `tag-name.ts` kept — documents a real SSR isolation boundary | `6c48463` |
+| 2026-09-05 | #37 | `balloon.ts`'s five `.split(/\s+/).filter(...)` sites replaced with `.match(/\S+/g) ?? []` — **upstream port to `grues-in-comic` still pending** | (this commit) |
+| 2026-09-05 | #38 (partial) | `copyCycles` hoisted to `figure.ts`; `normalizeAngle` simplified to `atan2(sin,cos)`; `readJson` and the part-sort comparator de-duplicated. `fail()`/`touches()` kept — already minimal. **`normalizeAngle`'s upstream port pending** | `6c48463` |
+| 2026-09-05 | #39 (partial) | `AlphaStats.opaque`, `TemplateResult.labelBand`, `gridBoundaries`' `profiles` removed; unused `maxShift`/`tolerance`/`ring` defaults trimmed; `leftover`/`DOCK_DELTA`/`LARGE` kept — still read by tests or intentional | `6c48463` |
+| 2026-09-05 | #43 (partial) | `packRoot`, `defaultPackDir`, `PopoverAnchor`, `SheetTrigger`, `SheetClose` dropped; `MAX_HASH_LENGTH`, the `columns` getter, `Diagnostic`/`image.ts` re-exports kept — still used | `6c48463` |
+| 2026-09-05 | #45 | `spriteStyle`/`Sprite.astro` crop math shared via `site/src/lib/sprite-crop.ts` | `6c48463` |
 
-**Caveat on #42's verification:** `site`'s Playwright suite (`pnpm test:e2e`) fails all 8
-playground specs, and it fails identically on a clean tree at `ee908f8` — pre-existing, not
-caused by these cuts. So the CodeMirror editor's *runtime* behaviour after #42 is covered by the
-production build only, not by a passing browser test. Fixing that suite is the prerequisite for
-confidently doing #12 (the `json-position.ts` rewrite), which touches editor internals.
+**Verified stale on re-check, not cut:** #6 (`pack-example` has a real external test importer,
+`core/test/pack-example.test.ts`), #7 (pack `types.ts` is deliberately schema-only per
+`TOONSTRIP_DEV_PLAN.md:92-93`, not a stray core copy).
+
+**Skipped, needs a human call:** #8 (`resizable.tsx` rewrite touches drag/keyboard behavior,
+needs a browser check, not just a green build), #46 (`sheetImage()` merge needs new shared code
+in `draw.mjs` plus fixture-regen verification, `draw.mjs`'s current exports don't cover it).
+
+**Not attempted — flagged:**
+- #1: the ajv/esbuild schema rewrite (biggest single win, ~700 generated lines + 2 deps) — a
+  real behavior rewrite, not a mechanical cut; needs its own pass with the
+  `ComicStripValidationError.issues` contract kept intact.
+- #4: `@toonstrip/next` deprecation — a product decision (needs a migration note), not a
+  cleanup.
+- #12: `json-position.ts` rewrite — blocked on fixing `site`'s Playwright suite (see caveat
+  below), can't be verified by a passing browser test yet.
+- #3, #14, #16, #19, #28 (†, upstream-shared `packages/core` files): applying the toonstrip-side
+  edit is safe, but `UPSTREAM_SYNC.md` requires a manual port into `grues-in-comic` (with an ADR
+  for #3's behavioral change, `gate`/`density` re-runs) and then a publish cascade through
+  `@toonstrip/core`→`element`→`astro` — the publish/push steps need your confirmation per that
+  doc's Safety section, so these were left for a dedicated session.
+
+**Caveat on #42's verification (still open):** `site`'s Playwright suite (`pnpm test:e2e`) fails
+all 8 playground specs, and it fails identically on a clean tree at `ee908f8` — pre-existing, not
+caused by any of these cuts. Fixing that suite is the prerequisite for confidently doing #12.
 
 ## Two standing caveats
 

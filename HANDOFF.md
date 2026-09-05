@@ -17,26 +17,26 @@ to `main` deploys prod (output `site/dist`; root `pnpm build` is the build).
 
 ## Last Session
 
-2026-09-04: New site docs page for the packager (`docs/asset-packager.mdx`, Reference,
-order 17; both input paths, the join, errors vs warnings) + cross-link from
-`asset-packs.mdx`. Published **`@toonstrip/asset-packager` 0.2.0** to npm (33 tests green;
-tarball verified, `@toonstrip/core` dep rewritten to 0.1.7). Then a repo-wide
-over-engineering audit → **`PONYTAIL_AUDIT.md`**: 46 ranked findings (~2,400 lines + ~700
-generated + 9 deps cuttable) with a Progress table at its top. Applied 2 — **#31** (dead
-`ui/scroll-area.tsx`, -1 radix dep) and **#42** (unused `codemirror`, -3 packages).
+2026-09-05: Worked `PONYTAIL_AUDIT.md` autonomously — 31 more items landed (33/46 total, 4
+partial), ~866 hand-written lines net removed, 5 deps dropped outright. Commits `5413998`
+(deps/dead-files + packager dedup) and `6c48463` (site/core/packager shrink). `pnpm
+build`/`pnpm test` green throughout, re-verified independently, not just trusted. A few
+"zero caller" claims turned out stale on re-check (kept, not cut) — see
+`PONYTAIL_AUDIT.md`'s Progress section for the full per-item ledger.
 
 ## Next Actions
 
-1. **Fix `site`'s Playwright suite** — 8/8 playground specs fail, pre-existing. It is the
-   safety net for the site-side audit items; #12 should wait for it.
-2. **Keep working `PONYTAIL_AUDIT.md`** in its suggested order: #29, then
-   #41/#40/#11/#5/#44, then the packager cuts, the schema's ajv removal, and the
-   upstream-shared core batch per `UPSTREAM_SYNC.md`.
-3. **S9 Korean locale** per `SITE_DEV_PLAN.md` §13 — M8-M13 all done, so this is
-   unblocked (per that plan: land English content once, not twice).
-4. **Daniel:** copy pass in his voice over `index.astro`/`docs/*.mdx`; link the site
-   from `danielkimdev.com`.
-5. If usage warrants: per-page OG images, Pagefind, short-link Worker (§9); a Nuxt wrapper.
+1. **#1** — ajv/esbuild schema rewrite (biggest win left, ~700 generated lines + 2 deps).
+   Real behavior rewrite, not mechanical; keep `ComicStripValidationError.issues` intact.
+2. **Fix `site`'s Playwright suite** — 8/8 playground specs fail, pre-existing. Blocks
+   #12 (`json-position.ts` rewrite) from being verified by more than a green build.
+3. **Upstream port to `grues-in-comic`** per `UPSTREAM_SYNC.md`: #18 (`layout.ts`), #37
+   (`balloon.ts`), #38's `normalizeAngle` (`pose.ts`) landed toonstrip-side only; #3/#14/
+   #16/#19/#28 never attempted (need ADR + gate/density + a publish cascade — your
+   go-ahead required per that doc's Safety section).
+4. **#4** — `@toonstrip/next` deprecation is a product decision (migration note needed),
+   not a cleanup; still on the table.
+5. **S9 Korean locale** per `SITE_DEV_PLAN.md` §13 — unblocked, M8-M13 done.
 
 ## Open Issues
 
