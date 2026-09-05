@@ -11,17 +11,13 @@
     "src/schema.json"
   ],
   "scripts": {
-    "prebuild": "node scripts/generate-validator.mjs",
+    "prebuild": "node scripts/embed-schema.mjs",
     "build": "tsc -p tsconfig.json",
-    "pretest": "node scripts/generate-validator.mjs",
+    "pretest": "node scripts/embed-schema.mjs",
     "test": "vitest run",
     "lint": "tsc -p tsconfig.json --noEmit"
   },
-  "dependencies": {
-    "ajv": "^8.17.1"
-  },
   "devDependencies": {
-    "esbuild": "^0.28.2",
     "typescript": "^5.6.3",
     "vitest": "^2.1.4"
   },

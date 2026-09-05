@@ -1,2 +1,2 @@
 export * from "./types.js";
-export { validateDocument, ComicStripValidationError } from "./validate.js";
+export { validateDocument, ComicStripValidationError, type ValidationIssue } from "./validate.js";
