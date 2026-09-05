@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@toonstrip/cli": "workspace:*",
-    "@toonstrip/next": "workspace:*",
+    "@toonstrip/react": "workspace:*",
     "@toonstrip/pack-comic-chat": "workspace:*",
     "@toonstrip/schema": "workspace:*",
     "next": "^15.5.25",

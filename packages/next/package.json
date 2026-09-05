@@ -1,7 +1,7 @@
 {
   "name": "@toonstrip/next",
-  "version": "0.1.0",
-  "description": "@toonstrip/react behind an App-Router-safe 'use client' boundary, plus a server-only SSR placeholder helper.",
+  "version": "0.1.1",
+  "description": "[DEPRECATED] @toonstrip/react's <ComicStrip> now carries its own 'use client' directive and @toonstrip/cli exports renderPlaceholder directly — import from those instead. See docs/next.md for the migration.",
   "license": "MIT",
   "type": "module",
   "main": "./dist/index.js",

@@ -1,5 +1,12 @@
 # @toonstrip/next
 
+**Deprecated.** `@toonstrip/react`'s `<ComicStrip>` now carries its own `'use client'`
+directive, and `@toonstrip/cli` exports `renderPlaceholder` directly — this package no
+longer adds anything on top of either. It's kept as a working re-export for existing
+installs; new code should import from `@toonstrip/react` and `@toonstrip/cli` instead.
+See [`docs/next.md`](https://github.com/dkdev24/toonstrip/blob/main/docs/next.md) for the
+two-line migration.
+
 `@toonstrip/react`'s `<ComicStrip>` behind an App-Router-safe `'use client'` boundary,
 plus `@toonstrip/next/server`'s `renderPlaceholder` for a real SSR PNG placeholder — no
 layout shift on hydration, and content visible with JavaScript disabled.

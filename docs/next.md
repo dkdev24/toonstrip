@@ -1,18 +1,30 @@
 # Embedding in Next.js
 
-`@toonstrip/next` wraps [`@toonstrip/react`](./react.md) for Next.js App Router: a
-`'use client'` boundary around `<ComicStrip>`, plus a server-only helper (§8's
-headless-canvas render path, reused) that renders a real PNG placeholder for the server
-render pass. `examples/next-app` is a full worked example — read it alongside this doc.
+**`@toonstrip/next` is deprecated.** It used to wrap two things Next.js App Router
+needs — a `'use client'` boundary around `<ComicStrip>`, and a server-only PNG-placeholder
+helper — but both now live directly on the packages that actually do the work, so the
+wrapper adds nothing on top of them. Existing installs keep working (it's a re-export
+shim, not removed), but new code should skip it:
+
+```diff
+-import { ComicStrip } from "@toonstrip/next";
+-import { renderPlaceholder } from "@toonstrip/next/server";
++import { ComicStrip } from "@toonstrip/react";
++import { renderPlaceholder } from "@toonstrip/cli";
+```
+
+Everything else below — props, the placeholder contract, the native-dependency setup —
+is unchanged; only the import source moved. `examples/next-app` uses the new imports
+directly.
 
 ## Install
 
 ```
-npm install @toonstrip/next @toonstrip/cli @toonstrip/pack-comic-chat
+npm install @toonstrip/react @toonstrip/cli @toonstrip/pack-comic-chat
 ```
 
 `@toonstrip/cli` must be your app's own direct dependency, not only reachable
-transitively through `@toonstrip/next` — see "Native dependency" below for why.
+transitively — see "Native dependency" below for why.
 
 Serve the pack's static files (`pack.json`, `characters/`, `backdrops/`) somewhere the
 browser can fetch them — Next has no integration-hook system like Astro's, so
@@ -24,7 +36,7 @@ browser can fetch them — Next has no integration-hook system like Astro's, so
 
 ```tsx
 // app/page.tsx — a Server Component; no "use client" needed here
-import { ComicStrip } from "@toonstrip/next";
+import { ComicStrip } from "@toonstrip/react";
 import doc from "./my-strip.json";
 
 export default function Page() {
@@ -32,8 +44,8 @@ export default function Page() {
 }
 ```
 
-Same props as `@toonstrip/react`'s `<ComicStrip>` (see [`react.md`](./react.md)) — this
-package re-exports it behind a `'use client'` module, the boundary React Server
+Same props as `@toonstrip/react`'s `<ComicStrip>` (see [`react.md`](./react.md)) — the
+component itself carries a `'use client'` directive, the boundary React Server
 Components require around anything using `useRef`/`useEffect`. You import it directly
 from a Server Component; you don't mark your own page `'use client'`.
 
@@ -41,11 +53,12 @@ from a Server Component; you don't mark your own page `'use client'`.
 
 ```tsx
 // app/page.tsx
-import { ComicStrip } from "@toonstrip/next";
-import { renderPlaceholder } from "@toonstrip/next/server";
+import { ComicStrip } from "@toonstrip/react";
 import doc from "./my-strip.json";
 
 export default async function Page() {
+  // Dynamic + webpackIgnore, not a static import — see "Native dependency" below.
+  const { renderPlaceholder } = await import(/* webpackIgnore: true */ "@toonstrip/cli");
   const placeholder = await renderPlaceholder(doc, { width: 640 });
   return <ComicStrip document={doc} packs={["/packs/comic-chat/"]} placeholder={placeholder} />;
 }
@@ -57,17 +70,15 @@ server, sized in CSS pixels to match the `width` you give it. `<ComicStrip>` ren
 as a light-DOM `<img slot="placeholder">` inside `<comic-strip>` — present in the raw
 server HTML with no client JS, so it shows with JavaScript disabled and in "view source".
 Once client JS hydrates and the live canvas is ready, `@toonstrip/element` hides the
-placeholder and shows the live strip itself; nothing in this package drives that swap
-directly.
+placeholder and shows the live strip itself; nothing drives that swap directly.
 
 Match the `width` you pass to `renderPlaceholder` to the CSS width your `<ComicStrip>` is
 actually laid out at — a mismatch produces a placeholder sized differently than the live
 strip, which shows up as a layout shift on hydration.
 
-`renderPlaceholder` is a separate entry point (`@toonstrip/next/server`, not the package
-root) because it pulls in `@toonstrip/cli`, which loads `@napi-rs/canvas` — a native Node
-addon that must never end up in a client bundle. Only call it from a Server Component or
-other server-only code.
+`@toonstrip/cli` loads `@napi-rs/canvas` — a native Node addon that must never end up in
+a client bundle. Only call `renderPlaceholder` from a Server Component or other
+server-only code.
 
 ## Native dependency
 
@@ -81,12 +92,15 @@ export default {
 ```
 
 Under pnpm's default strict `node_modules` layout, `@toonstrip/cli` must also be your
-app's own direct dependency (not only transitively reachable through `@toonstrip/next`) —
-`renderPlaceholder` loads it via a `webpackIgnore`d dynamic `import()` (a workaround for
-webpack statically bundling `@napi-rs/canvas`'s per-platform binary `require()`s when the
-importer is a symlinked local workspace package rather than a `node_modules` one), and
-that import resolves relative to the *bundled output file's* location at request time.
-See `examples/next-app`'s `next.config.mjs` and `package.json` for a working setup.
+app's own direct dependency (not only transitively reachable). Even with the config
+above, a **static** `import { renderPlaceholder } from "@toonstrip/cli"` at the top of a
+Server Component still makes webpack try to bundle `@napi-rs/canvas`'s per-platform
+binary `require()`s and fail — `serverExternalPackages` doesn't reliably keep a
+workspace-symlinked local package (as in this monorepo's own `examples/next-app`) off
+that path the way it does a real `node_modules` install. The fix is a `webpackIgnore`d
+dynamic `import()` instead (see the snippet above) — Node then resolves and loads it
+normally at request time, relative to the *bundled output file's* location. See
+`examples/next-app`'s `next.config.mjs` and `app/page.tsx` for a working setup.
 
 ## Worked example
 

@@ -79,7 +79,10 @@ pnpm --filter vue-vite-example dev
 - `@toonstrip/element`'s module no longer throws when imported with no DOM
   present (it guards `HTMLElement`/`customElements` access), so this package
   is safe to import in a Nuxt server render pass. No Nuxt-specific wrapper
-  exists yet — a dedicated module (matching [`@toonstrip/next`](./next.md)'s
-  pattern: a client boundary plus an SSR-placeholder helper) would still need
-  writing if demand shows up.
+  exists yet, and — per [`docs/next.md`](./next.md)'s deprecation of
+  `@toonstrip/next` — probably shouldn't: a client-boundary marker (Nuxt's
+  own equivalent of `'use client'`) belongs directly on this package's
+  component, and an SSR-placeholder helper already exists on
+  `@toonstrip/cli`, so there may be nothing left for a dedicated package to
+  wrap.
 - Tested against Vue 3.5; the `peerDependencies` range allows any Vue 3.3+.

@@ -1,3 +1,5 @@
+"use client";
+
 /**
  * `<ComicStrip>` — the React wrapper (dev plan §13.3). Mounts
  * `@toonstrip/element`'s `<comic-strip>` custom element via a ref and pushes
@@ -5,17 +7,21 @@
  * way `packages/astro`'s client renderer does — no rendering logic of its
  * own, same restraint the dev plan calls out for the Astro wrapper.
  *
- * The side-effect import below registers the element eagerly at module load.
- * That is fine for this package's target (a client-rendered React app); a
- * server-rendering wrapper (`@toonstrip/next`, M12) is what has to guard
- * against importing this on the server, not this package.
+ * The `"use client"` directive above is the RSC-protocol half of importing
+ * this from a Next.js (or other React Server Components framework) Server
+ * Component — it marks the boundary those frameworks require around
+ * anything using `useRef`/`useEffect`, and is a no-op string literal
+ * everywhere else (Vite, CRA, plain React). The side-effect import below
+ * registers the element eagerly at module load and is separately safe
+ * during a server render pass because `@toonstrip/element`'s own module
+ * guards against `document`/`window`/`customElements` not existing there.
  */
 import "@toonstrip/element";
 import { createElement, useEffect, useRef, type CSSProperties, type ReactElement } from "react";
 import type { ComicStripElement } from "@toonstrip/element";
 import type { ComicStripDocument } from "@toonstrip/schema";
 
-/** An SSR-rendered PNG (dev plan §13.4) to show until the live canvas paints — see `@toonstrip/next`'s `renderPlaceholder`. */
+/** An SSR-rendered PNG (dev plan §13.4) to show until the live canvas paints — see `@toonstrip/cli`'s `renderPlaceholder`. */
 export interface ComicStripPlaceholder {
   /** Image URL — typically a `data:image/png;base64,...` URI from `renderPlaceholder`. */
   src: string;

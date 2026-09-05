@@ -1,10 +1,8 @@
-"use client";
-
-// The client-side, App-Router-safe boundary (dev plan §13.4): `@toonstrip/react`'s
-// `<ComicStrip>` uses `useRef`/`useEffect`, so it must be marked a Client
-// Component wherever a Server Component imports it. `packages/element`'s own
-// SSR guards (customElements/HTMLElement) are what keep the *module* safe to
-// import during the server render pass that still happens for a "use client"
-// tree; this directive is the separate, RSC-protocol half of that story.
+/**
+ * @deprecated `@toonstrip/react`'s `<ComicStrip>` now carries its own
+ * `"use client"` directive — import it directly from `@toonstrip/react`
+ * instead of through this package, which no longer adds anything on top of
+ * it. Kept for existing installs; see `docs/next.md` for the migration.
+ */
 export { ComicStrip } from "@toonstrip/react";
 export type { ComicStripProps, ComicStripPlaceholder } from "@toonstrip/react";

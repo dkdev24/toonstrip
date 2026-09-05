@@ -18,7 +18,7 @@ import { ComicStrip } from "@toonstrip/react";
 |---|---|---|
 | `document` | `ComicStripDocument` | The strip. Any object of the right shape; usually an imported JSON file. Pushed onto the element whenever it changes. |
 | `packs` | `string[]` | Base URLs of asset packs (same shape as `packages/element`'s own `.packs` — not the pack **names** `@toonstrip/astro`'s component takes, since there's no integration step resolving names to URLs here). Default `[]`. |
-| `placeholder` | `{ src, width, height }` | An SSR-rendered PNG to show, as a light-DOM `<img>`, until the live canvas paints. See [Next.js reference](/docs/next-reference/) — `@toonstrip/next/server`'s `renderPlaceholder` produces this shape. Optional; most apps don't set it directly. |
+| `placeholder` | `{ src, width, height }` | An SSR-rendered PNG to show, as a light-DOM `<img>`, until the live canvas paints. See [Next.js reference](/docs/next-reference/) — `@toonstrip/cli`'s `renderPlaceholder` produces this shape. Optional; most apps don't set it directly. |
 | `className` / `style` | — | Forwarded straight to the underlying `<comic-strip>` element. |
 
 The component has no rendering logic of its own: it mounts `<comic-strip>` via a ref and
@@ -52,10 +52,11 @@ pnpm --filter react-vite-example dev
 
 <Callout kind="tip">
 Importing `@toonstrip/element` no longer throws on the server (it guards `HTMLElement`/
-`customElements` access) — this package is safe to render server-side. For Next.js App
-Router specifically, use [`@toonstrip/next`](/docs/next-reference/) instead of this
-package directly: it adds the `'use client'` boundary React Server Components require,
-plus an SSR-placeholder helper.
+`customElements` access) — this package is safe to render server-side. `<ComicStrip>`
+also carries its own `'use client'` directive, so it's directly usable from a Next.js App
+Router Server Component with no extra wrapper — see the
+[Next.js reference](/docs/next-reference/) for the SSR-placeholder helper
+(`@toonstrip/cli`'s `renderPlaceholder`) that goes with it.
 </Callout>
 
 <Callout kind="tip">

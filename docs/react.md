@@ -68,10 +68,11 @@ pnpm --filter react-vite-example dev
 
 - `@toonstrip/element`'s module no longer throws when imported with no DOM
   present (it guards `HTMLElement`/`customElements` access), so this package
-  is safe to import on a server. For Next.js App Router specifically, use
-  [`@toonstrip/next`](./next.md) instead of this package directly: it adds
-  the `'use client'` boundary React Server Components require, plus an
-  SSR-placeholder helper.
+  is safe to import on a server. `<ComicStrip>` also carries its own
+  `'use client'` directive, so it's directly usable from a Next.js App
+  Router Server Component with no extra wrapper — see
+  [`docs/next.md`](./next.md) for the SSR-placeholder helper
+  (`@toonstrip/cli`'s `renderPlaceholder`) that goes with it.
 - Tested against React 18; the `peerDependencies` range also allows React 19
   since nothing in the wrapper depends on 18-specific behavior, but 19 isn't
   in the test matrix yet.

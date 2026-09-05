@@ -137,3 +137,22 @@ export async function renderDocument(input: unknown, options: RenderOptions = {}
 
   return { png: canvas.toBuffer("image/png"), width: canvas.width, height: canvas.height, cssWidth: outW, cssHeight: outH, columns };
 }
+
+export interface PlaceholderImage {
+  /** `data:image/png;base64,...` URI, ready for an `<img src>`. */
+  src: string;
+  width: number;
+  height: number;
+}
+
+/**
+ * An SSR placeholder image for `@toonstrip/react`'s `<ComicStrip placeholder>`
+ * (dev plan §13.4): renders the document to a PNG via `renderDocument` and
+ * packages it as a data URI sized in CSS pixels, so an `<img>` embedding it
+ * displays at the right size regardless of `options.scale`. Pulls in
+ * `@napi-rs/canvas` — call only from server-only code.
+ */
+export async function renderPlaceholder(input: unknown, options: RenderOptions = {}): Promise<PlaceholderImage> {
+  const { png, cssWidth, cssHeight } = await renderDocument(input, options);
+  return { src: `data:image/png;base64,${png.toString("base64")}`, width: cssWidth, height: cssHeight };
+}

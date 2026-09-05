@@ -32,12 +32,12 @@ importers:
       '@toonstrip/cli':
         specifier: workspace:*
         version: link:../../packages/cli
-      '@toonstrip/next':
-        specifier: workspace:*
-        version: link:../../packages/next
       '@toonstrip/pack-comic-chat':
         specifier: workspace:*
         version: link:../../packages/pack-comic-chat
+      '@toonstrip/react':
+        specifier: workspace:*
+        version: link:../../packages/react
       '@toonstrip/schema':
         specifier: workspace:*
         version: link:../../packages/schema
