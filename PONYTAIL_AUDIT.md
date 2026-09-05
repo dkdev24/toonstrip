@@ -13,9 +13,10 @@ existing dep), `yagni` (abstraction with one implementation), `shrink` (same log
 
 ## Progress
 
-**34 of 46 applied (4 partial — see notes). ~700 generated lines and 7 deps fully dropped (2
-more moved to devDeps, 4 demoted); ~1,304 hand-written lines still on the table.** A row marked
-**done** in the table below is landed and the build is green; everything else is untouched.
+**35 of 46 applied (4 partial — see notes). ~700 generated lines and 7 deps fully dropped (2
+more moved to devDeps, 4 demoted), plus one published package (`@toonstrip/next`) deprecated;
+~1,304 hand-written lines still on the table.** A row marked **done** in the table below is
+landed and the build is green; everything else is untouched.
 
 | Date | Item | What landed | Commit |
 |---|---|---|---|
@@ -54,6 +55,7 @@ more moved to devDeps, 4 demoted); ~1,304 hand-written lines still on the table.
 | 2026-09-05 | #43 (partial) | `packRoot`, `defaultPackDir`, `PopoverAnchor`, `SheetTrigger`, `SheetClose` dropped; `MAX_HASH_LENGTH`, the `columns` getter, `Diagnostic`/`image.ts` re-exports kept — still used | `6c48463` |
 | 2026-09-05 | #45 | `spriteStyle`/`Sprite.astro` crop math shared via `site/src/lib/sprite-crop.ts` | `6c48463` |
 | 2026-09-05 | #1 | ajv+esbuild standalone-compile pipeline replaced with `scripts/embed-schema.mjs` (bakes `schema.json` into a TS literal) + a ~50-line hand-rolled recursive checker in `validate.ts`. `ComicStripValidationError.issues` shape (`instancePath`/`message`) verified byte-for-byte against ajv's old output for missing-required/bad-enum/additional-property/minLength cases | `f91aa64` |
+| 2026-09-05 | #4 | `@toonstrip/react`'s `<ComicStrip>` now carries its own `"use client"`; `@toonstrip/cli` exports `renderPlaceholder` directly. `@toonstrip/next` kept as a backward-compatible re-export shim (already published), marked `[DEPRECATED]`, version bumped. `examples/next-app` migrated to the new imports and verified end-to-end — built, started, checked in a browser (real SSR PNG placeholder, no errors). `docs/next.md`/`next-reference.mdx` rewritten as migration guides; also fixes the pre-existing `kind="warn"` Callout bug the audit found | `9668530` |
 
 **Verified stale on re-check, not cut:** #6 (`pack-example` has a real external test importer,
 `core/test/pack-example.test.ts`), #7 (pack `types.ts` is deliberately schema-only per
@@ -64,8 +66,6 @@ needs a browser check, not just a green build), #46 (`sheetImage()` merge needs 
 in `draw.mjs` plus fixture-regen verification, `draw.mjs`'s current exports don't cover it).
 
 **Not attempted — flagged:**
-- #4: `@toonstrip/next` deprecation — a product decision (needs a migration note), not a
-  cleanup.
 - #12: `json-position.ts` rewrite — blocked on fixing `site`'s Playwright suite (see caveat
   below), can't be verified by a passing browser test yet.
 - #3, #14, #16, #19, #28 (†, upstream-shared `packages/core` files): applying the toonstrip-side

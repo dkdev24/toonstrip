@@ -1,6 +1,6 @@
 {
   "name": "@toonstrip/react",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "<ComicStrip>, a thin React wrapper around @toonstrip/element's <comic-strip> custom element.",
   "license": "MIT",
   "type": "module",
