@@ -49,7 +49,6 @@ example `public/packs/comic-chat/`.
 |---|---|---|
 | `packs` | `string[]` property | Base URLs of asset packs, each serving `pack.json` and its files. Searched in order; duplicate ids across packs throw. |
 | `document` | `ComicStripDocument` property | The strip. Validated on set. Setting it again re-renders. |
-| `src` | attribute | URL of a JSON document to fetch instead of setting `document`. |
 | `columns` | `number` getter | Column count from the last layout pass. |
 
 Setting `document` before `packs` is fine; the element rebuilds on either change and the
@@ -84,7 +83,7 @@ The `install`/`npm`/bundler steps above assume *something* resolves the bare
 
 ```html
 <script type="module">
-  import "https://esm.sh/@toonstrip/element@0.1.8";
+  import "https://esm.sh/@toonstrip/element@0.1.11";
 </script>
 ```
 

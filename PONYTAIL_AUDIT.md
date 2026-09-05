@@ -191,17 +191,18 @@ and each names a path — re-verify before cutting.
 - The `react`/`vue`/`astro` client wrappers: all three only assign `.document`/`.packs` onto the
   element and carry no rendering logic. That is the right thickness. `next` (#4) is the outlier.
 
-## Suggested order
+## Suggested order — done, kept for history
 
-1. Dependency and dead-file cuts first — ~~#31~~, ~~#42~~, #29, #41, #40, #11, #5, #44. No behaviour
-   change, no upstream sync, immediate install-size win.
-2. Then the packager cuts (#2, #13, #10, #21, #22, #25) — one package, full test coverage.
-3. Then the schema rewrite (#1), the biggest single win, gated on keeping the
-   `ComicStripValidationError.issues` contract the playground reads.
-4. Upstream-shared core cuts (#3, #14, #16, #19, #28) last, in one batch, ported to
-   `grues-in-comic` in the same pass per `UPSTREAM_SYNC.md`.
-5. `@toonstrip/next` (#4) is a product decision, not a cleanup: it needs a deprecation note and a
-   migration line in `docs/next.md`, so it does not belong in a tidy-up commit.
+All five phases below landed; nothing is queued from this audit. See the Progress table for
+what each item actually did and Verification status/closing notes above for #3, #6, #7.
+
+1. Dependency and dead-file cuts — #31, #42, #29, #41, #40, #11, #5, #44. Done.
+2. Packager cuts (#2, #13, #10, #21, #22, #25). Done.
+3. Schema rewrite (#1). Done — `ComicStripValidationError.issues` contract preserved.
+4. Upstream-shared core cuts (#14, #16, #19, #28). Done, toonstrip-side; each verified
+   not portable to `grues-in-comic` (see Progress table). #3 closed as a user decision instead
+   of cut — see its dedicated note above.
+5. `@toonstrip/next` (#4). Done — deprecated with a migration note in `docs/next.md`, published.
 
 ## Out of scope, found while verifying
 
