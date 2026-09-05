@@ -2035,3 +2035,28 @@ afterward both times. Root `pnpm build` still green.
 ### Status
 
 Done. `PONYTAIL_AUDIT.md`'s #42 caveat cleared; #12 (`json-position.ts` rewrite) is unblocked.
+
+## v0.15.6 — Ponytail audit #12: `json-position.ts` rewrite
+
+**Date:** 2026-09-05
+
+### Changes
+
+Replaced `site/src/lib/playground/json-position.ts`'s hand-written JSON scanner (own
+`peek`/`advance`/`skipWs`/`readString`, manual line counting) with a walk over
+`@codemirror/lang-json`'s own Lezer parse tree, matching a JSON-pointer instance path
+segment by segment (`Object` → its `Property` children's `PropertyName`; `Array` → its
+non-punctuation children by index), then converting the matched node's character offset
+to a line number. `@codemirror/lang-json` was already a direct dependency (the editor
+already parses this same text); no new dependency added. ~41 lines net removed.
+
+Verified against `@toonstrip/schema`'s real `validateDocument` output — missing-required,
+bad-enum, wrong-type-nested, and additional-property cases — comparing the old and new
+`lineForPath` on the actual `issue.instancePath` values ajv-equivalent validation
+produces; every case resolved to the same line. All 8 Playwright playground specs pass,
+including the one that drives invalid JSON through the real editor (unblocked by
+v0.15.5's Playwright fix).
+
+### Status
+
+Done. `PONYTAIL_AUDIT.md` #12 moved to the Progress table (36/46 applied).

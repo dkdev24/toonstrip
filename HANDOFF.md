@@ -18,22 +18,22 @@ to `main` deploys prod (output `site/dist`; root `pnpm build` is the build).
 
 ## Last Session
 
-2026-09-05: Fixed `site`'s Playwright suite (all 8 playground specs, `PONYTAIL_AUDIT.md`
-#42's caveat) — not a code bug. Astro 7's `astro preview` always forks a detached daemon
-and exits immediately, which Playwright's `webServer.command` can't track; a stale
-daemon from an unrelated project was also squatting on port 4321 and got silently reused
-via `reuseExistingServer`. Fixed with `site/scripts/test-e2e.mjs` (starts the daemon, waits, runs Playwright with
-the server already live, stops it after) and a repo-specific test port (43210). See
-`WORKLOG.md` v0.15.5. Also caught up public `CHANGELOG.md` (0.15.1–0.15.4 were missing)
-and republished `@toonstrip/astro` (v0.15.4).
+2026-09-05: Fixed `site`'s Playwright suite (all 8 playground specs — Astro 7's `astro
+preview` daemonizes and exits immediately, which broke Playwright's `webServer`; a stale
+daemon from an unrelated project was also squatting on the default port). Then landed
+audit #12: `json-position.ts`'s hand-written JSON scanner replaced with a walk over
+`@codemirror/lang-json`'s own parse tree (already a dep, no new one added), verified
+byte-for-byte against real `@toonstrip/schema` validation output and the live Playwright
+suite. 36/46 audit items now done. Also caught up public `CHANGELOG.md` (0.15.1–0.15.4)
+and republished `@toonstrip/astro`. See `WORKLOG.md` v0.15.4–v0.15.6.
 
 ## Next Actions
 
-1. **#12** (`json-position.ts` rewrite, `PONYTAIL_AUDIT.md`) — unblocked, not attempted.
-2. **Upstream port to `grues-in-comic`** per `UPSTREAM_SYNC.md`: #18/#37/#38 landed
+1. **Upstream port to `grues-in-comic`** per `UPSTREAM_SYNC.md`: #18/#37/#38 landed
    toonstrip-side only; #3/#14/#16/#19/#28 never attempted — needs your go-ahead before
    the publish cascade (`UPSTREAM_SYNC.md`'s Safety section).
-3. **S9 Korean locale** per `SITE_DEV_PLAN.md` §13 — unblocked.
+2. **S9 Korean locale** per `SITE_DEV_PLAN.md` §13 — unblocked.
+3. `PONYTAIL_AUDIT.md`'s #8/#46 need a human call, not blocked on anything.
 
 ## Open Issues
 

@@ -1,89 +1,48 @@
 /**
  * Map a JSON-pointer instance path (ajv's `/panels/0/camera`) to a line number
- * in the editor's text, so validation errors land on the right line. A tiny
- * position-recording JSON scanner; the documents are small.
+ * in the editor's text, so validation errors land on the right line. Walks
+ * `@codemirror/lang-json`'s own parse tree by pointer segment rather than
+ * re-scanning the text by hand.
  */
+import { jsonLanguage } from "@codemirror/lang-json";
+import type { SyntaxNode } from "@lezer/common";
+
 export function lineForPath(text: string, instancePath: string): number | null {
   const want = instancePath.split("/").slice(1).map(decodeSegment);
   if (want.length === 0) return 1;
-  let i = 0;
-  let line = 1;
-  const path: (string | number)[] = [];
-  let found: number | null = null;
 
-  const peek = () => text[i];
-  const advance = () => {
-    if (text[i] === "\n") line++;
-    i++;
-  };
-  const skipWs = () => {
-    while (i < text.length && /\s/.test(text[i])) advance();
-  };
-  const matches = () => want.length === path.length && want.every((w, k) => String(w) === String(path[k]));
-  const readString = (): string => {
-    let out = "";
-    advance(); // opening quote
-    while (i < text.length && text[i] !== '"') {
-      if (text[i] === "\\") {
-        advance();
-        out += text[i];
-      } else out += text[i];
-      advance();
-    }
-    advance(); // closing quote
-    return out;
-  };
-  const value = (): void => {
-    if (found !== null) return;
-    skipWs();
-    if (matches()) {
-      found = line;
-      return;
-    }
-    const c = peek();
-    if (c === "{") {
-      advance();
-      skipWs();
-      while (peek() !== "}" && i < text.length) {
-        skipWs();
-        const key = readString();
-        skipWs();
-        advance(); // colon
-        path.push(key);
-        value();
-        path.pop();
-        if (found !== null) return;
-        skipWs();
-        if (peek() === ",") advance();
-        skipWs();
-      }
-      advance();
-    } else if (c === "[") {
-      advance();
-      skipWs();
-      let index = 0;
-      while (peek() !== "]" && i < text.length) {
-        path.push(index++);
-        value();
-        path.pop();
-        if (found !== null) return;
-        skipWs();
-        if (peek() === ",") advance();
-        skipWs();
-      }
-      advance();
-    } else if (c === '"') {
-      readString();
+  let node: SyntaxNode | null = jsonLanguage.parser.parse(text).topNode.firstChild;
+  for (const segment of want) {
+    if (!node) return null;
+    if (node.type.name === "Object") {
+      const prop = node.getChildren("Property").find((p) => propertyName(text, p) === segment);
+      node = prop?.lastChild ?? null;
+    } else if (node.type.name === "Array") {
+      node = arrayItems(node)[Number(segment)] ?? null;
     } else {
-      while (i < text.length && !/[,\]}\s]/.test(text[i])) advance();
+      return null;
     }
-  };
+  }
+  return node ? text.slice(0, node.from).split("\n").length : null;
+}
+
+function propertyName(text: string, property: SyntaxNode): string | null {
+  const name = property.getChild("PropertyName");
+  if (!name) return null;
   try {
-    value();
+    return JSON.parse(text.slice(name.from, name.to));
   } catch {
     return null;
   }
-  return found;
+}
+
+/** `Array`'s children interleave `[`/`,`/`]` tokens with the value nodes. */
+function arrayItems(array: SyntaxNode): SyntaxNode[] {
+  const items: SyntaxNode[] = [];
+  for (let child = array.firstChild; child; child = child.nextSibling) {
+    if (!["[", "]", ","].includes(child.type.name)) items.push(child);
+  }
+  return items;
 }
 
 function decodeSegment(s: string): string {

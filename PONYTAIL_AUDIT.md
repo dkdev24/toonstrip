@@ -13,13 +13,14 @@ existing dep), `yagni` (abstraction with one implementation), `shrink` (same log
 
 ## Progress
 
-**35 of 46 applied (4 partial — see notes). ~700 generated lines and 7 deps fully dropped (2
+**36 of 46 applied (4 partial — see notes). ~700 generated lines and 7 deps fully dropped (2
 more moved to devDeps, 4 demoted), plus one published package (`@toonstrip/next`) deprecated;
-~1,304 hand-written lines still on the table.** A row marked **done** in the table below is
+~1,263 hand-written lines still on the table.** A row marked **done** in the table below is
 landed and the build is green; everything else is untouched.
 
 | Date | Item | What landed | Commit |
 |---|---|---|---|
+| 2026-09-05 | #12 | `json-position.ts`'s hand-written JSON scanner replaced with a walk over `@codemirror/lang-json`'s own parse tree by JSON-pointer segment; ~41 lines net removed. Verified against `@toonstrip/schema`'s real validator output (missing-required, bad-enum, wrong-type-nested, additional-property cases) — every `instancePath` resolved to the same line as the old scanner. All 8 Playwright playground specs green, including the one exercising this path directly | (this commit) |
 | 2026-09-04 | #31 | Deleted `site/src/components/ui/scroll-area.tsx` (zero importers) and dropped `@radix-ui/react-scroll-area` from `site/package.json`; lockfile updated, `pnpm build` green, 23 pages built | `ee908f8` |
 | 2026-09-04 | #42 | Dropped the `codemirror` meta-package from `site/package.json`; all six `@codemirror/*` scoped packages the editor imports stay declared. `pnpm install` removed 3 packages, `pnpm build` green | (this commit) |
 | 2026-09-05 | #29 | `class-variance-authority` replaced with two `Record` lookups in `button.tsx`; dep dropped | `5413998` |
@@ -66,8 +67,6 @@ needs a browser check, not just a green build), #46 (`sheetImage()` merge needs 
 in `draw.mjs` plus fixture-regen verification, `draw.mjs`'s current exports don't cover it).
 
 **Not attempted — flagged:**
-- #12: `json-position.ts` rewrite — was blocked on the Playwright suite (fixed, see below),
-  now unblocked; not yet attempted.
 - #3, #14, #16, #19, #28 (†, upstream-shared `packages/core` files): applying the toonstrip-side
   edit is safe, but `UPSTREAM_SYNC.md` requires a manual port into `grues-in-comic` (with an ADR
   for #3's behavioral change, `gate`/`density` re-runs) and then a publish cascade through
