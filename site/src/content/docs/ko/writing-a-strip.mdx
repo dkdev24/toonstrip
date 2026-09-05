@@ -1,0 +1,99 @@
+---
+title: 스트립 작성하기
+description: 패널 하나에서 시작해 두 명이 대화하는 장면까지, Comic Strip Document를 단계적으로 구성합니다.
+order: 2
+section: Start
+---
+import CodeAndStrip from "../../../components/demo/CodeAndStrip.astro";
+import Callout from "../../../components/site/Callout.astro";
+import firstStrip from "../../strips/first-strip.json";
+import twoSpeakers from "../../strips/two-speakers.json";
+import hero from "../../strips/hero.json";
+
+스트립은 버전 번호와 패널 목록으로 이루어진 JSON 문서입니다. 각 패널은 배경을 지정하고
+무대에 인물 몇 명을 올린 뒤, 그중 일부에게 대사를 줍니다. 포맷은 이것이 전부입니다. 직접
+손으로 작성해도 되고, 어떤 언어로든 생성해도 되며, CMS 필드에 저장해도 됩니다.
+
+## 패널 하나, 발화자 한 명
+
+<CodeAndStrip doc={firstStrip} title="가장 작은 유효한 문서" layout="side" />
+
+- `backdrop`은 등록된 팩에 속한 id입니다. 기본 팩에는 `field`, `pastoral`, `room8bs`가
+  있습니다.
+- `bodies`는 무대에 있는 인물을 왼쪽부터 순서대로 나열합니다. 각 항목은 `character` id와
+  `emotion`을 지정합니다.
+- `speakers`는 말풍선 목록입니다. 대사의 `speaker`는 해당 패널의 `bodies` 중 하나이거나
+  `"caption"`이어야 합니다.
+
+## 감정은 단어가 아니라 좌표입니다
+
+`emotion`은 휠 위의 `{ angle, intensity }` 좌표입니다. 각도 0은 HAPPY이고 이름이 붙은
+감정마다 π/4씩 회전한 위치에 있습니다. intensity는 0부터 1까지이며, 0이면 각도와 무관하게
+NEUTRAL이 됩니다. 렌더러는 팩이 보유한 얼굴 중 가장 가까운 것을 고르므로, 두 이름 사이의
+각도를 넣어도 오류가 나지 않습니다. 휠 전체는 [감정과 포즈](/docs/emotions-and-poses/)에서
+확인할 수 있습니다.
+
+| 감정 | angle | intensity |
+|---|---|---|
+| Neutral | `0` | `0` |
+| Happy | `0` | `0.4`~`1` |
+| Coy | `0.785` (π/4) | `0.4`~`1` |
+| Bored | `1.571` (π/2) | `0.4`~`1` |
+| Scared | `2.356` (3π/4) | `0.4`~`1` |
+| Sad | `3.142` (π) | `0.4`~`1` |
+| Angry | `3.927` (5π/4) | `0.4`~`1` |
+| Shout | `4.712` (3π/2) | `0.4`~`1` |
+| Laugh | `5.498` (7π/4) | `0.4`~`1` |
+
+## 발화자 둘
+
+인물과 대사를 하나씩 더 추가합니다. 말풍선은 `speakers` 순서대로 그려지며, 레이아웃은 각
+말풍선을 해당 발화자의 머리 옆에 배치합니다.
+
+<CodeAndStrip doc={twoSpeakers} title="인물 둘, 대사 둘" layout="side" />
+
+## 세 패널짜리 스트립
+
+패널은 서로 독립적이며, 각각 자신만의 배경과 카메라, 등장인물을 지정합니다. 캐릭터는 패널이
+바뀌어도 정체성을 유지하고, 포즈가 순환하므로 같은 얼굴이 패널마다 반복해서 나오지 않습니다.
+
+<CodeAndStrip doc={hero} title="홈페이지의 스트립" collapse />
+
+## 검증하기
+
+`@toonstrip/schema`는 JSON Schema와 검증기를 함께 제공합니다. 엘리먼트와 Astro 컴포넌트는
+경계 지점에서 검증을 수행하지만, 빌드 과정에서 직접 검증하면 실수를 더 일찍, 필드까지 짚어
+주는 경로와 함께 발견할 수 있습니다.
+
+```ts
+import { validateDocument, ComicStripValidationError } from "@toonstrip/schema";
+
+try {
+  const doc = validateDocument(JSON.parse(raw));
+} catch (err) {
+  if (err instanceof ComicStripValidationError) console.error(err.message);
+}
+```
+
+검증 오류는 경로와 문제를 함께 알려줍니다.
+
+```
+Invalid ComicStripDocument:
+  /panels/0/camera must be equal to one of the allowed values
+  /panels/0 must NOT have additional property 'emotions'
+```
+
+<Callout>
+알 수 없는 키는 무시되지 않고 거부됩니다. `emotion` 대신 `emotions`를 쓰면 오류가 되는데,
+이는 다른 도구가 이 포맷을 생성할 때 바라는 동작입니다.
+</Callout>
+
+검증기는 구조만 검사합니다. `character`나 `backdrop` id가 실제로 존재하는지는 스트립이
+로드되어 등록된 팩과 대조될 때 확인되며, 이때 알 수 없는 id는 항상 명확한 오류로
+처리되고 조용히 대체되는 일은 없습니다.
+
+## 다음 단계
+
+[감정과 포즈](/docs/emotions-and-poses/)를 읽은 뒤 [카메라와 패널](/docs/cameras-and-panels/)로
+넘어가세요. 아니면 바로 [플레이그라운드](/playground/)로 가서 이 문서들을 직접 편집해 볼 수도
+있습니다.

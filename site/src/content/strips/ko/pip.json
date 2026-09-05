@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "panels": [
+    {
+      "backdrop": "meadow",
+      "camera": "medium",
+      "bodies": [
+        {
+          "character": "pip",
+          "emotion": {
+            "angle": 0,
+            "intensity": 0.5
+          },
+          "pose": "wave"
+        }
+      ],
+      "speakers": [
+        {
+          "speaker": "pip",
+          "balloon": "speech",
+          "text": "안녕! 나는 예제 팩에서 왔어."
+        }
+      ]
+    },
+    {
+      "backdrop": "meadow",
+      "camera": "medium",
+      "bodies": [
+        {
+          "character": "pip",
+          "emotion": {
+            "angle": 0,
+            "intensity": 0.2
+          },
+          "pose": "shrug"
+        }
+      ],
+      "speakers": [
+        {
+          "speaker": "pip",
+          "balloon": "speech",
+          "text": "캐릭터 하나, 배경 하나, 매니페스트 하나."
+        }
+      ]
+    }
+  ]
+}

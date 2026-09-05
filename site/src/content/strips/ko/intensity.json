@@ -1,0 +1,68 @@
+{
+  "version": 1,
+  "panels": [
+    {
+      "backdrop": "field",
+      "camera": "close-up",
+      "bodies": [
+        {
+          "character": "tiki",
+          "emotion": {
+            "angle": 3.141593,
+            "intensity": 0.6
+          },
+          "requested": true
+        }
+      ],
+      "speakers": [
+        {
+          "speaker": "caption",
+          "balloon": "caption",
+          "text": "SAD, 강도 0.6"
+        }
+      ]
+    },
+    {
+      "backdrop": "field",
+      "camera": "close-up",
+      "bodies": [
+        {
+          "character": "tiki",
+          "emotion": {
+            "angle": 3.141593,
+            "intensity": 0.8
+          },
+          "requested": true
+        }
+      ],
+      "speakers": [
+        {
+          "speaker": "caption",
+          "balloon": "caption",
+          "text": "SAD, 강도 0.8"
+        }
+      ]
+    },
+    {
+      "backdrop": "field",
+      "camera": "close-up",
+      "bodies": [
+        {
+          "character": "tiki",
+          "emotion": {
+            "angle": 3.141593,
+            "intensity": 1.0
+          },
+          "requested": true
+        }
+      ],
+      "speakers": [
+        {
+          "speaker": "caption",
+          "balloon": "caption",
+          "text": "SAD, 강도 1.0"
+        }
+      ]
+    }
+  ]
+}

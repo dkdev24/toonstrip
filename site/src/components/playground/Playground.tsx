@@ -15,10 +15,14 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "../ui/tabs";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "../ui/resizable";
 import { Sheet, SheetContent } from "../ui/sheet";
 import { TooltipProvider } from "../ui/tooltip";
+import type { Lang } from "../../i18n/utils";
+import type { PlaygroundStrings } from "./strings";
 
 interface Props {
   roster: Roster;
   presets: Preset[];
+  strings: PlaygroundStrings;
+  lang?: Lang;
 }
 
 type Tab = "configure" | "json" | "preview";
@@ -45,7 +49,7 @@ function usePersisted<T>(key: string, initial: T): [T, (v: T) => void] {
   return [value, set];
 }
 
-export default function Playground({ roster, presets }: Props) {
+export default function Playground({ roster, presets, strings, lang = "en" }: Props) {
   const [ready, setReady] = useState(false);
   const [tab, setTab] = useState<Tab>("configure");
   const [sheet, setSheet] = useState(false);
@@ -77,15 +81,15 @@ export default function Playground({ roster, presets }: Props) {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  if (!ready) return <p class="pg-loading">Loading the playground…</p>;
+  if (!ready) return <p class="pg-loading">{strings.loading}</p>;
 
   const configurePane = (
-    <section aria-label="Configure" class="flex h-full min-h-0 flex-col">
+    <section aria-label={strings.pane.configure} class="flex h-full min-h-0 flex-col">
       <div class="flex h-9 shrink-0 items-center gap-3 border-b border-border bg-muted pr-2 pl-4">
-        <span class="caption">Configure</span>
+        <span class="caption">{strings.pane.configure}</span>
       </div>
       <div class="relative min-h-0 flex-1 overflow-auto p-4">
-        <PanelForm />
+        <PanelForm strings={strings} lang={lang} />
       </div>
     </section>
   );
@@ -93,9 +97,10 @@ export default function Playground({ roster, presets }: Props) {
   const jsonPane = (
     <section aria-label="JSON" class="flex h-full min-h-0 flex-col">
       <JsonEditor
+        strings={strings.editor}
         actions={
           desktop && (
-            <Button variant="ghost" size="icon-sm" aria-label="Collapse JSON" onClick={() => setJsonOpen(false)}>
+            <Button variant="ghost" size="icon-sm" aria-label={strings.pane.collapseJson} onClick={() => setJsonOpen(false)}>
               <ChevronsRight />
             </Button>
           )
@@ -105,8 +110,8 @@ export default function Playground({ roster, presets }: Props) {
   );
 
   const previewPane = (
-    <section aria-label="Preview" class="flex h-full min-h-0 flex-col">
-      <Preview />
+    <section aria-label={strings.pane.preview} class="flex h-full min-h-0 flex-col">
+      <Preview strings={strings.preview} />
     </section>
   );
 
@@ -121,7 +126,7 @@ export default function Playground({ roster, presets }: Props) {
               {jsonOpen ? (
                 <ResizablePanelGroup orientation="horizontal" defaultLayout={hLayout} onLayoutChange={setHLayout}>
                   <ResizablePanel minSize={25}>{configurePane}</ResizablePanel>
-                  <ResizableHandle withHandle aria-label="Resize Configure and JSON" />
+                  <ResizableHandle withHandle aria-label={strings.pane.resizeConfigureJson} />
                   <ResizablePanel minSize={25}>{jsonPane}</ResizablePanel>
                 </ResizablePanelGroup>
               ) : (
@@ -130,7 +135,7 @@ export default function Playground({ roster, presets }: Props) {
                   <button
                     type="button"
                     class="flex w-9 shrink-0 flex-col items-center gap-2 border-l border-border bg-muted pt-2 text-muted-foreground hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring outline-none"
-                    aria-label="Expand JSON"
+                    aria-label={strings.pane.expandJson}
                     onClick={() => setJsonOpen(true)}
                   >
                     <ChevronsLeft class="size-4" />
@@ -139,7 +144,7 @@ export default function Playground({ roster, presets }: Props) {
                 </div>
               )}
             </ResizablePanel>
-            <ResizableHandle withHandle aria-label="Resize editor and preview" />
+            <ResizableHandle withHandle aria-label={strings.pane.resizeEditorPreview} />
             <ResizablePanel minSize={25}>{previewPane}</ResizablePanel>
           </ResizablePanelGroup>
           {toast.value && (
@@ -157,13 +162,13 @@ export default function Playground({ roster, presets }: Props) {
       <Tabs value={tab} onValueChange={(v: Tab) => setTab(v)} class={`${shell} gap-0`}>
         <div class="flex shrink-0 items-center gap-2 border-b border-border bg-background px-4 py-2">
           <TabsList aria-label="Playground panes">
-            <TabsTrigger value="configure">Configure</TabsTrigger>
+            <TabsTrigger value="configure">{strings.pane.configure}</TabsTrigger>
             <TabsTrigger value="json">JSON</TabsTrigger>
-            <TabsTrigger value="preview">Preview</TabsTrigger>
+            <TabsTrigger value="preview">{strings.pane.preview}</TabsTrigger>
           </TabsList>
           {tab !== "preview" && (
             <Button class="ml-auto" onClick={() => setSheet(true)}>
-              Preview
+              {strings.pane.preview}
             </Button>
           )}
         </div>
@@ -177,7 +182,7 @@ export default function Playground({ roster, presets }: Props) {
           {previewPane}
         </TabsContent>
         <Sheet open={sheet} onOpenChange={setSheet}>
-          <SheetContent title="Preview" class="pt-8">
+          <SheetContent title={strings.pane.preview} class="pt-8">
             {previewPane}
           </SheetContent>
         </Sheet>

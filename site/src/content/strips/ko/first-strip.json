@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "panels": [
+    {
+      "backdrop": "field",
+      "camera": "medium",
+      "bodies": [
+        {
+          "character": "anna",
+          "emotion": {
+            "angle": 0,
+            "intensity": 0.6
+          }
+        }
+      ],
+      "speakers": [
+        {
+          "speaker": "anna",
+          "balloon": "speech",
+          "text": "내 첫 코믹 스트립이에요."
+        }
+      ]
+    }
+  ]
+}

@@ -2215,3 +2215,55 @@ lookup, no threaded index) more than a raw line-count win in this case.
 
 All 46 `PONYTAIL_AUDIT.md` items now resolved: 43 applied (4 partial), 3 verified stale on
 re-check and correctly left uncut (#3, #6, #7). The audit is complete.
+
+## v0.16.0 — S9: Korean locale (`SITE_DEV_PLAN.md` §13)
+
+Published `asset-packager@0.2.1` first (the ponytail-audit #10/#13/#21/#22/#25/#26/#36
+cleanup had landed on `main` but never shipped past 0.2.0). Site docs synced against
+current package APIs (3 files: asset-packager, plain-html, writing-a-strip), then given a
+technical-writing pass — em-dashes swept from 7 files, one stale "precompiled validator"
+phrase fixed in two.
+
+Then the Korean locale itself, end to end:
+
+- **Infra**: `i18n: { defaultLocale: "en", locales: ["en","ko"], routing: {
+  prefixDefaultLocale: false } }` in `astro.config.mjs`, plus a Pretendard font entry
+  (`fontProviders.fontsource()`, `--font-body-ko`) alongside the existing DM Sans/Noto
+  Sans KR. `src/i18n/{en,ko}.json` + `utils.ts` (`useTranslations`/`getLocalizedPath`/
+  `getLangFromUrl`; `ko` is `satisfies typeof en`-checked so a missing key is a type
+  error), modeled directly on `danielkimdev-astro`'s existing implementation.
+- **Docs routing**: `content/docs/*.mdx` moved to `content/docs/{en,ko}/*.mdx`;
+  `docs-nav.ts` derives `lang` from the folder and merges EN+KO by slug, so the KO
+  sidebar is always the complete set and a not-yet-translated page renders the EN entry
+  under a "not translated yet" `Callout` instead of 404ing (this fallback is why every
+  `/ko/docs/*` route could exist and build correctly *before* any translation work
+  landed — infra and content shipped as two verifiable stages, not one).
+- **Content — not machine-translated.** All 17 docs pages and all 20 comic strips were
+  re-authored in Korean (via the `daniel-writing-style` skill's English→Korean rewrite
+  method, not sentence-by-sentence translation), in neutral technical-documentation
+  register (not the skill's personal-blog voice — no CTA, no forced balance). Strips
+  keep exact structural parity with their EN source (same panels/bodies/speakers order,
+  only `text`/`roomTitle` translated) — `validate-strips.mjs` gained a parity check for
+  this, 20/20 pass. The intro page (405 lines of hand-authored copy) was extracted to
+  `components/pages/IntroPage.astro` with a `lang` prop and freshly written Korean copy,
+  not a dictionary of long-form prose.
+- **Playground**: ~40 UI strings threaded through a `strings` prop (`PlaygroundStrings`
+  type) built once server-side in `playground.astro` so the client bundle carries only
+  one language. The emotion wheel shows a Korean label with the English id in mono
+  beside it ("기쁨 `HAPPY`"), per §13.2 — the id is what serializes into the JSON.
+- **Chrome**: `LanguageToggle` (mirrors the current path, pins a webfont-free label font
+  so an EN page never fetches Pretendard for one word), `hreflang`/`x-default`/
+  `og:locale` in `Base.astro`, `:lang(ko)` line-height/`word-break: keep-all`.
+
+Verified live in a real browser (`agent-browser`, not just the build): opened both
+`/playground/` and `/ko/playground/`, zero console errors, screenshots confirm full
+Korean UI including the emotion wheel. This is also how one real gap was caught that
+static verification missed — `Preview.tsx`'s width readout had a hardcoded `"col"`
+abbreviation never touched by the dictionary (fixed to `strings.columnUnit`/
+`columnUnitPlural`, reusing the same keys the site-wide `WidthSlider.astro` already had).
+
+Build green, 44 pages (up from 24 pre-S9 — every EN route now has a `/ko/` counterpart).
+
+**Not done**: axe accessibility audit and Lighthouse mobile score on `/ko/` routes
+(§13.6 exit criteria, not yet measured), and Daniel's own review/sign-off of the KO copy
+— both are the explicit remaining exit criteria and belong in a follow-up session.

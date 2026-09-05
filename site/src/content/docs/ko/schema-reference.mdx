@@ -1,0 +1,20 @@
+---
+title: 스키마 레퍼런스
+description: Comic Strip Document의 모든 필드를 정리한 문서로, 공개된 JSON Schema로부터 생성됩니다.
+order: 13
+section: Reference
+---
+import SchemaReference from "../../../components/site/SchemaReference.astro";
+import Callout from "../../../components/site/Callout.astro";
+
+아래 표는 `@toonstrip/schema`의 `schema.json`(draft-07, 전체적으로 `additionalProperties:
+false` 적용)으로부터 빌드 시점에 생성됩니다. 필드 이름과 타입, 필수 여부는 스키마에서
+가져오며, 한 줄 설명은 이 사이트에서 별도로 관리합니다.
+
+<Callout>
+TypeScript 타입은 `@toonstrip/schema`에서 `ComicStripDocument`, `Panel`, `Body`, `Line`,
+`Emotion`, `CameraPreset`, `BalloonKind`로 내보내집니다. JSON Schema는 TypeScript를 쓰지
+않는 생산자를 위한 기계 검증 가능한 원본입니다.
+</Callout>
+
+<SchemaReference />

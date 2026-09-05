@@ -1,0 +1,194 @@
+{
+  "version": 1,
+  "panels": [
+    {
+      "backdrop": "field",
+      "camera": "close-up",
+      "bodies": [
+        {
+          "character": "sage",
+          "emotion": {
+            "angle": 0,
+            "intensity": 0
+          },
+          "requested": true
+        }
+      ],
+      "speakers": [
+        {
+          "speaker": "caption",
+          "balloon": "caption",
+          "text": "NEUTRAL: 강도 0"
+        }
+      ]
+    },
+    {
+      "backdrop": "field",
+      "camera": "close-up",
+      "bodies": [
+        {
+          "character": "sage",
+          "emotion": {
+            "angle": 0.0,
+            "intensity": 0.8
+          },
+          "requested": true
+        }
+      ],
+      "speakers": [
+        {
+          "speaker": "caption",
+          "balloon": "caption",
+          "text": "HAPPY: 각도 0π/4, 강도 0.8"
+        }
+      ]
+    },
+    {
+      "backdrop": "field",
+      "camera": "close-up",
+      "bodies": [
+        {
+          "character": "sage",
+          "emotion": {
+            "angle": 0.785398,
+            "intensity": 0.8
+          },
+          "requested": true
+        }
+      ],
+      "speakers": [
+        {
+          "speaker": "caption",
+          "balloon": "caption",
+          "text": "COY: 각도 1π/4, 강도 0.8"
+        }
+      ]
+    },
+    {
+      "backdrop": "field",
+      "camera": "close-up",
+      "bodies": [
+        {
+          "character": "sage",
+          "emotion": {
+            "angle": 1.570796,
+            "intensity": 0.8
+          },
+          "requested": true
+        }
+      ],
+      "speakers": [
+        {
+          "speaker": "caption",
+          "balloon": "caption",
+          "text": "BORED: 각도 2π/4, 강도 0.8"
+        }
+      ]
+    },
+    {
+      "backdrop": "field",
+      "camera": "close-up",
+      "bodies": [
+        {
+          "character": "sage",
+          "emotion": {
+            "angle": 2.356194,
+            "intensity": 0.8
+          },
+          "requested": true
+        }
+      ],
+      "speakers": [
+        {
+          "speaker": "caption",
+          "balloon": "caption",
+          "text": "SCARED: 각도 3π/4, 강도 0.8"
+        }
+      ]
+    },
+    {
+      "backdrop": "field",
+      "camera": "close-up",
+      "bodies": [
+        {
+          "character": "sage",
+          "emotion": {
+            "angle": 3.141593,
+            "intensity": 0.8
+          },
+          "requested": true
+        }
+      ],
+      "speakers": [
+        {
+          "speaker": "caption",
+          "balloon": "caption",
+          "text": "SAD: 각도 4π/4, 강도 0.8"
+        }
+      ]
+    },
+    {
+      "backdrop": "field",
+      "camera": "close-up",
+      "bodies": [
+        {
+          "character": "sage",
+          "emotion": {
+            "angle": 3.926991,
+            "intensity": 0.8
+          },
+          "requested": true
+        }
+      ],
+      "speakers": [
+        {
+          "speaker": "caption",
+          "balloon": "caption",
+          "text": "ANGRY: 각도 5π/4, 강도 0.8"
+        }
+      ]
+    },
+    {
+      "backdrop": "field",
+      "camera": "close-up",
+      "bodies": [
+        {
+          "character": "sage",
+          "emotion": {
+            "angle": 4.712389,
+            "intensity": 0.8
+          },
+          "requested": true
+        }
+      ],
+      "speakers": [
+        {
+          "speaker": "caption",
+          "balloon": "caption",
+          "text": "SHOUT: 각도 6π/4, 강도 0.8"
+        }
+      ]
+    },
+    {
+      "backdrop": "field",
+      "camera": "close-up",
+      "bodies": [
+        {
+          "character": "sage",
+          "emotion": {
+            "angle": 5.497787,
+            "intensity": 0.8
+          },
+          "requested": true
+        }
+      ],
+      "speakers": [
+        {
+          "speaker": "caption",
+          "balloon": "caption",
+          "text": "LAUGH: 각도 7π/4, 강도 0.8"
+        }
+      ]
+    }
+  ]
+}

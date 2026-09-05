@@ -1,0 +1,179 @@
+{
+  "version": 1,
+  "panels": [
+    {
+      "backdrop": "pastoral",
+      "camera": "establishing",
+      "bodies": [
+        {
+          "character": "dan",
+          "emotion": {
+            "angle": 0,
+            "intensity": 0.6
+          },
+          "requested": true
+        },
+        {
+          "character": "anna",
+          "emotion": {
+            "angle": 0,
+            "intensity": 0.4
+          },
+          "requested": true
+        }
+      ],
+      "speakers": [
+        {
+          "speaker": "caption",
+          "balloon": "caption",
+          "text": "\"camera\": \"establishing\""
+        }
+      ]
+    },
+    {
+      "backdrop": "pastoral",
+      "camera": "wide",
+      "bodies": [
+        {
+          "character": "dan",
+          "emotion": {
+            "angle": 0,
+            "intensity": 0.6
+          },
+          "requested": true
+        },
+        {
+          "character": "anna",
+          "emotion": {
+            "angle": 0,
+            "intensity": 0.4
+          },
+          "requested": true
+        }
+      ],
+      "speakers": [
+        {
+          "speaker": "caption",
+          "balloon": "caption",
+          "text": "\"camera\": \"wide\""
+        }
+      ]
+    },
+    {
+      "backdrop": "pastoral",
+      "camera": "medium",
+      "bodies": [
+        {
+          "character": "dan",
+          "emotion": {
+            "angle": 0,
+            "intensity": 0.6
+          },
+          "requested": true
+        },
+        {
+          "character": "anna",
+          "emotion": {
+            "angle": 0,
+            "intensity": 0.4
+          },
+          "requested": true
+        }
+      ],
+      "speakers": [
+        {
+          "speaker": "caption",
+          "balloon": "caption",
+          "text": "\"camera\": \"medium\""
+        }
+      ]
+    },
+    {
+      "backdrop": "pastoral",
+      "camera": "over-shoulder",
+      "bodies": [
+        {
+          "character": "dan",
+          "emotion": {
+            "angle": 0,
+            "intensity": 0.6
+          },
+          "requested": true
+        },
+        {
+          "character": "anna",
+          "emotion": {
+            "angle": 0,
+            "intensity": 0.4
+          },
+          "requested": true
+        }
+      ],
+      "speakers": [
+        {
+          "speaker": "caption",
+          "balloon": "caption",
+          "text": "\"camera\": \"over-shoulder\""
+        }
+      ]
+    },
+    {
+      "backdrop": "pastoral",
+      "camera": "close-up",
+      "bodies": [
+        {
+          "character": "dan",
+          "emotion": {
+            "angle": 0,
+            "intensity": 0.6
+          },
+          "requested": true
+        },
+        {
+          "character": "anna",
+          "emotion": {
+            "angle": 0,
+            "intensity": 0.4
+          },
+          "requested": true
+        }
+      ],
+      "speakers": [
+        {
+          "speaker": "caption",
+          "balloon": "caption",
+          "text": "\"camera\": \"close-up\""
+        }
+      ]
+    },
+    {
+      "backdrop": "pastoral",
+      "camera": "reaction",
+      "bodies": [
+        {
+          "character": "dan",
+          "emotion": {
+            "angle": 0,
+            "intensity": 0.6
+          },
+          "requested": true
+        },
+        {
+          "character": "anna",
+          "emotion": {
+            "angle": 0,
+            "intensity": 0.4
+          },
+          "requested": true
+        }
+      ],
+      "speakers": [
+        {
+          "speaker": "caption",
+          "balloon": "caption",
+          "text": "\"camera\": \"reaction\""
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,78 @@
+{
+  "version": 1,
+  "panels": [
+    {
+      "backdrop": "room8bs",
+      "camera": "wide",
+      "bodies": [
+        {
+          "character": "scotty",
+          "emotion": {
+            "angle": 0,
+            "intensity": 0.5
+          }
+        },
+        {
+          "character": "rebecca",
+          "emotion": {
+            "angle": 1.5707963267948966,
+            "intensity": 0.5
+          }
+        },
+        {
+          "character": "denise",
+          "emotion": {
+            "angle": 0,
+            "intensity": 0.3
+          }
+        }
+      ],
+      "speakers": [
+        {
+          "speaker": "scotty",
+          "balloon": "speech",
+          "text": "리디자인 금요일에 출시할 수 있을까?"
+        },
+        {
+          "speaker": "rebecca",
+          "balloon": "speech",
+          "text": "문서 페이지를 빼면 가능해."
+        }
+      ],
+      "roomTitle": "#디자인-리뷰"
+    },
+    {
+      "backdrop": "room8bs",
+      "camera": "medium",
+      "bodies": [
+        {
+          "character": "denise",
+          "emotion": {
+            "angle": 4.71238898038469,
+            "intensity": 0.6
+          }
+        },
+        {
+          "character": "rebecca",
+          "emotion": {
+            "angle": 2.356194490192345,
+            "intensity": 0.4
+          }
+        }
+      ],
+      "speakers": [
+        {
+          "speaker": "denise",
+          "balloon": "speech",
+          "text": "문서 페이지가 곧 리디자인이야."
+        },
+        {
+          "speaker": "rebecca",
+          "balloon": "speech",
+          "text": "그럼 월요일로."
+        }
+      ],
+      "roomTitle": "#디자인-리뷰"
+    }
+  ]
+}

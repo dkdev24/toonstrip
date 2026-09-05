@@ -1,0 +1,71 @@
+---
+title: 감정과 포즈
+description: 얼굴별로 렌더링되는 감정 휠과, 몸통을 담당하는 세 가지 제스처를 설명합니다.
+order: 3
+section: Authoring
+---
+import CodeAndStrip from "../../../components/demo/CodeAndStrip.astro";
+import Callout from "../../../components/site/Callout.astro";
+import emotions from "../../strips/emotions.json";
+import intensity from "../../strips/intensity.json";
+import poses from "../../strips/poses.json";
+
+인물의 `emotion`은 휠 위의 좌표입니다. `angle`은 라디안 단위이고, `intensity`는 0부터
+1까지입니다. 렌더러는 캐릭터가 속한 팩에 선언된 얼굴 중 가장 가까운 것을 찾아 그립니다.
+최근접 이웃 방식이므로 어떤 각도든 유효하며, 아래 이름들은 기본 팩이 뚜렷하게 구분해
+그리는 여덟 지점입니다.
+
+## 휠
+
+같은 캐릭터의 클로즈업 아홉 장입니다. NEUTRAL과, intensity 0.8에서의 여덟 개 명명된
+각도입니다.
+
+<CodeAndStrip doc={emotions} title="휠을 따라 도는 sage" collapse />
+
+| 이름 | angle | 라디안 |
+|---|---|---|
+| HAPPY | 0 | `0` |
+| COY | π/4 | `0.785` |
+| BORED | π/2 | `1.571` |
+| SCARED | 3π/4 | `2.356` |
+| SAD | π | `3.142` |
+| ANGRY | 5π/4 | `3.927` |
+| SHOUT | 3π/2 | `4.712` |
+| LAUGH | 7π/4 | `5.498` |
+
+## Intensity
+
+Intensity는 팩이 같은 각도에 여러 얼굴을 갖고 있을 때 그중 하나를 고르는 값이며, 0일 때는
+각도와 무관하게 NEUTRAL을 뜻합니다. 기본 팩은 대부분의 캐릭터마다 감정별로 얼굴을 두세 개씩
+갖고 있으므로, intensity가 낮을 때와 높을 때가 다르게 보이는 경우가 많습니다.
+
+<CodeAndStrip doc={intensity} title="세 가지 intensity의 SAD" collapse />
+
+<Callout>
+NEUTRAL은 HAPPY와 같은 각도를 공유합니다. `{ angle: 0, intensity: 0 }`와
+`{ angle: 3.142, intensity: 0 }`는 같은 얼굴입니다. intensity 0을 휠의 중심이라고
+생각하면 됩니다.
+</Callout>
+
+## 포즈
+
+`pose`는 emotion과 별개의 채널입니다. emotion이 **얼굴**을 정하는 동안 pose는 제스처로
+**몸통**을 담당하므로, 슬픈 표정을 지으면서 손을 흔드는 캐릭터도 표현할 수 있습니다. 제스처는
+`wave`, `point`, `shrug` 세 가지이며, 팩은 해당 제스처용 몸통을 선언함으로써 이를
+지원합니다. 기본 팩은 모든 캐릭터에 대해 세 제스처를 전부 지원합니다.
+
+<CodeAndStrip doc={poses} title="세 가지 제스처" collapse />
+
+## 선택 방식
+
+각 캐릭터는 얼굴과 몸통을 별도의 스프라이트로 갖고 있습니다. 패널마다 렌더러는 다음 순서로
+동작합니다.
+
+1. 인물의 emotion 좌표에 가장 가까운 얼굴을 고릅니다.
+2. 몸통을 고릅니다. pose가 설정되어 있으면 해당 제스처의 몸통을, 아니면 emotion에 가장
+   가까운 몸통을 선택합니다.
+3. 동등하게 적합한 후보들 사이를 패널마다 순환시켜서, 같은 캐릭터가 세 패널에 등장해도
+   똑같은 그림이 세 번 반복되지 않게 합니다.
+
+이 순환은 스트립이 로드될 때 패널별로 고정되므로, 리사이즈가 일어나도 같은 그림이 다시
+그려집니다.

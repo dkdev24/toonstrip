@@ -1,0 +1,62 @@
+{
+  "version": 1,
+  "panels": [
+    {
+      "backdrop": "room8bs",
+      "camera": "medium",
+      "bodies": [
+        {
+          "character": "margaret",
+          "emotion": {
+            "angle": 0,
+            "intensity": 0.6
+          }
+        },
+        {
+          "character": "hugh",
+          "emotion": {
+            "angle": 1.5707963267948966,
+            "intensity": 0.4
+          }
+        }
+      ],
+      "speakers": [
+        {
+          "speaker": "caption",
+          "balloon": "caption",
+          "text": "v0.7.11"
+        },
+        {
+          "speaker": "margaret",
+          "balloon": "speech",
+          "text": "이제 말풍선 텍스트와 여백이 패널 크기에 맞춰 조정돼서, 좁은 임베드에서도 답답해 보이지 않아요."
+        },
+        {
+          "speaker": "hugh",
+          "balloon": "speech",
+          "text": "제가 따로 바꿔야 할 게 있나요?"
+        }
+      ]
+    },
+    {
+      "backdrop": "room8bs",
+      "camera": "reaction",
+      "bodies": [
+        {
+          "character": "margaret",
+          "emotion": {
+            "angle": 5.497787143782138,
+            "intensity": 0.7
+          }
+        }
+      ],
+      "speakers": [
+        {
+          "speaker": "margaret",
+          "balloon": "speech",
+          "text": "없어요. 패키지 버전만 올리면 돼요."
+        }
+      ]
+    }
+  ]
+}

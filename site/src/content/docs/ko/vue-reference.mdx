@@ -1,0 +1,68 @@
+---
+title: Vue 레퍼런스
+description: <ComicStrip> 컴포넌트의 props와, prop이 바뀌어도 엘리먼트가 리마운트되지 않는 이유를 설명합니다.
+order: 11
+section: Integrate
+---
+import Callout from "../../../components/site/Callout.astro";
+
+## `<ComicStrip>`
+
+```vue
+<script setup>
+import { ComicStrip } from "@toonstrip/vue";
+</script>
+
+<template>
+  <ComicStrip :document="doc" :packs="['/packs/comic-chat/']" />
+</template>
+```
+
+| Prop | 타입 | 의미 |
+|---|---|---|
+| `document` | `ComicStripDocument` | 스트립 데이터입니다. 알맞은 형태의 객체라면 무엇이든 되며, 보통은 임포트한 JSON 파일을 씁니다. 값이 바뀔 때마다 엘리먼트로 전달됩니다. |
+| `packs` | `string[]` | 에셋 팩의 베이스 URL입니다(`packages/element` 자체의 `.packs`와 같은 형태이며, `@toonstrip/astro` 컴포넌트가 받는 팩 **이름**과는 다릅니다. 이름을 URL로 리졸브하는 인테그레이션 단계가 여기에는 없기 때문입니다). 기본값은 `[]`입니다. |
+| `class` / `style` | 해당 없음 | props로 선언되지 않고, Vue의 기본 단일 루트 속성 상속 방식으로 내부의 `<comic-strip>` 엘리먼트에 자동으로 전달됩니다. |
+
+이 컴포넌트에는 자체 렌더링 로직이 없습니다. 템플릿 ref를 통해 `<comic-strip>`을
+마운트하고, `watch`에서 `document`/`packs`를 DOM 속성으로 설정하는데, 이는
+`@toonstrip/astro`의 클라이언트 렌더러와 동일한 방식입니다.
+
+## 리마운트 없이 업데이트되는 이유
+
+`<ComicStrip>`은 항상 같은 호스트 태그(`h("comic-strip", { ref })`, 이 태그 하나만큼은
+SFC `<template>`이 아니라 렌더 함수로 작성했는데, `comic-strip`만을 위해
+`compilerOptions.isCustomElement`를 설정하지 않아도 되기 때문입니다)를 렌더링하므로,
+Vue의 패치 과정에서 리렌더링 사이에 기존 `<comic-strip>` DOM 노드가 그대로
+재사용됩니다. 새로운 `document` 값은 노드를 해체하고 다시 만드는 대신 있는 그대로
+갱신됩니다. M11 작업 중 devtools 콘솔에서 라이브 엘리먼트에 임시 속성을 태깅한 뒤
+`document` 변경 이후에도 그 속성이 남아 있는지 확인하는 방식으로 검증했습니다.
+
+## 예제
+
+레포의 `examples/vue-vite`는 Vite + Vue 앱으로, 토글 버튼으로 두 개의 수작업 문서를
+전환합니다. `scripts/copy-pack-assets.mjs`는 `dev`/`build` 실행 전에
+`@toonstrip/pack-comic-chat`의 파일들을 `public/packs/comic-chat/`로 복사합니다(Vite에는
+Astro 같은 인테그레이션 훅 시스템이 없으므로, 설정 시점 훅이 아니라 일반 Node
+스크립트로 구현되어 있으며, `examples/react-vite`와 같은 스크립트를 씁니다). 로컬에서
+실행하려면 다음과 같이 합니다.
+
+```
+pnpm --filter vue-vite-example dev
+```
+
+## 현재 제약 사항
+
+- Vue 3.5를 기준으로 테스트되었습니다. 아직 Nuxt 전용 래퍼는 없습니다. `@toonstrip/element`
+  모듈은 이제 서버에서 임포트해도 오류가 발생하지 않으므로(`HTMLElement`/
+  `customElements` 접근을 가드 처리했으며, 개발 계획 §13.4 참고), 이 패키지는 Nuxt의
+  서버 렌더링 과정에서도 안전하게 임포트할 수 있습니다. [Next.js 레퍼런스](/docs/next-reference/)에서
+  다루는 `@toonstrip/next`의 폐기 방향을 따르면, 전용 Nuxt 패키지 역시 정답은 아닐 가능성이
+  높습니다. 클라이언트 경계 마커(Nuxt판 `'use client'`에 해당)는 이 패키지의 컴포넌트에
+  직접 두는 편이 맞고, SSR 플레이스홀더 헬퍼는 이미 `@toonstrip/cli`에 있습니다.
+
+<Callout kind="tip">
+Svelte는 아직 배포되어 있지 않습니다. 그 전까지는 [Plain HTML](/docs/plain-html/)의
+"프레임워크에서 사용하기" 절에서 다루는, 커스텀 엘리먼트를 각 프레임워크의 프로퍼티
+바인딩 문법으로 직접 사용하는 방법을 참고하시기 바랍니다.
+</Callout>

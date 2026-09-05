@@ -5,12 +5,130 @@ import Playground from "../components/playground/Playground";
 import { loadRoster } from "../lib/roster";
 import type { ComicStripDocument } from "@toonstrip/schema";
 import { useTranslations, type Lang } from "../i18n/utils";
+import type { PlaygroundStrings } from "../components/playground/strings";
 
 interface Props {
   lang?: Lang;
 }
 const { lang = "en" } = Astro.props;
 const t = useTranslations(lang);
+
+// Built here (not read from en/ko.json by the island itself) so the client bundle only
+// carries the active language's strings (SITE_DEV_PLAN.md §13.2).
+const strings: PlaygroundStrings = {
+  loading: t("playground.loading"),
+  pane: {
+    configure: t("playground.pane.configure"),
+    preview: t("playground.pane.preview"),
+    collapseJson: t("playground.pane.collapseJson"),
+    expandJson: t("playground.pane.expandJson"),
+    resizeConfigureJson: t("playground.pane.resizeConfigureJson"),
+    resizeEditorPreview: t("playground.pane.resizeEditorPreview"),
+  },
+  strip: {
+    tabLabel: t("playground.strip.tabLabel"),
+    assetPacks: t("playground.strip.assetPacks"),
+    assetPacksHint: t("playground.strip.assetPacksHint"),
+    presets: t("playground.strip.presets"),
+    loadPreset: t("playground.strip.loadPreset"),
+    choosePreset: t("playground.strip.choosePreset"),
+    presetHint: t("playground.strip.presetHint"),
+    resetToFirst: t("playground.strip.resetToFirst"),
+    thisStrip: t("playground.strip.thisStrip"),
+    addPanel: t("playground.strip.addPanel"),
+  },
+  panel: {
+    label: t("playground.panel.label"),
+    labelWithRoom: t("playground.panel.labelWithRoom"),
+    actionsAria: t("playground.panel.actionsAria"),
+    scene: t("playground.panel.scene"),
+    backdrop: t("playground.panel.backdrop"),
+    camera: t("playground.panel.camera"),
+    roomTitle: t("playground.panel.roomTitle"),
+    roomTitlePlaceholder: t("playground.panel.roomTitlePlaceholder"),
+    dark: t("playground.panel.dark"),
+    moveLeft: t("playground.panel.moveLeft"),
+    moveRight: t("playground.panel.moveRight"),
+    duplicate: t("playground.panel.duplicate"),
+    remove: t("playground.panel.remove"),
+    removeConfirm: t("playground.panel.removeConfirm"),
+    removePanel: t("playground.panel.removePanel"),
+    cancel: t("playground.panel.cancel"),
+  },
+  character: {
+    title: t("playground.character.title"),
+    none: t("playground.character.none"),
+    add: t("playground.character.add"),
+    choose: t("playground.character.choose"),
+    close: t("playground.character.close"),
+    moveLeft: t("playground.character.moveLeft"),
+    moveRight: t("playground.character.moveRight"),
+    remove: t("playground.character.remove"),
+    removeReassign: t("playground.character.removeReassign"),
+    pose: t("playground.character.pose"),
+    angle: t("playground.character.angle"),
+    intensity: t("playground.character.intensity"),
+    keepOnStage: t("playground.character.keepOnStage"),
+    emotion: t("playground.character.emotion"),
+  },
+  line: {
+    title: t("playground.line.title"),
+    none: t("playground.line.none"),
+    speaker: t("playground.line.speaker"),
+    balloon: t("playground.line.balloon"),
+    moveUp: t("playground.line.moveUp"),
+    moveDown: t("playground.line.moveDown"),
+    remove: t("playground.line.remove"),
+    textPlaceholder: t("playground.line.textPlaceholder"),
+    add: t("playground.line.add"),
+    addCaption: t("playground.line.addCaption"),
+    charsCount: t("playground.line.charsCount"),
+  },
+  preview: {
+    containerWidth: t("widthSlider.containerWidth"),
+    widthPresetsAria: t("widthSlider.presetsAria"),
+    presetPhone: t("widthSlider.presetPhone"),
+    presetTablet: t("widthSlider.presetTablet"),
+    presetDesktop: t("widthSlider.presetDesktop"),
+    presetFill: t("widthSlider.presetFill"),
+    columnUnit: t("widthSlider.columnUnit"),
+    columnUnitPlural: t("widthSlider.columnUnitPlural"),
+    darkSurface: t("playground.preview.darkSurface"),
+    darkSurfaceHint: t("playground.preview.darkSurfaceHint"),
+    undo: t("playground.preview.undo"),
+    redo: t("playground.preview.redo"),
+    presetsButton: t("playground.preview.presetsButton"),
+    loadPresetMenuLabel: t("playground.preview.loadPresetMenuLabel"),
+    share: t("playground.preview.share"),
+    shareLinkCopied: t("playground.preview.shareLinkCopied"),
+    linkInAddressBar: t("playground.preview.linkInAddressBar"),
+    export: t("playground.preview.export"),
+    rendering: t("playground.preview.rendering"),
+    downloadPng: t("playground.preview.downloadPng"),
+    transparentBackground: t("playground.preview.transparentBackground"),
+    copyJson: t("playground.preview.copyJson"),
+    copyAstro: t("playground.preview.copyAstro"),
+    copyHtml: t("playground.preview.copyHtml"),
+    copiedJson: t("playground.preview.copiedJson"),
+    copiedAstro: t("playground.preview.copiedAstro"),
+    copiedHtml: t("playground.preview.copiedHtml"),
+    exportFailed: t("playground.preview.exportFailed"),
+    clipboardBlocked: t("playground.preview.clipboardBlocked"),
+    pngDownloaded: t("playground.preview.pngDownloaded"),
+    panelUnit: t("playground.preview.panelUnit"),
+    panelUnitPlural: t("playground.preview.panelUnitPlural"),
+    packsLabel: t("playground.preview.packsLabel"),
+  },
+  editor: {
+    valid: t("playground.editor.valid"),
+    problemUnit: t("playground.editor.problemUnit"),
+    problemUnitPlural: t("playground.editor.problemUnitPlural"),
+    format: t("playground.editor.format"),
+    copy: t("playground.editor.copy"),
+    linePrefix: t("playground.editor.linePrefix"),
+    documentAria: t("playground.editor.documentAria"),
+  },
+};
 import "../styles/playground-ui.css";
 import "../styles/playground.css";
 import hero from "../content/strips/hero.json";
@@ -53,5 +171,5 @@ const presets = [
 
 <Base title={t("nav.playground")} description={t("playground.description")} lang={lang} bare>
   <h1 class="visually-hidden">{t("nav.playground")}</h1>
-  <Playground roster={roster} presets={presets} client:load />
+  <Playground roster={roster} presets={presets} strings={strings} lang={lang} client:load />
 </Base>

@@ -1,0 +1,98 @@
+---
+title: Next.js (사용 중단)
+description: App Router에서 안전한 클라이언트 경계로 감싼 <ComicStrip>과 SSR 플레이스홀더 헬퍼는, 이제 @toonstrip/react와 @toonstrip/cli에 직접 내장되어 있습니다.
+order: 12
+section: Integrate
+---
+import Callout from "../../../components/site/Callout.astro";
+
+<Callout kind="warning" title="사용 중단">
+`@toonstrip/next`는 Next.js App Router에 필요한 두 가지, 즉 `'use client'` 경계와
+서버 전용 PNG 플레이스홀더 헬퍼를 감싸는 패키지였습니다. 이제 둘 다 실제 동작을
+담당하는 패키지에 직접 포함되어 있어, 이 래퍼가 그 위에 더해 주는 것은 없습니다. 기존
+설치는 그대로 동작합니다(제거된 것이 아니라 재익스포트용 shim입니다). 새로 작성하는
+코드는 아래와 같이 [`@toonstrip/react`](/docs/react-reference/)와 `@toonstrip/cli`에서
+가져와야 합니다.
+</Callout>
+
+## `<ComicStrip>`
+
+```tsx
+// app/page.tsx: Server Component입니다. 여기에는 "use client"가 필요 없습니다
+import { ComicStrip } from "@toonstrip/react";
+
+<ComicStrip document={doc} packs={["/packs/comic-chat/"]} />
+```
+
+[`@toonstrip/react`](/docs/react-reference/)의 `<ComicStrip>`과 동일한 props입니다.
+컴포넌트 자체가 `'use client'` 지시어를 갖고 있는데, 이는 `useRef`/`useEffect`를 쓰는
+코드 주위에 React Server Components가 요구하는 경계입니다. Server Component에서 바로
+임포트할 수 있으며, 페이지 자체를 `'use client'`로 표시할 필요는 없습니다.
+
+## SSR 플레이스홀더
+
+```tsx
+// app/page.tsx
+import { ComicStrip } from "@toonstrip/react";
+
+export default async function Page() {
+  // 정적 임포트가 아니라 동적 임포트 + webpackIgnore입니다. 아래 콜아웃을 참고하시기 바랍니다.
+  const { renderPlaceholder } = await import(/* webpackIgnore: true */ "@toonstrip/cli");
+  const placeholder = await renderPlaceholder(doc, { width: 640 });
+  return <ComicStrip document={doc} packs={["/packs/comic-chat/"]} placeholder={placeholder} />;
+}
+```
+
+`renderPlaceholder`는 [`toonstrip render`](/docs/astro-reference/)가 사용하는 것과 같은
+`@toonstrip/cli`의 헤드리스 캔버스 렌더링 경로를 재사용해, 서버에서 PNG를 생성합니다.
+크기는 넘겨준 `width` 값에 맞춰 CSS 픽셀 단위로 정해집니다. `<ComicStrip>`은 이 PNG를
+`<comic-strip>` 내부의 라이트 DOM `<img slot="placeholder">`로 렌더링하며, 이는 원본
+서버 HTML에 클라이언트 JS 없이도 그대로 담겨 있으므로 자바스크립트가 꺼져 있어도,
+그리고 "소스 보기"에서도 나타납니다. 클라이언트 JS가 하이드레이션되고 라이브
+캔버스가 준비되면 `@toonstrip/element`가 플레이스홀더를 숨기고 라이브 스트립을
+보여줍니다. 이 전환을 직접 제어하는 코드는 없습니다.
+
+`renderPlaceholder`에 넘기는 `width`는 실제로 `<ComicStrip>`이 배치되는 CSS 너비와
+일치시켜야 합니다. 값이 어긋나면 플레이스홀더가 라이브 스트립과 다른 크기로 표시되고,
+하이드레이션 시점에 레이아웃 시프트로 나타납니다.
+
+`renderPlaceholder`는 `@toonstrip/cli`를 끌어오는데, 이 패키지는 네이티브 Node 애드온인
+`@napi-rs/canvas`를 로드하므로 클라이언트 번들에 절대 들어가서는 안 됩니다. Server
+Component나 그 밖의 서버 전용 코드에서만 호출하시기 바랍니다.
+
+<Callout kind="warning">
+`@toonstrip/cli`의 네이티브 의존성 때문에 앱의 `next.config`에 두 가지가 필요합니다.
+`@napi-rs/canvas`와 `@toonstrip/cli`를 `serverExternalPackages`에 등록하고,
+`@toonstrip/cli`를 앱의 직접 의존성으로도 추가해야 합니다(단순한 전이 의존성이 아니라).
+이 두 가지를 모두 해도, `@toonstrip/cli`가 이 모노레포의 예제처럼 워크스페이스로
+심볼릭 링크된 로컬 패키지인 경우 `renderPlaceholder`를 **정적으로** 임포트하면
+webpack이 네이티브 바이너리까지 번들링하려 시도합니다. 위에서 `webpackIgnore`
+처리된 동적 `import()`를 쓰는 이유가 여기에 있습니다. 실제로 동작하는 설정은
+`examples/next-app`의 `next.config.mjs`와 `app/page.tsx`를 참고하시기 바랍니다.
+</Callout>
+
+## 예제
+
+레포의 `examples/next-app`은 App Router 앱으로, Server Component 페이지가 플레이스홀더와
+함께 스트립을 렌더링합니다. `scripts/copy-pack-assets.mjs`는 클라이언트 쪽 캐스트
+페치를 위해 `@toonstrip/pack-comic-chat`의 파일들을 `public/packs/comic-chat/`로
+복사하며(`examples/react-vite`와 `examples/vue-vite`가 쓰는 것과 같은 스크립트입니다),
+`renderPlaceholder`는 서버 사이드 렌더링을 위해 `node_modules`에서 팩을 직접 읽습니다.
+로컬에서 실행하려면 다음과 같이 합니다.
+
+```
+pnpm --filter next-app-example build && pnpm --filter next-app-example start
+```
+
+## 현재 제약 사항
+
+- Next.js 15(App Router)와 React 18을 기준으로 테스트되었습니다. Pages Router는
+  다루지 않습니다.
+- 아직 Nuxt에 해당하는 래퍼는 없습니다. 관련 내용은 [Vue 레퍼런스](/docs/vue-reference/)의
+  설명을 참고하시기 바랍니다.
+
+<Callout kind="tip">
+`@toonstrip/element` 모듈은 이제 서버에서 임포트해도 오류가 발생하지 않습니다. 이 가드
+처리(개발 계획 §13.4)가 애초에 `<ComicStrip>`의 클라이언트 경계를 Server Component에서
+안전하게 임포트할 수 있게 해 주는 부분입니다.
+</Callout>

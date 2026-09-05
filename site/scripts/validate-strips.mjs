@@ -31,4 +31,40 @@ for (const file of readdirSync(dir).filter((f) => f.endsWith(".json"))) {
     console.error(`FAIL ${file}: ${err.message}`);
   }
 }
+
+// Parity: every ko/<name>.json must match the structure of its EN counterpart
+// (panel count, bodies character/pose order, speakers speaker/balloon order).
+// Only text/roomTitle are allowed to differ.
+const koDir = new URL("ko/", dir);
+for (const file of readdirSync(koDir).filter((f) => f.endsWith(".json"))) {
+  const enUrl = new URL(file, dir);
+  const koUrl = new URL(file, koDir);
+  const en = JSON.parse(readFileSync(enUrl, "utf-8"));
+  const ko = JSON.parse(readFileSync(koUrl, "utf-8"));
+  const problems = [];
+  if (en.panels.length !== ko.panels.length) {
+    problems.push(`panel count ${ko.panels.length} !== EN ${en.panels.length}`);
+  } else {
+    en.panels.forEach((enPanel, i) => {
+      const koPanel = ko.panels[i];
+      const enBodies = enPanel.bodies.map((b) => `${b.character}/${b.pose ?? ""}`);
+      const koBodies = koPanel.bodies.map((b) => `${b.character}/${b.pose ?? ""}`);
+      if (enBodies.join(",") !== koBodies.join(",")) {
+        problems.push(`panel ${i}: bodies [${koBodies}] !== EN [${enBodies}]`);
+      }
+      const enSpeakers = enPanel.speakers.map((s) => `${s.speaker}/${s.balloon}`);
+      const koSpeakers = koPanel.speakers.map((s) => `${s.speaker}/${s.balloon}`);
+      if (enSpeakers.join(",") !== koSpeakers.join(",")) {
+        problems.push(`panel ${i}: speakers [${koSpeakers}] !== EN [${enSpeakers}]`);
+      }
+    });
+  }
+  if (problems.length) {
+    failed++;
+    console.error(`FAIL ko/${file}: ${problems.join("; ")}`);
+  } else {
+    console.log(`ok   ko/${file} (parity with ${file})`);
+  }
+}
+
 process.exit(failed ? 1 : 0);

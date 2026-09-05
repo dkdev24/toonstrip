@@ -1,0 +1,78 @@
+---
+title: 시작하기
+description: 패키지 두 개를 설치하고 Astro 통합을 등록해서 첫 스트립을 렌더링합니다.
+order: 1
+section: Start
+---
+import CodeAndStrip from "../../../components/demo/CodeAndStrip.astro";
+import PackageManagerTabs from "../../../components/site/PackageManagerTabs.astro";
+import Callout from "../../../components/site/Callout.astro";
+import firstStrip from "../../strips/first-strip.json";
+
+toonstrip는 사용자가 제공한 데이터로 코믹 스트립을 렌더링합니다. 별도로 생성할 것도, 이미지
+파이프라인도 없습니다. 작은 JSON 문서를 작성하면 페이지가 이를 캔버스에 그립니다. 이 페이지는
+빈 Astro 프로젝트에서 시작해 첫 패널을 렌더링하기까지의 과정을 안내합니다.
+
+## 1. 설치
+
+Astro 통합과 에셋 팩을 최소 하나 설치해야 합니다. 기본 팩은 15개 캐릭터와 배경 3종으로
+구성된 Comic Chat 로스터입니다.
+
+<PackageManagerTabs packages={["@toonstrip/astro", "@toonstrip/pack-comic-chat"]} />
+
+Astro 5 이상(Astro 7에서 테스트됨)과 Node 20 이상이 필요합니다.
+
+## 2. 통합 등록
+
+이 통합은 두 가지 역할을 합니다. `<ComicStrip>` 컴포넌트용 렌더러를 등록하고, 목록에 지정한
+각 팩을 `public/_toonstrip/<pack-name>/`에 복사해 브라우저가 스프라이트를 가져올 수 있게
+합니다. 여기서 팩은 **npm 지정자**로 나열합니다.
+
+```js
+// astro.config.mjs
+import { defineConfig } from "astro/config";
+import { toonstrip } from "@toonstrip/astro";
+
+export default defineConfig({
+  integrations: [toonstrip({ packs: ["@toonstrip/pack-comic-chat"] })],
+});
+```
+
+<Callout kind="tip" title="자동 탐색 없음">
+페이지가 사용하는 팩은 반드시 여기에 나열해야 합니다. 그러지 않으면 빌드된 사이트에 해당
+파일이 존재하지 않아 스트립 로딩이 실패하며, 누락된 id를 명시한 오류가 표시됩니다.
+</Callout>
+
+## 3. 스트립 렌더링
+
+페이지 옆에 문서를 두거나(또는 인라인으로 작성해서) 컴포넌트에 전달합니다. `packs` prop은
+`pack.json`에 정의된 팩 **name**을 받습니다. 기본 팩의 경우 npm 지정자가 아니라
+`comic-chat`입니다.
+
+```astro
+---
+// src/pages/index.astro
+import { ComicStrip } from "@toonstrip/astro";
+import doc from "../content/first-strip.json";
+---
+<ComicStrip document={doc} packs={["comic-chat"]} client:visible />
+```
+
+<CodeAndStrip doc={firstStrip} title="src/content/first-strip.json" layout="side" />
+
+임베드에 필요한 것은 이 세 가지, 문서와 팩 name, 클라이언트 지시어뿐입니다.
+
+## 여기서 `client:visible`이 하는 일
+
+이 컴포넌트의 서버 사이드 렌더링은 비활성 상태의 `<comic-strip>` 태그만 내보냅니다. 엘리먼트의
+JavaScript, 팩 fetch, 캔버스 드로잉은 모두 클라이언트에서 실행되며, Astro의
+`client:visible` 지시어는 스트립이 뷰포트에 들어올 때까지 이 실행을 지연시킵니다. 폴드 아래에
+있는 스트립은 독자가 그 지점에 도달하기 전까지 아무 비용도 발생시키지 않습니다. Astro의
+클라이언트 지시어는 무엇을 써도 동작하며, 폴드 위에 있는 스트립에는 `client:load`를
+사용하세요.
+
+## 다음 단계
+
+[스트립 작성하기](/docs/writing-a-strip/)에서는 실제 예제와 함께 문서 포맷을 살펴봅니다.
+Astro를 쓰지 않는다면 [plain HTML](/docs/plain-html/)에서 커스텀 엘리먼트 단독 사용법을
+확인하세요.

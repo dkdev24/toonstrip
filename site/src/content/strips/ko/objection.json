@@ -1,0 +1,64 @@
+{
+  "version": 1,
+  "panels": [
+    {
+      "backdrop": "pastoral",
+      "camera": "over-shoulder",
+      "bodies": [
+        {
+          "character": "bolo",
+          "emotion": {
+            "angle": 3.9269908169872414,
+            "intensity": 0.5
+          }
+        },
+        {
+          "character": "anna",
+          "emotion": {
+            "angle": 0,
+            "intensity": 0.4
+          }
+        }
+      ],
+      "speakers": [
+        {
+          "speaker": "bolo",
+          "balloon": "speech",
+          "text": "이거 그냥 번거로운 이미지 아니에요?"
+        }
+      ]
+    },
+    {
+      "backdrop": "pastoral",
+      "camera": "medium",
+      "bodies": [
+        {
+          "character": "anna",
+          "emotion": {
+            "angle": 0,
+            "intensity": 0.8
+          }
+        },
+        {
+          "character": "bolo",
+          "emotion": {
+            "angle": 0.7853981633974483,
+            "intensity": 0.4
+          }
+        }
+      ],
+      "speakers": [
+        {
+          "speaker": "anna",
+          "balloon": "speech",
+          "text": "이미지는 다시 배치될 수도, 소리 내 읽힐 수도, JSON 한 줄로 수정될 수도 없어."
+        },
+        {
+          "speaker": "bolo",
+          "balloon": "speech",
+          "text": "...그건 인정."
+        }
+      ]
+    }
+  ]
+}

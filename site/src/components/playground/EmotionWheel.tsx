@@ -4,10 +4,27 @@
  * ↑/↓ step intensity by 0.1; `aria-valuetext` announces the named emotion.
  */
 import { useRef } from "preact/hooks";
+import type { Lang } from "../../i18n/utils";
 
+// Mirrors the relevant subset of @toonstrip/core's EMOTION_NAMES (packages/core/src/emotion.ts):
+// the 8 named emotions around the wheel plus NEUTRAL for the low-intensity centre.
 const NAMES = ["HAPPY", "COY", "BORED", "SCARED", "SAD", "ANGRY", "SHOUT", "LAUGH"];
 const TAU = Math.PI * 2;
 const NEUTRAL_ZONE = 0.12;
+
+// English id -> Korean label. The id itself is never translated: it's what a caller
+// reads back off the wheel (SITE_DEV_PLAN.md §13.2 — "the id is what goes into the JSON").
+const KO_LABELS: Record<string, string> = {
+  HAPPY: "기쁨",
+  COY: "수줍음",
+  BORED: "지루함",
+  SCARED: "무서움",
+  SAD: "슬픔",
+  ANGRY: "화남",
+  SHOUT: "고함",
+  LAUGH: "웃음",
+  NEUTRAL: "무표정",
+};
 
 export function emotionName(angle: number, intensity: number): string {
   if (intensity <= NEUTRAL_ZONE) return "NEUTRAL";
@@ -15,14 +32,27 @@ export function emotionName(angle: number, intensity: number): string {
   return NAMES[index];
 }
 
+/** Renders an emotion id: plain mono on EN, translated label + mono id on KO. */
+export function EmotionLabel({ name, lang }: { name: string; lang?: Lang }) {
+  if (lang === "ko") {
+    return (
+      <span class="text-sm">
+        {KO_LABELS[name] ?? name} <code class="mono">{name}</code>
+      </span>
+    );
+  }
+  return <span class="mono text-sm">{name}</span>;
+}
+
 interface Props {
   angle: number;
   intensity: number;
   onChange: (angle: number, intensity: number) => void;
   size?: number;
+  lang?: Lang;
 }
 
-export function EmotionWheel({ angle, intensity, onChange, size = 120 }: Props) {
+export function EmotionWheel({ angle, intensity, onChange, size = 120, lang = "en" }: Props) {
   const ref = useRef<SVGSVGElement>(null);
   const r = size / 2;
   const radius = r - 14;
@@ -86,11 +116,11 @@ export function EmotionWheel({ angle, intensity, onChange, size = 120 }: Props) 
       viewBox={`0 0 ${size} ${size}`}
       role="slider"
       tabindex={0}
-      aria-label="Emotion"
+      aria-label={lang === "ko" ? "감정" : "Emotion"}
       aria-valuemin={0}
       aria-valuemax={1}
       aria-valuenow={intensity}
-      aria-valuetext={`${name}, intensity ${intensity.toFixed(1)}`}
+      aria-valuetext={lang === "ko" ? `${KO_LABELS[name] ?? name}, 강도 ${intensity.toFixed(1)}` : `${name}, intensity ${intensity.toFixed(1)}`}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onKeyDown={onKeyDown}

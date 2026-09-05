@@ -11,14 +11,18 @@ import { Slider } from "../ui/slider";
 import { ToggleGroup, ToggleGroupItem } from "../ui/toggle-group";
 import { Tooltip, TooltipTrigger, TooltipContent } from "../ui/tooltip";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuCheckboxItem, DropdownMenuSeparator, DropdownMenuLabel } from "../ui/dropdown-menu";
+import { interpolate } from "../../i18n/utils";
+import type { PlaygroundStrings } from "./strings";
 
 const GUTTER = 10;
+// `key` is the toggle value (stable, language-invariant); the displayed label comes
+// from `strings.preset*` so it's translated without disturbing the selected-preset match.
 const PRESET_WIDTHS = [
-  { label: "Phone", width: 390 },
-  { label: "Tablet", width: 768 },
-  { label: "Desktop", width: 1240 },
-  { label: "Fill", width: 0 },
-];
+  { key: "phone", width: 390 },
+  { key: "tablet", width: 768 },
+  { key: "desktop", width: 1240 },
+  { key: "fill", width: 0 },
+] as const;
 
 // The element type isn't a DOM built-in; treat it structurally.
 interface StripEl extends HTMLElement {
@@ -39,7 +43,9 @@ function IconButton({ label, onClick, disabled, children }: { label: string; onC
   );
 }
 
-export function Preview() {
+export function Preview({ strings }: { strings: PlaygroundStrings["preview"] }) {
+  const presetLabel = (key: string): string =>
+    ({ phone: strings.presetPhone, tablet: strings.presetTablet, desktop: strings.presetDesktop, fill: strings.presetFill })[key] ?? key;
   const stripRef = useRef<StripEl>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(0); // 0 = fill
@@ -98,27 +104,27 @@ export function Preview() {
   const effective = width === 0 ? stageWidth : Math.min(width, stageWidth);
   const columns = effective > 0 ? Math.min(layoutStrip(effective, { gutter: GUTTER }).columns, Math.max(1, doc.value.panels.length)) : 1;
   const sliderMax = Math.max(260, Math.min(1240, stageWidth || 1240));
-  const presetValue = PRESET_WIDTHS.find((p) => p.width === width)?.label ?? "";
+  const presetValue = PRESET_WIDTHS.find((p) => p.width === width)?.key ?? "";
 
   async function exportPng() {
     setBusy(true);
     try {
       const blob = await renderStripPng(doc.value, packUrls.value, { width: effective || 1200, scale: 2, transparent, background: dark ? "#0f0e0b" : "#ffffff" });
       downloadBlob(blob, "toonstrip.png");
-      showToast("PNG downloaded");
+      showToast(strings.pngDownloaded);
     } catch (err) {
-      showToast(`Export failed: ${(err as Error).message}`);
+      showToast(interpolate(strings.exportFailed, { message: (err as Error).message }));
     } finally {
       setBusy(false);
     }
   }
 
-  async function copy(text: string, what: string) {
+  async function copy(text: string, copiedMessage: string) {
     try {
       await navigator.clipboard.writeText(text);
-      showToast(`${what} copied`);
+      showToast(copiedMessage);
     } catch {
-      showToast("Clipboard blocked; select the JSON pane and copy manually");
+      showToast(strings.clipboardBlocked);
     }
   }
 
@@ -126,10 +132,10 @@ export function Preview() {
     const url = `${location.origin}${location.pathname}${shareHash.value}`;
     try {
       await navigator.clipboard.writeText(url);
-      showToast("Share link copied");
+      showToast(strings.shareLinkCopied);
     } catch {
       history.replaceState(null, "", shareHash.value);
-      showToast("Link is in the address bar");
+      showToast(strings.linkInAddressBar);
     }
   }
 
@@ -139,52 +145,52 @@ export function Preview() {
     <div class="pg-preview flex min-h-0 flex-1 flex-col">
       <div class="flex min-h-11 shrink-0 flex-wrap items-center gap-2 border-b border-border bg-background px-4 py-1.5" role="toolbar" aria-label="Preview">
         <div class="flex min-w-32 flex-1 basis-40 items-center gap-2">
-          <Slider min={260} max={sliderMax} step={10} value={width || Math.min(stageWidth, sliderMax) || 260} onValueChange={(v) => setWidth(v)} aria-label="Container width" />
+          <Slider min={260} max={sliderMax} step={10} value={width || Math.min(stageWidth, sliderMax) || 260} onValueChange={(v) => setWidth(v)} aria-label={strings.containerWidth} />
         </div>
         <output class="mono shrink-0 text-xs text-muted-foreground" aria-live="polite">
-          {Math.round(effective)} px · {columns} col
+          {Math.round(effective)} px · {columns} {columns === 1 ? strings.columnUnit : strings.columnUnitPlural}
         </output>
-        <ToggleGroup type="single" value={presetValue} onValueChange={(label: string) => { const p = PRESET_WIDTHS.find((x) => x.label === label); if (p) setWidth(p.width); }} aria-label="Width presets">
+        <ToggleGroup type="single" value={presetValue} onValueChange={(key: string) => { const p = PRESET_WIDTHS.find((x) => x.key === key); if (p) setWidth(p.width); }} aria-label={strings.widthPresetsAria}>
           {PRESET_WIDTHS.map((p) => (
-            <ToggleGroupItem key={p.label} value={p.label}>{p.label}</ToggleGroupItem>
+            <ToggleGroupItem key={p.key} value={p.key}>{presetLabel(p.key)}</ToggleGroupItem>
           ))}
         </ToggleGroup>
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant={dark ? "primary" : "secondary"} size="icon" aria-label="Dark surface" aria-pressed={dark} onClick={() => setDark(!dark)}>
+            <Button variant={dark ? "primary" : "secondary"} size="icon" aria-label={strings.darkSurface} aria-pressed={dark} onClick={() => setDark(!dark)}>
               {dark ? <Sun /> : <Moon />}
             </Button>
           </TooltipTrigger>
-          <TooltipContent>Dark surface: check the strip against a dark page</TooltipContent>
+          <TooltipContent>{strings.darkSurfaceHint}</TooltipContent>
         </Tooltip>
         <span class="flex-1" />
-        <IconButton label="Undo" disabled={!canUndo.value} onClick={undo}><Undo2 /></IconButton>
-        <IconButton label="Redo" disabled={!canRedo.value} onClick={redo}><Redo2 /></IconButton>
+        <IconButton label={strings.undo} disabled={!canUndo.value} onClick={undo}><Undo2 /></IconButton>
+        <IconButton label={strings.redo} disabled={!canRedo.value} onClick={redo}><Redo2 /></IconButton>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button>Presets <ChevronDown /></Button>
+            <Button>{strings.presetsButton} <ChevronDown /></Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent class="max-h-80 overflow-auto">
-            <DropdownMenuLabel>Load a preset (replaces the strip)</DropdownMenuLabel>
+            <DropdownMenuLabel>{strings.loadPresetMenuLabel}</DropdownMenuLabel>
             {presets.value.map((p) => (
               <DropdownMenuItem key={p.name} onSelect={() => { loadPreset(p); stripTab.value = false; }}>{p.name}</DropdownMenuItem>
             ))}
           </DropdownMenuContent>
         </DropdownMenu>
-        <Button onClick={share}><Share2 /> Share</Button>
+        <Button onClick={share}><Share2 /> {strings.share}</Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="primary"><Download /> Export <ChevronDown /></Button>
+            <Button variant="primary"><Download /> {strings.export} <ChevronDown /></Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent class="w-56">
-            <DropdownMenuItem disabled={busy} onSelect={exportPng}>{busy ? "Rendering…" : "Download PNG"}</DropdownMenuItem>
+            <DropdownMenuItem disabled={busy} onSelect={exportPng}>{busy ? strings.rendering : strings.downloadPng}</DropdownMenuItem>
             <DropdownMenuCheckboxItem checked={transparent} onCheckedChange={(v: boolean) => setTransparent(v)} onSelect={(e: Event) => e.preventDefault()}>
-              Transparent background
+              {strings.transparentBackground}
             </DropdownMenuCheckboxItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onSelect={() => copy(JSON.stringify(doc.value, null, 2), "JSON")}>Copy JSON</DropdownMenuItem>
-            <DropdownMenuItem onSelect={() => copy(astroSnippet(doc.value, packs.value), "Astro snippet")}>Copy Astro snippet</DropdownMenuItem>
-            <DropdownMenuItem onSelect={() => copy(htmlSnippet(doc.value, packs.value), "HTML snippet")}>Copy HTML snippet</DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => copy(JSON.stringify(doc.value, null, 2), strings.copiedJson)}>{strings.copyJson}</DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => copy(astroSnippet(doc.value, packs.value), strings.copiedAstro)}>{strings.copyAstro}</DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => copy(htmlSnippet(doc.value, packs.value), strings.copiedHtml)}>{strings.copyHtml}</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
@@ -202,7 +208,7 @@ export function Preview() {
         </div>
       </div>
       <p class="mono m-0 shrink-0 border-t border-border bg-background px-4 py-1 text-xs text-muted-foreground">
-        {panelCount} panel{panelCount === 1 ? "" : "s"} · packs: {packs.value.join(", ")}
+        {panelCount} {panelCount === 1 ? strings.panelUnit : strings.panelUnitPlural} · {strings.packsLabel}: {packs.value.join(", ")}
       </p>
     </div>
   );

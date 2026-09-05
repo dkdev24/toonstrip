@@ -1,0 +1,147 @@
+---
+title: 에셋 팩
+description: 기본 제공되는 두 팩을 사용하는 방법, 여러 팩을 함께 등록하는 방법, 나만의 캐릭터를 추가하는 방법을 설명합니다.
+order: 7
+section: Integrate
+---
+import CodeAndStrip from "../../../components/demo/CodeAndStrip.astro";
+import Callout from "../../../components/site/Callout.astro";
+import pip from "../../strips/pip.json";
+import mixedPacks from "../../strips/mixed-packs.json";
+
+에셋 팩은 문서가 id로 참조하는 아트를 제공합니다. 포즈 테이블이 딸린 캐릭터 스프라이트
+시트와 배경 이미지입니다. 렌더러 자체는 아트를 전혀 포함하지 않습니다.
+
+## 기본 제공되는 두 팩
+
+| 팩 | npm | name | 구성 |
+|---|---|---|---|
+| Comic Chat | `@toonstrip/pack-comic-chat` | `comic-chat` | 캐릭터 15종, 배경 3종. 원작 Microsoft Comic Chat 아트, MIT. |
+| Example | `@toonstrip/pack-example` | `example` | 캐릭터 1종(`pip`), 배경 1종(`meadow`). 자체 제작한 작은 팩으로, 나만의 팩을 만들 때의 템플릿입니다. |
+
+<CodeAndStrip doc={pip} packs={["example"]} title="example 팩" layout="side" />
+
+## 여러 팩 등록하기
+
+통합 설정에는 모든 팩을 나열하고, 컴포넌트에는 해당 스트립이 필요로 하는 팩만 지정합니다.
+id는 등록된 모든 팩을 통틀어 해석되며, 캐릭터나 배경 id가 두 팩에 동시에 선언되어 있으면
+조용히 첫 번째 항목을 쓰는 대신 로드 시점 오류가 발생합니다.
+
+```js
+// astro.config.mjs
+toonstrip({ packs: ["@toonstrip/pack-comic-chat", "@toonstrip/pack-example"] })
+```
+
+```astro
+<ComicStrip document={doc} packs={["comic-chat", "example"]} client:visible />
+```
+
+<CodeAndStrip doc={mixedPacks} packs={["comic-chat", "example"]} title="한 패널에 팩 두 개" layout="side" />
+
+## 팩 구조
+
+```
+my-pack/
+  pack.json                      # name, version, license, characters[], backdrops[]
+  characters/<id>/sheet.png      # 캐릭터당 스프라이트 시트 하나
+  characters/<id>/<id>.json      # 해당 캐릭터의 구성 요소: faces, torsos, rects, sockets
+  backdrops/<id>.png
+  NOTICE                         # 아트 일부라도 본인 소유가 아니면 필수
+```
+
+`pack.json`:
+
+```json
+{
+  "name": "my-pack",
+  "version": "0.1.0",
+  "license": "MIT",
+  "characters": [
+    { "id": "pip", "name": "Pip", "manifest": "characters/pip/pip.json", "sheet": "characters/pip/sheet.png" }
+  ],
+  "backdrops": [
+    { "id": "meadow", "file": "backdrops/meadow.png", "width": 240, "height": 240 }
+  ]
+}
+```
+
+스트립이 참조하는 값은 npm 패키지 이름이 아니라 `name`입니다. `license`는 모든 팩에 필수
+항목입니다.
+
+## 캐릭터 매니페스트
+
+캐릭터는 완성된 그림이 아니라 부품으로 구성됩니다. 시트 안의 사각형으로 표현된 얼굴과
+몸통에 각각 감정 좌표가 태그로 붙어 있고, 얼굴이 어떤 몸통에도 붙을 수 있도록 목 소켓
+정보가 함께 있습니다.
+
+```ts
+interface PackedAvatar {
+  name: string;
+  type: string;
+  torsoFirst: boolean;     // torso draws over the collar, or under it
+  sheet: string;           // path relative to this manifest
+  sheetWidth: number;
+  sheetHeight: number;
+  faces: PackedPart[];
+  torsos: PackedPart[];
+  bodies: PackedPart[];    // unused today; leave empty
+}
+
+interface PackedPart {
+  kind: "face" | "torso" | "body";
+  index: number;
+  emotion: string;         // "NEUTRAL", "HAPPY", … or a gesture name
+  angle: number;           // wheel angle, or 1001 wave / 1002 point / 1005 shrug
+  intensity: number;
+  cx: number; cy: number;  // neck socket
+  cxDelta: number; cyDelta: number;
+  x: number;               // where a balloon tail attaches
+  figure: { x: number; y: number; width: number; height: number };
+  aura: { x: number; y: number; width: number; height: number } | null;
+}
+```
+
+최소 요건은 `emotion: "NEUTRAL"`인 얼굴 하나와 몸통 하나입니다. 제스처는 특정 각도값을
+가진 몸통으로 표현됩니다(`1001` wave, `1002` point, `1005` shrug). 직접 그린 만큼만
+지원하면 됩니다.
+
+## 검증하기
+
+```
+npx toonstrip pack validate ./my-pack
+```
+
+`pack.json`, 선언된 모든 파일, NEUTRAL 얼굴, 그리고 각 배경의 실제 픽셀 크기가
+`pack.json`이 명시한 값과 일치하는지 확인합니다. 첫 번째 문제만이 아니라 모든 문제를
+나열합니다.
+
+<Callout kind="warning">
+얼굴은 있지만 몸통이 없는 캐릭터는 오늘 기준으로 검증은 통과하지만 아무것도 렌더링되지
+않습니다. 몸통을 최소 하나는 항상 선언하세요.
+</Callout>
+
+## 캐릭터 추가하기, 단계별로
+
+1. 하나의 시트에 부품을 그립니다(어떤 에디터를 써도, 스크립트로 그려도 됩니다). 최소한
+   NEUTRAL 얼굴 하나와 몸통 하나를, 각각 깔끔한 사각형으로 준비합니다.
+2. 매니페스트를 작성합니다. example 팩의 `pip.json`을 복사해서 사각형과 소켓 값을 본인
+   것으로 바꾸세요.
+3. `pack.json`에 캐릭터를 추가합니다.
+4. `pack validate`를 실행합니다.
+5. [플레이그라운드](/playground/)에서 팩을 로컬로 서빙해 패널 하나를 렌더링해 보거나,
+   Node 스크립트에서 `@toonstrip/core`의 `renderPanel`을 통해 렌더링합니다.
+
+example 팩의 시트는 `@napi-rs/canvas`를 사용한 60줄짜리 스크립트로 그려졌습니다. 가장
+작고 완결된 팩이며, 그대로 복사해서 시작하기 좋습니다.
+
+<Callout kind="tip">
+사각형이 아니라 실제 그림으로 작업 중이신가요? 매니페스트를 직접 작성하지 마세요.
+[`@toonstrip/asset-packager`](/docs/asset-packager/)가 포즈별 PNG 폴더나 라벨이 붙은
+시트 한 장을 받아서 `pack.json`과 스프라이트 시트, 소켓까지 대신 작성해 줍니다.
+</Callout>
+
+## 라이선스
+
+아트의 출처를 명시하세요. 일부라도 본인이 직접 만든 것이 아니라면, 출처와 라이선스를
+명시한 `NOTICE` 파일을 함께 배포하세요. 기본 팩의 `NOTICE`(Microsoft Comic Chat 아트,
+MIT, 상표권 면책 조항 포함)가 실제 예시입니다.

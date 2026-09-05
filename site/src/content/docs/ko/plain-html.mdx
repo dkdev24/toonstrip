@@ -1,0 +1,105 @@
+---
+title: Plain HTML
+description: Astro 없이, 어떤 페이지나 프레임워크에서도 사용할 수 있는 comic-strip 커스텀 엘리먼트입니다.
+order: 8
+section: Integrate
+---
+import Callout from "../../../components/site/Callout.astro";
+
+`@toonstrip/element`는 프레임워크 의존성이 없는 커스텀 엘리먼트입니다. Astro
+컴포넌트는 이를 감싼 얇은 래퍼일 뿐이며, 그것이 하는 모든 일을 이 엘리먼트가
+자체적으로 해냅니다.
+
+## 설치
+
+```
+npm install @toonstrip/element @toonstrip/pack-comic-chat
+```
+
+팩의 파일들을 브라우저가 가져올 수 있는 곳에 서빙하시기 바랍니다. 팩 패키지에는
+`pack.json`, `characters/`, `backdrops/`가 들어 있으므로, 이 디렉터리를 정적 에셋
+경로로 복사합니다. 예를 들어 `public/packs/comic-chat/` 같은 위치입니다.
+
+## 사용
+
+```html
+<comic-strip id="strip"></comic-strip>
+
+<script type="module">
+  import "@toonstrip/element";
+
+  const strip = document.getElementById("strip");
+  strip.packs = ["/packs/comic-chat/"];
+  strip.document = {
+    version: 1,
+    panels: [
+      {
+        backdrop: "pastoral",
+        camera: "establishing",
+        bodies: [{ character: "dan", emotion: { angle: 0, intensity: 0.6 } }],
+        speakers: [{ speaker: "caption", balloon: "caption", text: "A field outside town." }],
+      },
+    ],
+  };
+</script>
+```
+
+## API
+
+| 멤버 | 타입 | 의미 |
+|---|---|---|
+| `packs` | `string[]` 프로퍼티 | 각각 `pack.json`과 그 파일들을 서빙하는 에셋 팩의 베이스 URL입니다. 등록된 순서대로 검색하며, 팩 간에 id가 겹치면 오류가 발생합니다. |
+| `document` | `ComicStripDocument` 프로퍼티 | 스트립 데이터입니다. 설정할 때마다 검증되며, 다시 설정하면 다시 렌더링됩니다. |
+| `columns` | `number` 게터 | 마지막 레이아웃 계산에서 나온 열 개수입니다. |
+
+`packs`보다 `document`를 먼저 설정해도 문제없습니다. 어느 쪽이 바뀌든 엘리먼트는
+다시 빌드되며, 마지막에 설정한 값이 적용됩니다.
+
+<Callout>
+검증 오류나 알 수 없는 id는 스트립 자리를 짧은 빨간색 안내 문구로 대체하고 콘솔에
+로그를 남기는 방식으로 보고됩니다. 프로퍼티 세터에서 예외가 발생하는 일은 없습니다.
+</Callout>
+
+## 프레임워크에서 사용하기
+
+React, Vue, Svelte를 비롯한 대부분의 프레임워크는 커스텀 엘리먼트를 렌더링하고 그
+위에 프로퍼티를 설정할 수 있습니다. 기억해야 할 한 가지는 `packs`와 `document`가
+**프로퍼티**이지 속성(attribute)이 아니라는 점입니다. 마운트 후 ref를 통해 설정하거나,
+각 프레임워크의 프로퍼티 바인딩 문법을 사용하시기 바랍니다(Lit에서는
+`.document={doc}`, Solid에서는 `prop:document={doc}`, Vue에서는 `:document.prop`).
+React와 Vue의 경우 `@toonstrip/react`와 `@toonstrip/vue`가 이 패턴을 정확히
+`<ComicStrip>` 컴포넌트로 패키징해 제공합니다. [React 레퍼런스](/docs/react-reference/)와
+[Vue 레퍼런스](/docs/vue-reference/)를 참고하시기 바랍니다.
+
+## 번들링
+
+이 엘리먼트는 `@toonstrip/core`와 `@toonstrip/schema`를 임포트하며, 어떤 ESM 번들러로도
+문제없이 처리됩니다. 스키마는 빌드 시점에 평범한 데이터로 임베드되고, 검증도 `eval`
+없이 일반 JS로 실행되므로, 엄격한 콘텐츠 보안 정책(CSP)에서도 `unsafe-eval`이
+필요하지 않습니다.
+
+## 빌드 단계 자체를 두지 않는 경우
+
+위의 install/npm/번들러 단계는 무언가가 `import "@toonstrip/element"`라는 베어
+지정자를 리졸브해 준다는 전제 위에 있습니다. 번들러도 import map도 없다면 대신
+패키지 자체의 의존성까지 리졸브해 주는 [esm.sh](https://esm.sh)를 사용하시기
+바랍니다.
+
+```html
+<script type="module">
+  import "https://esm.sh/@toonstrip/element@0.1.11";
+</script>
+```
+
+`packs`도 CDN을 가리키게 할 수 있습니다. unpkg는 팩의 정적 파일들(`pack.json`, 스프라이트
+시트, 배경)을 CORS를 활성화한 채로 그대로 서빙합니다.
+
+```js
+strip.packs = ["https://unpkg.com/@toonstrip/pack-comic-chat@0.1.1/"];
+```
+
+전체 예제는 레포의 `examples/vanilla-html/index.html`입니다. 파일 하나뿐이고
+`package.json`도 없으며, `file://`나 어떤 정적 파일 서버에서도 바로 열립니다. 다른
+의존성과 마찬가지로 두 URL 모두 정확한 버전을 고정하시기 바랍니다. esm.sh와 unpkg 중
+어느 쪽을 언제 쓸지에 대한 전체 논의는 레포의 `docs/vanilla-html.md`를 참고하시기
+바랍니다.

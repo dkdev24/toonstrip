@@ -1,0 +1,60 @@
+---
+title: Astro 레퍼런스
+description: 인테그레이션과 컴포넌트의 모든 옵션, 그리고 현재의 제약 사항을 정리합니다.
+order: 9
+section: Integrate
+---
+import Callout from "../../../components/site/Callout.astro";
+
+## `toonstrip(options)`
+
+`astro.config.mjs`의 `integrations`에 추가하는 인테그레이션입니다.
+
+| 옵션 | 타입 | 의미 |
+|---|---|---|
+| `packs` | `string[]` | 제공할 에셋 팩의 npm 지정자입니다. 각 팩은 `astro:config:setup` 단계에서 리졸브되어, 해당 팩의 `pack.json`과 `characters/`, `backdrops/`가 `public/_toonstrip/<pack name>/`로 복사됩니다. 기본값은 없음입니다. |
+
+이 인테그레이션은 `<ComicStrip>`용 렌더러도 등록합니다. 서버 쪽에서는 비활성 상태의
+`<comic-strip>` 태그만 출력하고, 클라이언트 쪽에서 `@toonstrip/element`를 임포트해
+속성을 설정합니다. Vite 설정에는 그 외 어떤 것도 손대지 않습니다.
+
+## `<ComicStrip>`
+
+```astro
+---
+import { ComicStrip } from "@toonstrip/astro";
+---
+<ComicStrip document={doc} packs={["comic-chat"]} client:visible />
+```
+
+| Prop | 타입 | 의미 |
+|---|---|---|
+| `document` | `ComicStripDocument` | 스트립 데이터입니다. 알맞은 형태의 객체라면 무엇이든 되며, 보통은 임포트한 JSON 파일을 씁니다. |
+| `packs` | `string[]` | 팩 **이름**(각 `pack.json`의 `name` 필드)이며, `/_toonstrip/<name>/`로 리졸브됩니다. 기본값은 `[]`인데 이 경우 아무것도 렌더링되지 않으므로 최소 하나는 반드시 넘겨야 합니다. |
+
+Astro의 클라이언트 디렉티브는 모두 사용할 수 있습니다. `client:visible`이 문서에서
+권장하는 기본값이며, 스크롤 없이 바로 보이는 위치에는 `client:load`를, 스트립이 상단에
+있지만 독자가 가장 먼저 봐야 할 요소는 아닐 때는 `client:idle`을 씁니다.
+
+## 서버에서 렌더링되는 것
+
+태그뿐입니다. 컴포넌트에는 서버 사이드 캔버스가 없으므로, 클라이언트 쪽에서 함께
+생성되는 엘리먼트의 `aria-label`을 제외하면 자바스크립트 없이는 아무 콘텐츠도 나오지
+않습니다. 정적 이미지(오픈 그래프, RSS, `<noscript>` 대체 콘텐츠)가 필요하다면
+`@toonstrip/cli`의 `npx toonstrip render strip.json --out strip.png`로 빌드 시점에 같은
+문서를 렌더링하면 됩니다. 이 명령은 엘리먼트와 동일한 레이아웃 정책과 피규어 선택
+로직을 사용합니다.
+
+## 제약 사항
+
+- Astro 7을 기준으로 테스트되었습니다. Astro 5와 6도 버전 특정 기능을 쓰지 않으므로 동작할
+  것으로 보이지만 테스트 매트릭스에는 포함되어 있지 않습니다.
+- 이 엘리먼트는 프레임워크 의존성이 없는 순수 `HTMLElement`이기 때문에, 렌더러는
+  `@astrojs/lit`이 아니라 직접 작성되었습니다. 이는 의도된 설계입니다.
+- 인테그레이션의 `packs`와 컴포넌트의 `packs`는 서로 다른 값을 받습니다(지정자 대
+  이름). 이름은 각 팩의 `pack.json`에서 가져옵니다.
+
+<Callout kind="tip">
+`public/_toonstrip/` 디렉터리는 빌드와 dev 서버 시작 시마다 생성됩니다. `.gitignore`에
+추가하시기 바랍니다.
+</Callout>

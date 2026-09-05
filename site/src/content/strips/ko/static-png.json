@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "panels": [
+    {
+      "backdrop": "room8bs",
+      "camera": "medium",
+      "bodies": [
+        { "character": "scotty", "emotion": { "angle": 3.9269908169872414, "intensity": 0.6 } },
+        { "character": "rebecca", "emotion": { "angle": 0, "intensity": 0.5 } }
+      ],
+      "speakers": [
+        { "speaker": "scotty", "balloon": "speech", "text": "npm의 README는 캔버스를 못 돌려. 이메일도 마찬가지고." },
+        { "speaker": "rebecca", "balloon": "speech", "text": "그럼 같은 JSON을 PNG로 렌더링하면 되지." }
+      ]
+    },
+    {
+      "backdrop": "room8bs",
+      "camera": "close-up",
+      "bodies": [
+        { "character": "rebecca", "emotion": { "angle": 0, "intensity": 0.8 } }
+      ],
+      "speakers": [
+        { "speaker": "rebecca", "balloon": "speech", "text": "명령어 하나면 끝. 레이아웃도 그림도 그대로, 브라우저도 필요 없어." }
+      ]
+    }
+  ]
+}

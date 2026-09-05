@@ -8,7 +8,10 @@ import type { ComponentChildren } from "preact";
 import { useState } from "preact/hooks";
 import { ArrowDown, ArrowUp, ChevronLeft, ChevronRight, Copy, Plus, Trash2, X } from "lucide-preact";
 import type { Panel, CameraPreset } from "@toonstrip/schema";
-import { EmotionWheel, emotionName } from "./EmotionWheel";
+import { EmotionWheel, EmotionLabel, emotionName } from "./EmotionWheel";
+import type { Lang } from "../../i18n/utils";
+import { interpolate } from "../../i18n/utils";
+import type { PlaygroundStrings } from "./strings";
 import { Button } from "../ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "../ui/tabs";
 import { Popover, PopoverTrigger, PopoverContent, PopoverClose } from "../ui/popover";
@@ -47,7 +50,7 @@ function Group({ title, children }: { title: string; children: ComponentChildren
   );
 }
 
-export function PanelForm() {
+export function PanelForm({ strings, lang }: { strings: PlaygroundStrings; lang?: Lang }) {
   const d = doc.value;
   const last = Math.max(0, d.panels.length - 1);
   const current = Math.min(selectedPanel.value, last);
@@ -63,56 +66,62 @@ export function PanelForm() {
     <Tabs value={value} onValueChange={onTab} class="pg-form gap-0">
       <div class="sticky -top-4 z-10 -mx-4 -mt-4 mb-4 flex items-center gap-2 border-b border-border bg-background px-4 py-2">
         <TabsList aria-label="Strip and panels" class="max-w-full flex-nowrap justify-start overflow-x-auto">
-          <TabsTrigger value="strip" class="flex-none">Strip</TabsTrigger>
+          <TabsTrigger value="strip" class="flex-none">{strings.strip.tabLabel}</TabsTrigger>
           {d.panels.map((p, i) => (
-            <TabsTrigger key={i} value={String(i)} class="min-w-8 flex-none" aria-label={`Panel ${i + 1}`} title={p.roomTitle ? `Panel ${i + 1}: ${p.roomTitle}` : `Panel ${i + 1}`}>
+            <TabsTrigger
+              key={i}
+              value={String(i)}
+              class="min-w-8 flex-none"
+              aria-label={interpolate(strings.panel.label, { n: i + 1 })}
+              title={p.roomTitle ? interpolate(strings.panel.labelWithRoom, { n: i + 1, title: p.roomTitle }) : interpolate(strings.panel.label, { n: i + 1 })}
+            >
               {i + 1}
             </TabsTrigger>
           ))}
         </TabsList>
-        <Button variant="ghost" class="ml-auto shrink-0" aria-label="+ Add panel" onClick={() => addPanel()}>
-          <Plus /> Add panel
+        <Button variant="ghost" class="ml-auto shrink-0" aria-label={`+ ${strings.strip.addPanel}`} onClick={() => addPanel()}>
+          <Plus /> {strings.strip.addPanel}
         </Button>
       </div>
 
       <TabsContent value="strip">
-        <StripSettings />
+        <StripSettings strings={strings} />
       </TabsContent>
       {d.panels.map((panel, i) => (
         <TabsContent key={i} value={String(i)}>
-          <PanelEditor panel={panel} index={i} total={d.panels.length} />
+          <PanelEditor panel={panel} index={i} total={d.panels.length} strings={strings} lang={lang} />
         </TabsContent>
       ))}
     </Tabs>
   );
 }
 
-function StripSettings() {
+function StripSettings({ strings }: { strings: PlaygroundStrings }) {
   const d = doc.value;
   const list = presets.value;
   const bodies = new Set(d.panels.flatMap((p) => p.bodies.map((b) => b.character)));
   return (
     <div class="flex flex-col gap-4">
-      <Group title="Asset packs">
+      <Group title={strings.strip.assetPacks}>
         <ToggleGroup
           type="multiple"
           value={packs.value}
           onValueChange={(next: string[]) => {
             for (const name of roster.value.packNames) if (packs.value.includes(name) !== next.includes(name)) togglePack(name);
           }}
-          aria-label="Asset packs"
+          aria-label={strings.strip.assetPacks}
         >
           {roster.value.packNames.map((name) => (
             <ToggleGroupItem key={name} value={name} class="font-mono">{name}</ToggleGroupItem>
           ))}
         </ToggleGroup>
-        <p class="m-0 text-sm text-muted-foreground">Characters and backdrops from every enabled pack are available in the pickers.</p>
+        <p class="m-0 text-sm text-muted-foreground">{strings.strip.assetPacksHint}</p>
       </Group>
-      <Group title="Presets">
-        <Label for="pg-preset">Load a preset</Label>
+      <Group title={strings.strip.presets}>
+        <Label for="pg-preset">{strings.strip.loadPreset}</Label>
         <Select onValueChange={(name: string) => { const p = list.find((x) => x.name === name); if (p) loadPreset(p); }}>
-          <SelectTrigger id="pg-preset" class="max-w-xs" aria-label="Load a preset">
-            <SelectValue placeholder="Choose a preset…" />
+          <SelectTrigger id="pg-preset" class="max-w-xs" aria-label={strings.strip.loadPreset}>
+            <SelectValue placeholder={strings.strip.choosePreset} />
           </SelectTrigger>
           <SelectContent>
             {list.map((p) => (
@@ -120,10 +129,10 @@ function StripSettings() {
             ))}
           </SelectContent>
         </Select>
-        <p class="m-0 text-sm text-muted-foreground">Replaces the current strip. Undo with Ctrl/Cmd+Z.</p>
-        {list[0] && <Button class="self-start" onClick={() => loadPreset(list[0])}>Reset to the first preset</Button>}
+        <p class="m-0 text-sm text-muted-foreground">{strings.strip.presetHint}</p>
+        {list[0] && <Button class="self-start" onClick={() => loadPreset(list[0])}>{strings.strip.resetToFirst}</Button>}
       </Group>
-      <Group title="This strip">
+      <Group title={strings.strip.thisStrip}>
         <dl class="mono m-0 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
           <dt class="text-muted-foreground">panels</dt><dd class="m-0">{d.panels.length}</dd>
           <dt class="text-muted-foreground">characters</dt><dd class="m-0">{bodies.size === 0 ? "none" : [...bodies].join(", ")}</dd>
@@ -134,18 +143,18 @@ function StripSettings() {
   );
 }
 
-function PanelEditor({ panel, index, total }: { panel: Panel; index: number; total: number }) {
+function PanelEditor({ panel, index, total, strings, lang }: { panel: Panel; index: number; total: number; strings: PlaygroundStrings; lang?: Lang }) {
   const [picker, setPicker] = useState(false);
   const backdrops = activeBackdrops.value;
   const characters = activeCharacters.value;
   const onStage = panel.bodies.map((b) => b.character);
 
   return (
-    <div class="pg-panel-editor flex flex-col gap-4" aria-label={`Panel ${index + 1}`}>
-      <Group title="Scene">
+    <div class="pg-panel-editor flex flex-col gap-4" aria-label={interpolate(strings.panel.label, { n: index + 1 })}>
+      <Group title={strings.panel.scene}>
         <div>
-          <Label>Backdrop</Label>
-          <div class="mt-1 flex flex-wrap gap-2" role="radiogroup" aria-label="Backdrop">
+          <Label>{strings.panel.backdrop}</Label>
+          <div class="mt-1 flex flex-wrap gap-2" role="radiogroup" aria-label={strings.panel.backdrop}>
             {backdrops.map((b) => {
               const on = panel.backdrop === b.id;
               return (
@@ -169,8 +178,8 @@ function PanelEditor({ panel, index, total }: { panel: Panel; index: number; tot
           </div>
         </div>
         <div>
-          <Label>Camera</Label>
-          <ToggleGroup type="single" class="mt-1 max-w-full flex-wrap" value={panel.camera ?? "medium"} onValueChange={(v: CameraPreset) => v && updatePanel(index, { camera: v })} aria-label="Camera">
+          <Label>{strings.panel.camera}</Label>
+          <ToggleGroup type="single" class="mt-1 max-w-full flex-wrap" value={panel.camera ?? "medium"} onValueChange={(v: CameraPreset) => v && updatePanel(index, { camera: v })} aria-label={strings.panel.camera}>
             {CAMERAS.map((cam) => (
               <ToggleGroupItem key={cam} value={cam}>{cam}</ToggleGroupItem>
             ))}
@@ -178,15 +187,15 @@ function PanelEditor({ panel, index, total }: { panel: Panel; index: number; tot
         </div>
         <div class="flex flex-wrap items-end gap-3">
           <div class="min-w-40 flex-1">
-            <Label for={`room-${index}`}>Room title</Label>
-            <Input id={`room-${index}`} class="mt-1" value={panel.roomTitle ?? ""} placeholder="none" onInput={(e) => updatePanel(index, { roomTitle: (e.currentTarget as HTMLInputElement).value || undefined })} />
+            <Label for={`room-${index}`}>{strings.panel.roomTitle}</Label>
+            <Input id={`room-${index}`} class="mt-1" value={panel.roomTitle ?? ""} placeholder={strings.panel.roomTitlePlaceholder} onInput={(e) => updatePanel(index, { roomTitle: (e.currentTarget as HTMLInputElement).value || undefined })} />
           </div>
-          <Checkbox label="Dark" checked={!!panel.dark} onChange={(e) => updatePanel(index, { dark: (e.currentTarget as HTMLInputElement).checked || undefined })} />
+          <Checkbox label={strings.panel.dark} checked={!!panel.dark} onChange={(e) => updatePanel(index, { dark: (e.currentTarget as HTMLInputElement).checked || undefined })} />
         </div>
       </Group>
 
-      <Group title="Characters">
-        {panel.bodies.length === 0 && <p class="m-0 text-sm text-muted-foreground">No one on stage.</p>}
+      <Group title={strings.character.title}>
+        {panel.bodies.length === 0 && <p class="m-0 text-sm text-muted-foreground">{strings.character.none}</p>}
         <ul class="m-0 flex list-none flex-col gap-3 p-0">
           {panel.bodies.map((body, j) => {
             const c = characters.find((x) => x.id === body.character);
@@ -197,8 +206,8 @@ function PanelEditor({ panel, index, total }: { panel: Panel; index: number; tot
                   {c && <span class="pg-sprite" style={spriteCropStyle(c, 40)} aria-hidden="true" />}
                   <span class="mono">{body.character}</span>
                   <span class="ml-auto flex items-center gap-1">
-                    <Button variant="ghost" size="icon-sm" aria-label="Move character left" disabled={j === 0} onClick={() => moveBody(index, j, -1)}><ChevronLeft /></Button>
-                    <Button variant="ghost" size="icon-sm" aria-label="Move character right" disabled={j === panel.bodies.length - 1} onClick={() => moveBody(index, j, 1)}><ChevronRight /></Button>
+                    <Button variant="ghost" size="icon-sm" aria-label={strings.character.moveLeft} disabled={j === 0} onClick={() => moveBody(index, j, -1)}><ChevronLeft /></Button>
+                    <Button variant="ghost" size="icon-sm" aria-label={strings.character.moveRight} disabled={j === panel.bodies.length - 1} onClick={() => moveBody(index, j, 1)}><ChevronRight /></Button>
                     <Button
                       variant="ghost"
                       size="sm"
@@ -209,34 +218,34 @@ function PanelEditor({ panel, index, total }: { panel: Panel; index: number; tot
                         removeBody(index, j, target ?? "caption");
                       }}
                     >
-                      Remove{hasLine ? " (reassign lines)" : ""}
+                      {hasLine ? strings.character.removeReassign : strings.character.remove}
                     </Button>
                   </span>
                 </div>
                 <div class="flex flex-wrap items-start gap-4">
-                  <EmotionWheel angle={body.emotion.angle} intensity={body.emotion.intensity} onChange={(angle, intensity) => updateBody(index, j, { emotion: { angle, intensity } })} />
+                  <EmotionWheel angle={body.emotion.angle} intensity={body.emotion.intensity} onChange={(angle, intensity) => updateBody(index, j, { emotion: { angle, intensity } })} lang={lang} />
                   <div class="flex min-w-40 flex-1 flex-col gap-2">
-                    <span class="mono text-sm">{emotionName(body.emotion.angle, body.emotion.intensity)}</span>
+                    <EmotionLabel name={emotionName(body.emotion.angle, body.emotion.intensity)} lang={lang} />
                     <div class="grid grid-cols-2 gap-2">
                       <div>
-                        <Label>angle</Label>
-                        <Input type="number" step="0.01" min="0" max="6.2832" value={body.emotion.angle} aria-label="angle" onInput={(e) => updateBody(index, j, { emotion: { ...body.emotion, angle: Number((e.currentTarget as HTMLInputElement).value) || 0 } })} />
+                        <Label>{strings.character.angle}</Label>
+                        <Input type="number" step="0.01" min="0" max="6.2832" value={body.emotion.angle} aria-label={strings.character.angle} onInput={(e) => updateBody(index, j, { emotion: { ...body.emotion, angle: Number((e.currentTarget as HTMLInputElement).value) || 0 } })} />
                       </div>
                       <div>
-                        <Label>intensity</Label>
-                        <Input type="number" step="0.05" min="0" max="1" value={body.emotion.intensity} aria-label="intensity" onInput={(e) => updateBody(index, j, { emotion: { ...body.emotion, intensity: Math.max(0, Math.min(1, Number((e.currentTarget as HTMLInputElement).value) || 0)) } })} />
+                        <Label>{strings.character.intensity}</Label>
+                        <Input type="number" step="0.05" min="0" max="1" value={body.emotion.intensity} aria-label={strings.character.intensity} onInput={(e) => updateBody(index, j, { emotion: { ...body.emotion, intensity: Math.max(0, Math.min(1, Number((e.currentTarget as HTMLInputElement).value) || 0)) } })} />
                       </div>
                     </div>
                     <div>
-                      <Label>Pose</Label>
-                      <ToggleGroup type="single" class="mt-1" value={body.pose ?? "none"} onValueChange={(pose: (typeof POSES)[number]) => pose && updateBody(index, j, { pose: pose === "none" ? undefined : pose })} aria-label="Pose">
+                      <Label>{strings.character.pose}</Label>
+                      <ToggleGroup type="single" class="mt-1" value={body.pose ?? "none"} onValueChange={(pose: (typeof POSES)[number]) => pose && updateBody(index, j, { pose: pose === "none" ? undefined : pose })} aria-label={strings.character.pose}>
                         {POSES.map((pose) => (
                           <ToggleGroupItem key={pose} value={pose}>{pose}</ToggleGroupItem>
                         ))}
                       </ToggleGroup>
                     </div>
                     {!hasLine && (
-                      <Checkbox label="Keep on stage (requested)" checked={!!body.requested} onChange={(e) => updateBody(index, j, { requested: (e.currentTarget as HTMLInputElement).checked || undefined })} />
+                      <Checkbox label={strings.character.keepOnStage} checked={!!body.requested} onChange={(e) => updateBody(index, j, { requested: (e.currentTarget as HTMLInputElement).checked || undefined })} />
                     )}
                   </div>
                 </div>
@@ -246,15 +255,15 @@ function PanelEditor({ panel, index, total }: { panel: Panel; index: number; tot
         </ul>
         <Popover open={picker} onOpenChange={setPicker}>
           <PopoverTrigger asChild>
-            <Button variant="ghost" class={DASHED} aria-label="+ Add character">
-              <Plus /> Add character
+            <Button variant="ghost" class={DASHED} aria-label={`+ ${strings.character.add}`}>
+              <Plus /> {strings.character.add}
             </Button>
           </PopoverTrigger>
-          <PopoverContent class="w-[min(24rem,calc(100vw-2rem))]" aria-label="Choose a character">
+          <PopoverContent class="w-[min(24rem,calc(100vw-2rem))]" aria-label={strings.character.choose}>
             <div class="mb-2 flex items-center">
-              <span class="caption">Choose a character</span>
+              <span class="caption">{strings.character.choose}</span>
               <PopoverClose asChild>
-                <Button variant="ghost" size="icon-sm" class="ml-auto" aria-label="Close"><X /></Button>
+                <Button variant="ghost" size="icon-sm" class="ml-auto" aria-label={strings.character.close}><X /></Button>
               </PopoverClose>
             </div>
             <div class="grid max-h-72 grid-cols-[repeat(auto-fill,minmax(4.5rem,1fr))] gap-2 overflow-auto">
@@ -278,16 +287,16 @@ function PanelEditor({ panel, index, total }: { panel: Panel; index: number; tot
         </Popover>
       </Group>
 
-      <Group title="Lines">
-        {panel.speakers.length === 0 && <p class="m-0 text-sm text-muted-foreground">No balloons yet.</p>}
+      <Group title={strings.line.title}>
+        {panel.speakers.length === 0 && <p class="m-0 text-sm text-muted-foreground">{strings.line.none}</p>}
         <ul class="m-0 flex list-none flex-col gap-3 p-0">
           {panel.speakers.map((line, k) => (
             <li key={k} class="pg-line flex flex-col gap-2 rounded-md border border-border p-3">
               <div class="flex flex-wrap items-end gap-2">
                 <div class="min-w-28 flex-1">
-                  <Label>Speaker</Label>
+                  <Label>{strings.line.speaker}</Label>
                   <Select value={line.speaker} onValueChange={(v: string) => updateLine(index, k, { speaker: v })}>
-                    <SelectTrigger class="mt-1" aria-label="Speaker"><SelectValue /></SelectTrigger>
+                    <SelectTrigger class="mt-1" aria-label={strings.line.speaker}><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="caption">caption</SelectItem>
                       {onStage.map((id) => (
@@ -297,9 +306,9 @@ function PanelEditor({ panel, index, total }: { panel: Panel; index: number; tot
                   </Select>
                 </div>
                 <div class="min-w-28 flex-1">
-                  <Label>Balloon</Label>
+                  <Label>{strings.line.balloon}</Label>
                   <Select value={line.balloon} disabled={line.speaker === "caption"} onValueChange={(v: string) => updateLine(index, k, { balloon: v as any })}>
-                    <SelectTrigger class="mt-1" aria-label="Balloon"><SelectValue /></SelectTrigger>
+                    <SelectTrigger class="mt-1" aria-label={strings.line.balloon}><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="speech">speech</SelectItem>
                       <SelectItem value="thought">thought</SelectItem>
@@ -308,35 +317,35 @@ function PanelEditor({ panel, index, total }: { panel: Panel; index: number; tot
                   </Select>
                 </div>
                 <span class="flex items-center gap-1">
-                  <Button variant="ghost" size="icon-sm" aria-label="Move line up" disabled={k === 0} onClick={() => moveLine(index, k, -1)}><ArrowUp /></Button>
-                  <Button variant="ghost" size="icon-sm" aria-label="Move line down" disabled={k === panel.speakers.length - 1} onClick={() => moveLine(index, k, 1)}><ArrowDown /></Button>
-                  <Button variant="ghost" size="icon-sm" aria-label="Remove line" onClick={() => removeLine(index, k)}><X /></Button>
+                  <Button variant="ghost" size="icon-sm" aria-label={strings.line.moveUp} disabled={k === 0} onClick={() => moveLine(index, k, -1)}><ArrowUp /></Button>
+                  <Button variant="ghost" size="icon-sm" aria-label={strings.line.moveDown} disabled={k === panel.speakers.length - 1} onClick={() => moveLine(index, k, 1)}><ArrowDown /></Button>
+                  <Button variant="ghost" size="icon-sm" aria-label={strings.line.remove} onClick={() => removeLine(index, k)}><X /></Button>
                 </span>
               </div>
-              <Textarea rows={2} value={line.text} placeholder="What they say" aria-label="Text" onInput={(e) => updateLine(index, k, { text: (e.currentTarget as HTMLTextAreaElement).value })} />
-              <span class="mono text-xs text-muted-foreground">{line.text.length} chars</span>
+              <Textarea rows={2} value={line.text} placeholder={strings.line.textPlaceholder} aria-label={strings.line.textPlaceholder} onInput={(e) => updateLine(index, k, { text: (e.currentTarget as HTMLTextAreaElement).value })} />
+              <span class="mono text-xs text-muted-foreground">{interpolate(strings.line.charsCount, { count: line.text.length })}</span>
             </li>
           ))}
         </ul>
         <div class="grid grid-cols-2 gap-2">
-          <AddButton label="Add line" onClick={() => addLine(index, onStage[0] ?? "caption")} />
-          <AddButton label="Add caption" onClick={() => addLine(index, "caption")} />
+          <AddButton label={strings.line.add} onClick={() => addLine(index, onStage[0] ?? "caption")} />
+          <AddButton label={strings.line.addCaption} onClick={() => addLine(index, "caption")} />
         </div>
       </Group>
 
-      <div class="flex flex-wrap items-center gap-2 border-t border-border pt-4" role="group" aria-label={`Panel ${index + 1} actions`}>
-        <Button variant="ghost" size="icon" aria-label="Move panel left" disabled={index === 0} onClick={() => movePanel(index, -1)}><ChevronLeft /></Button>
-        <Button variant="ghost" size="icon" aria-label="Move panel right" disabled={index === total - 1} onClick={() => movePanel(index, 1)}><ChevronRight /></Button>
-        <Button variant="ghost" onClick={() => duplicatePanel(index)}><Copy /> Duplicate</Button>
+      <div class="flex flex-wrap items-center gap-2 border-t border-border pt-4" role="group" aria-label={interpolate(strings.panel.actionsAria, { n: index + 1 })}>
+        <Button variant="ghost" size="icon" aria-label={strings.panel.moveLeft} disabled={index === 0} onClick={() => movePanel(index, -1)}><ChevronLeft /></Button>
+        <Button variant="ghost" size="icon" aria-label={strings.panel.moveRight} disabled={index === total - 1} onClick={() => movePanel(index, 1)}><ChevronRight /></Button>
+        <Button variant="ghost" onClick={() => duplicatePanel(index)}><Copy /> {strings.panel.duplicate}</Button>
         <Popover>
           <PopoverTrigger asChild>
-            <Button variant="destructive" class="ml-auto" disabled={total === 1}><Trash2 /> Remove</Button>
+            <Button variant="destructive" class="ml-auto" disabled={total === 1}><Trash2 /> {strings.panel.remove}</Button>
           </PopoverTrigger>
           <PopoverContent align="end" class="w-60">
-            <p class="mb-3 text-sm">Remove panel {index + 1}? Undo restores it.</p>
+            <p class="mb-3 text-sm">{interpolate(strings.panel.removeConfirm, { n: index + 1 })}</p>
             <div class="flex justify-end gap-2">
-              <PopoverClose asChild><Button variant="ghost" size="sm">Cancel</Button></PopoverClose>
-              <PopoverClose asChild><Button variant="primary" size="sm" onClick={() => removePanel(index)}>Remove panel</Button></PopoverClose>
+              <PopoverClose asChild><Button variant="ghost" size="sm">{strings.panel.cancel}</Button></PopoverClose>
+              <PopoverClose asChild><Button variant="primary" size="sm" onClick={() => removePanel(index)}>{strings.panel.removePanel}</Button></PopoverClose>
             </div>
           </PopoverContent>
         </Popover>

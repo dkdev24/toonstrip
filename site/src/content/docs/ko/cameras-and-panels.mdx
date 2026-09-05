@@ -1,0 +1,51 @@
+---
+title: 카메라와 패널
+description: 하나의 장면에 적용되는 여섯 가지 프레이밍 프리셋과, 룸 타이틀, 어두운 패널, 대사 없는 인물을 설명합니다.
+order: 4
+section: Authoring
+---
+import CodeAndStrip from "../../../components/demo/CodeAndStrip.astro";
+import Callout from "../../../components/site/Callout.astro";
+import cameras from "../../strips/cameras.json";
+import panelOptions from "../../strips/panel-options.json";
+
+패널의 `camera`는 인물과 배경이 얼마나 화면에 보일지를 정합니다. 프리셋은 Comic Chat이
+사용하던 여섯 단계 그대로이며, 이를 번갈아 사용하는 것이 스트립을 똑같은 초상화의 나열이
+아니라 만화답게 읽히게 만드는 핵심입니다.
+
+## 여섯 가지 프리셋
+
+같은 캐릭터 둘, 같은 배경, 카메라만 여섯 가지입니다.
+
+<CodeAndStrip doc={cameras} title="한 장면, 여섯 카메라" collapse />
+
+| 프리셋 | 쓰임새 |
+|---|---|
+| `establishing` | 새로운 장소를 소개할 때. 인물은 작게, 배경이 전부 보입니다. |
+| `wide` | 이미 등장한 장소일 때. 인물 둘 다 보이고 배경은 부수적입니다. |
+| `medium` | 기본값입니다. 허리 위까지 보이고 말풍선을 위한 공간이 있습니다. |
+| `over-shoulder` | 한 발화자가 다른 쪽에게 말할 때. 듣는 쪽이 가깝고 일부 잘려 보입니다. |
+| `close-up` | 얼굴 하나가 화면 대부분을 차지하고 배경은 흐릿합니다. |
+| `reaction` | 머리에 바짝 붙은 샷으로, 말풍선이 없을 것으로 예상됩니다. 박자를 찍는 패널입니다. |
+
+<Callout kind="tip">
+establishing → medium → reaction 순서로 이어지는 세 패널짜리 스트립은 자연스럽게 읽힙니다.
+장면을 소개하고, 대화를 나누고, 박자를 찍는 흐름입니다.
+</Callout>
+
+## 룸 타이틀
+
+`roomTitle`은 패널 왼쪽 상단에 작은 배너를 그립니다. 장소 이름이나 채널 이름에 사용하세요.
+
+## 어두운 패널
+
+`dark: true`는 패널을 검게 칠하고 인물을 생략합니다. 말풍선은 그대로 그려집니다. "조명이
+꺼지는" 장면이나, 장소를 보여주고 싶지 않은 캡션 전용 패널에 유용합니다.
+
+## 대사 없는 인물
+
+패널에 대사가 없는 인물은 기본적으로 무대에서 제외되므로, `bodies`를 편집하지 않고도 두
+캐릭터짜리 스트립에서 한 패널을 한 인물에게만 할애할 수 있습니다. 대사 없는 인물을 무대에
+남겨 두려면 `requested: true`를 설정하세요.
+
+<CodeAndStrip doc={panelOptions} title="roomTitle, dark, requested" collapse />

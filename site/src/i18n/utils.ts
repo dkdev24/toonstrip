@@ -71,7 +71,9 @@ function lookup(dict: unknown, key: string): string | undefined {
   return typeof value === "string" ? value : undefined;
 }
 
-function interpolate(template: string, params: TranslationParams): string {
+/** Exported so client islands (which get a plain-object `strings` prop, not `t`) can
+ * interpolate `{token}` placeholders in templated strings themselves. */
+export function interpolate(template: string, params: TranslationParams): string {
   return template.replace(/\{(\w+)\}/g, (match, token: string) => (token in params ? String(params[token]) : match));
 }
 

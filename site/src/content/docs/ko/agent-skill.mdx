@@ -1,0 +1,71 @@
+---
+title: 에이전트 스킬
+description: 문서 형식을 AI 코딩 에이전트에게 가르쳐, 더 이상 추측에 의존하지 않게 만드는 패키징된 SKILL.md입니다.
+order: 16
+section: Reference
+---
+
+import Callout from "../../../components/site/Callout.astro";
+
+toonstrip은 스트립을 직접 생성하지 않지만([FAQ](/docs/faq/) 참고), AI 코딩 에이전트에게
+`ComicStripDocument`를 작성해 달라고 요청하는 상황이라면, 그 에이전트가 문서 형식이나
+감정 휠의 각도, 실제로 존재하는 캐릭터 id를 일일이 추측할 필요는 없어야 합니다. 레포의
+`skills/toonstrip/SKILL.md`가 바로 이 지식을 파일 하나에 패키징해, 에이전트가 그대로
+불러올 수 있게 해 줍니다.
+
+## 무엇을 가르치는가
+
+- [`ComicStripDocument`](/docs/schema-reference/) v1의 전체 형식(`Panel`, `Body`,
+  `Line`)입니다. 모든 객체가 `additionalProperties: false`라는 점도 포함되어, 오타가
+  섞인 키는 조용히 무시되지 않고 검증에서 곧바로 실패합니다.
+- 정확한 [감정 휠](/docs/emotions-and-poses/) 각도(`HAPPY`는 `0`, `SAD`는 `Math.PI`
+  등)를 조회 테이블 형태로 담고 있어, 에이전트가 숫자를 임의로 지어내는 대신 정해진
+  지점을 그대로 사용하게 됩니다.
+- 기본 `@toonstrip/pack-comic-chat` 팩이 실제로 갖고 있는 15개 캐릭터 id와 3개 배경
+  id입니다. 이 스킬을 쓰는 에이전트는 존재하지 않는 `character`나 `backdrop`을
+  지어내지 않습니다. 그런 값은 조용히 대체되는 것이 아니라 렌더링 시점에 하드 에러로
+  이어집니다.
+- 마지막 필수 단계로서의 `toonstrip render` 워크플로입니다. CLI로 실제 실행해 보지
+  않은 문서는 절대 그대로 넘기지 말아야 한다는 것입니다.
+
+## 사용하기
+
+에이전트가 스킬을 찾는 위치에 파일을 두면 됩니다. [Claude Code](https://claude.com/claude-code)의
+경우 `.claude/skills/` 아래의 `SKILL.md`가 그 위치입니다.
+
+```
+mkdir -p .claude/skills/toonstrip
+curl -o .claude/skills/toonstrip/SKILL.md \
+  https://raw.githubusercontent.com/dkdev24/toonstrip/main/skills/toonstrip/SKILL.md
+```
+
+비슷한 규약을 지원하는 다른 에이전트라면 같은 파일을 직접 가리키게 하면 됩니다. YAML
+프론트매터가 붙은 평범한 마크다운 파일이므로, 이를 읽는 데 toonstrip 전용 도구가 따로
+필요하지는 않습니다.
+
+<Callout kind="tip">
+에이전트가 스킬 기능을 지원하지 않나요? 파일 내용을 프롬프트에 그대로 붙여 넣거나,
+같은 스키마와 워크플로를 더 깊이 다루는, 전체 문서 사이트를 마크다운 파일 하나로 담은
+<a href="/llms-full.txt">/llms-full.txt</a>를 에이전트에게 가리키게 하시기 바랍니다.
+</Callout>
+
+## 제대로 동작했는지 확인하기
+
+이 스킬의 지침은 "JSON만 그대로 넘기지 말고 `toonstrip render`를 실행하라"는 말로
+끝납니다. 이 스킬을 쓰는 에이전트가 문서를 건네주었다면, 빠르게 확인하는 방법은 스킬이
+가르치는 것과 동일합니다.
+
+```
+npx @toonstrip/cli render doc.json --out strip.png
+```
+
+스키마 오류나 해석되지 않는 character/backdrop id가 있으면 첫 번째 문제만이 아니라
+발견된 모든 문제 목록과 함께 요란하게 실패합니다(`FAIL:`, 종료 코드 1). 깨끗하게
+실행되었다면 그 문서는 구조적으로 유효할 뿐 아니라 실제 팩에 대해서도 정상적으로
+해석된다는 뜻입니다.
+
+## 소스
+
+레포의 [`skills/toonstrip/SKILL.md`](https://github.com/dkdev24/toonstrip/blob/main/skills/toonstrip/SKILL.md)입니다.
+이 프로젝트 계획의 다른 어떤 마일스톤에도 의존하지 않으며, 여기서 다루는 스키마와
+CLI는 이미 안정적으로 공개되어 있습니다.

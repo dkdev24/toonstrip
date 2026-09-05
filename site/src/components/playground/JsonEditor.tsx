@@ -19,8 +19,10 @@ const highlight = HighlightStyle.define([
 import { lintGutter, setDiagnostics, type Diagnostic } from "@codemirror/lint";
 import { jsonText, jsonProblems, lastSource, applyJson, doc, pretty, setDoc } from "../../lib/playground/state";
 import { Button } from "../ui/button";
+import { interpolate } from "../../i18n/utils";
+import type { PlaygroundStrings } from "./strings";
 
-export function JsonEditor({ actions }: { actions?: ComponentChildren }) {
+export function JsonEditor({ actions, strings }: { actions?: ComponentChildren; strings: PlaygroundStrings["editor"] }) {
   const host = useRef<HTMLDivElement>(null);
   const view = useRef<EditorView | null>(null);
   const timer = useRef<number | undefined>(undefined);
@@ -38,7 +40,7 @@ export function JsonEditor({ actions }: { actions?: ComponentChildren }) {
         lintGutter(),
         keymap.of([...defaultKeymap, ...historyKeymap, indentWithTab]),
         EditorView.lineWrapping,
-        EditorView.contentAttributes.of({ "aria-label": "JSON document" }),
+        EditorView.contentAttributes.of({ "aria-label": strings.documentAria }),
         EditorView.updateListener.of((update) => {
           if (!update.docChanged) return;
           const text = update.state.doc.toString();
@@ -80,10 +82,10 @@ export function JsonEditor({ actions }: { actions?: ComponentChildren }) {
       <div class="flex h-9 shrink-0 items-center gap-3 border-b border-border bg-muted pr-2 pl-4">
         <span class="caption">JSON</span>
         <span class={`pg-status ${problems.length ? "is-invalid" : "is-valid"}`} role="status">
-          {problems.length ? `${problems.length} problem${problems.length === 1 ? "" : "s"}` : "Valid"}
+          {problems.length ? `${problems.length} ${problems.length === 1 ? strings.problemUnit : strings.problemUnitPlural}` : strings.valid}
         </span>
         <span class="ml-auto flex items-center gap-1">
-          <Button variant="ghost" size="sm" onClick={() => setDoc(doc.value, "form")}>Format</Button>
+          <Button variant="ghost" size="sm" onClick={() => setDoc(doc.value, "form")}>{strings.format}</Button>
           <Button
             variant="ghost"
             size="sm"
@@ -93,7 +95,7 @@ export function JsonEditor({ actions }: { actions?: ComponentChildren }) {
               } catch {}
             }}
           >
-            Copy
+            {strings.copy}
           </Button>
           {actions}
         </span>
@@ -113,7 +115,7 @@ export function JsonEditor({ actions }: { actions?: ComponentChildren }) {
                   v.focus();
                 }}
               >
-                {p.line ? `Line ${p.line}: ` : ""}
+                {p.line ? interpolate(strings.linePrefix, { n: p.line }) : ""}
                 {p.message}
               </button>
             </li>

@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "panels": [
+    {
+      "backdrop": "meadow",
+      "camera": "medium",
+      "bodies": [
+        {
+          "character": "pip",
+          "emotion": {
+            "angle": 0,
+            "intensity": 0.6
+          },
+          "pose": "wave"
+        },
+        {
+          "character": "anna",
+          "emotion": {
+            "angle": 0,
+            "intensity": 0.6
+          }
+        }
+      ],
+      "speakers": [
+        {
+          "speaker": "pip",
+          "balloon": "speech",
+          "text": "두 개의 팩, 한 패널."
+        },
+        {
+          "speaker": "anna",
+          "balloon": "speech",
+          "text": "아이디만 서로 겹치지 않으면 돼요."
+        }
+      ]
+    }
+  ]
+}

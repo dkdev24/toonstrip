@@ -1,0 +1,69 @@
+{
+  "version": 1,
+  "panels": [
+    {
+      "backdrop": "field",
+      "camera": "medium",
+      "bodies": [
+        {
+          "character": "tiki",
+          "emotion": {
+            "angle": 0.7853981633974483,
+            "intensity": 0.5
+          }
+        },
+        {
+          "character": "sage",
+          "emotion": {
+            "angle": 0,
+            "intensity": 0.4
+          }
+        }
+      ],
+      "speakers": [
+        {
+          "speaker": "tiki",
+          "balloon": "speech",
+          "text": "그림 때문에 빌드 과정이 필요한가요?"
+        },
+        {
+          "speaker": "sage",
+          "balloon": "speech",
+          "text": "아니요. 팩이 스프라이트 시트를 제공하고, 엘리먼트는 스트립에 쓰인 캐릭터만 가져와요."
+        }
+      ]
+    },
+    {
+      "backdrop": "field",
+      "camera": "over-shoulder",
+      "bodies": [
+        {
+          "character": "tiki",
+          "emotion": {
+            "angle": 0,
+            "intensity": 0.7
+          }
+        },
+        {
+          "character": "sage",
+          "emotion": {
+            "angle": 0,
+            "intensity": 0.5
+          }
+        }
+      ],
+      "speakers": [
+        {
+          "speaker": "tiki",
+          "balloon": "speech",
+          "text": "폰에서는요?"
+        },
+        {
+          "speaker": "sage",
+          "balloon": "speech",
+          "text": "같은 JSON이에요. 스트립이 한 열로 줄고 패널 크기도 작아져요."
+        }
+      ]
+    }
+  ]
+}

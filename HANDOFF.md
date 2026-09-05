@@ -5,7 +5,7 @@ Cross-session context memory. Update this file at the end of every session.
 ## Current Version
 
 **0.15.8** (npm, all internally consistent: schema 0.1.3, core 0.1.9, element 0.1.11,
-astro 0.1.13, packs 0.1.1, asset-packager 0.2.0, cli 0.2.4, react 0.1.3, vue 0.1.2, next
+astro 0.1.13, packs 0.1.1, asset-packager 0.2.1, cli 0.2.4, react 0.1.3, vue 0.1.2, next
 0.1.2)
 
 ## Project Status
@@ -18,21 +18,26 @@ to `main` deploys prod (output `site/dist`; root `pnpm build` is the build).
 
 ## Last Session
 
-2026-09-05: Fixed `site`'s Playwright suite, landed audit #12, completed the upstream-port
-arc (published core/element/astro, propagated to `danielkimdev-astro`, all three repos
-pushed — see `WORKLOG.md` v0.15.4–v0.15.9), then landed the last two items, #8 and #46 —
-**`PONYTAIL_AUDIT.md` is now fully resolved, 46/46**. #46: `sheets.test.ts`'s 4th copy of
-a grid-sheet drawer replaced with a shared `sheet()` in `draw.mjs`, verified byte-identical
-fixture regen. #8: `resizable.tsx`'s Context/sizes-array indirection replaced with a
-3-track CSS grid; caught two real bugs in the process (grid needs a track for the handle,
-and the shared `.grid` utility's 24px gap collided with the literal class name) — the
-existing pixel-perfect drag Playwright assertion is what caught the first one. See
-`WORKLOG.md` v0.15.10.
+2026-09-05: Published `asset-packager@0.2.1` (ponytail-audit cleanup was unreleased since
+0.2.0). Site docs synced to current package APIs, then given a technical-writing pass
+(em-dashes and one stale phrase, 8 files). **Landed S9, the Korean locale**
+(`SITE_DEV_PLAN.md` §13) end to end: Astro i18n routing (`/ko/`), `src/i18n/{en,ko}.json`
++ utils, docs moved to `content/docs/{en,ko}`, all 17 docs and all 20 strips translated
+(not machine-translated — re-authored via the `daniel-writing-style` skill), playground
+island fully localized (~40 strings + emotion-wheel KO label), LanguageToggle/hreflang/
+Pretendard wired. Verified live in a real browser (KO and EN playground, no console
+errors, screenshots) as well as by build. `validate-strips.mjs` gained an EN/KO parity
+check (20/20 pass). Build green, 44 pages. Not yet done: axe/Lighthouse audits on `/ko/`
+routes, and Daniel's own review/sign-off of the KO copy (S9 exit criteria, §13.6) — both
+still open.
 
 ## Next Actions
 
-1. **S9 Korean locale** per `SITE_DEV_PLAN.md` §13 — unblocked, no other backlog item
-   pending from this session's work.
+1. **Daniel reviews the KO copy** (docs, strips, UI strings) and signs off — §13.6's last
+   unchecked exit criterion. Flagged word choices worth a second look: "beat panel" →
+   "박자를 찍는 패널" (cameras-and-panels), "join" → "접합부" (asset-packager/asset-packs).
+2. Run an axe accessibility pass and Lighthouse mobile score on a few `/ko/` routes
+   (§13.6 exit criteria; not yet measured this session).
 
 ## Open Issues
 

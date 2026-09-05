@@ -1,0 +1,53 @@
+---
+title: 말풍선
+description: 대사, 생각, 캡션 말풍선이 줄바꿈되고 쌓이고 머리 옆 공간을 찾는 방식을 설명합니다.
+order: 5
+section: Authoring
+---
+import CodeAndStrip from "../../../components/demo/CodeAndStrip.astro";
+import Callout from "../../../components/site/Callout.astro";
+import balloons from "../../strips/balloons.json";
+import balloonsLong from "../../strips/balloons-long.json";
+
+패널의 `speakers` 항목 하나하나가 말풍선 하나가 됩니다. `balloon` 필드가 모양을 정하고,
+`speaker` 필드가 꼬리가 가리킬 방향을 정합니다.
+
+## 세 가지 종류
+
+<CodeAndStrip doc={balloons} title="speech, thought, caption" collapse />
+
+- `speech`: 발화자의 머리를 향해 꼬리가 뻗은 둥근 말풍선입니다.
+- `thought`: 작은 거품들이 이어진 구름 모양입니다.
+- `caption`: 패널 상단의 꼬리 없는 박스입니다. `speaker`는 반드시 `"caption"`이어야 합니다.
+
+## 순서와 배치
+
+말풍선은 `speakers` 순서대로 그려집니다. 캡션이 먼저(상단을 차지) 그려지고, 그 뒤로
+각 발화 인물의 말풍선이 이어집니다. 레이아웃은 각 말풍선을 다른 발화자의 머리와 겹치지
+않는 열 안에서 해당 발화자의 머리 옆에 배치하려 시도하며, 도저히 들어갈 자리가 없을 때만
+말풍선을 패널 전체에 걸쳐 쌓습니다. 패널 하나에 발화자 둘은 무리 없이 소화되고, 셋은 넓은
+카메라에서 가능하며, 그 이상은 패널이 아니라 스트립으로 나눠야 합니다.
+
+## 긴 대사
+
+텍스트는 말풍선 너비에 맞춰 줄바꿈되며, 말풍선은 넓어지기 전에 먼저 아래로 늘어납니다.
+패널 자체는 커지지 않으므로, 아주 긴 대사는 인물들을 밀어붙이게 됩니다. 짧은 대사가 읽기도
+좋고 레이아웃도 더 잘 잡힙니다.
+
+<CodeAndStrip doc={balloonsLong} title="긴 텍스트도 들어가지만, 짧게 쓰는 편이 좋습니다" collapse />
+
+<Callout kind="warning" title="말풍선이 들어갈 자리가 없을 때">
+레이아웃은 절대 실패하지 않습니다. 말풍선이 발화자 옆에 도저히 들어갈 수 없으면 발화자별로
+확보된 통로에 쌓이며, 가장 좁은 패널 크기에서는 텍스트가 패널 크기에 맞춰 축소됩니다.
+v0.7.11부터는 모든 레이아웃 상수가 패널 너비에 비례해 조정되므로, 같은 문서가 400px 패널부터
+260px 패널까지 동일한 방식으로 배치됩니다.
+</Callout>
+
+## 말풍선을 위한 작성 요령
+
+- 한 줄에 하나의 생각만 담으세요. 같은 발화자의 긴 생각은 두 줄로 나누세요.
+- `speakers`에서 캡션을 먼저 배치하세요. 어차피 가장 먼저 그려집니다.
+- `reaction` 카메라에는 말풍선이 들어갈 공간이 없습니다. 이런 패널에는 캡션을 주거나
+  대사를 아예 없애세요.
+- 꼬리의 정확한 위치에 의존하는 텍스트는 피하세요. 꼬리는 항상 머리를 찾아가지만, 말풍선이
+  어느 쪽에 놓일지는 레이아웃이 결정합니다.

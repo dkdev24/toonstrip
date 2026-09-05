@@ -1,0 +1,65 @@
+{
+  "version": 1,
+  "panels": [
+    {
+      "backdrop": "room8bs",
+      "camera": "medium",
+      "bodies": [
+        {
+          "character": "lynnea",
+          "emotion": {
+            "angle": 0,
+            "intensity": 0.5
+          }
+        }
+      ],
+      "speakers": [
+        {
+          "speaker": "lynnea",
+          "balloon": "speech",
+          "text": "말풍선이에요."
+        }
+      ]
+    },
+    {
+      "backdrop": "room8bs",
+      "camera": "medium",
+      "bodies": [
+        {
+          "character": "lynnea",
+          "emotion": {
+            "angle": 1.570796,
+            "intensity": 0.5
+          }
+        }
+      ],
+      "speakers": [
+        {
+          "speaker": "lynnea",
+          "balloon": "thought",
+          "text": "생각 풍선이에요."
+        }
+      ]
+    },
+    {
+      "backdrop": "room8bs",
+      "camera": "medium",
+      "bodies": [
+        {
+          "character": "lynnea",
+          "emotion": {
+            "angle": 0,
+            "intensity": 0.3
+          }
+        }
+      ],
+      "speakers": [
+        {
+          "speaker": "caption",
+          "balloon": "caption",
+          "text": "캡션이에요. 무대 위 화자가 말할 필요 없어요."
+        }
+      ]
+    }
+  ]
+}

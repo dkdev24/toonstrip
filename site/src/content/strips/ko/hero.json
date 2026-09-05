@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "panels": [
+    {
+      "backdrop": "pastoral",
+      "camera": "establishing",
+      "bodies": [
+        { "character": "dan", "emotion": { "angle": 0, "intensity": 0.6 } },
+        { "character": "anna", "emotion": { "angle": 0, "intensity": 0.4 } }
+      ],
+      "speakers": [
+        { "speaker": "caption", "balloon": "caption", "text": "툰스트립은 데이터로 코믹 스트립을 그려줘요." },
+        { "speaker": "dan", "balloon": "speech", "text": "패널을 JSON으로 작성하면 돼요." }
+      ]
+    },
+    {
+      "backdrop": "pastoral",
+      "camera": "medium",
+      "bodies": [
+        { "character": "anna", "emotion": { "angle": 2.356194490192345, "intensity": 0.6 } },
+        { "character": "dan", "emotion": { "angle": 0, "intensity": 0.7 } }
+      ],
+      "speakers": [
+        { "speaker": "anna", "balloon": "speech", "text": "그러면 여기 캔버스에 바로 그려주는 거예요?" },
+        { "speaker": "dan", "balloon": "speech", "text": "실시간으로요. 페이지 크기를 바꿔보면 다시 배치되는 게 보일 거예요." }
+      ]
+    },
+    {
+      "backdrop": "pastoral",
+      "camera": "reaction",
+      "bodies": [
+        { "character": "anna", "emotion": { "angle": 5.497787143782138, "intensity": 0.9 } }
+      ],
+      "speakers": [
+        { "speaker": "anna", "balloon": "thought", "text": "그림에 빌드 과정이 필요 없네. 동기화할 이미지 파일도 없고." }
+      ]
+    }
+  ]
+}

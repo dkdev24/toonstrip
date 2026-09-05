@@ -1,0 +1,53 @@
+---
+title: 접근성
+description: 엘리먼트가 보조 기술을 위해 무엇을 출력하는지, 그리고 소리 내어 읽었을 때 자연스러운 대사를 쓰는 방법을 설명합니다.
+order: 14
+section: Reference
+---
+
+캔버스는 비트맵이라서 그 자체로는 스크린 리더에 아무것도 전달하지 않습니다. 엘리먼트는
+패널마다 문서 자체로부터 이를 보완하므로, 스트립을 그리는 데 쓰인 데이터가 곧 스트립을
+설명하는 데도 쓰입니다.
+
+## 엘리먼트가 출력하는 내용
+
+모든 패널의 `<canvas>`는 `role="img"`와, 패널로부터 생성된 `aria-label`을 갖습니다.
+카메라 샷, 룸 타이틀(있는 경우), 그리고 각 대사를 발화자와 말풍선 종류와 함께 순서대로
+담습니다. 홈페이지의 세 패널은 다음과 같이 읽힙니다.
+
+```
+establishing shot; caption: toonstrip draws comic strips from data.; dan says "You write the panels as JSON."
+medium shot; anna says "And it draws them right here, on a canvas?"; dan says "Live. Resize the page and watch it reflow."
+reaction shot; anna thinks "No build step for the art. No image files to keep in sync."
+```
+
+생각 말풍선은 "thinks"로, 대사는 "says"로, 캡션은 "caption:"으로 읽힙니다. 어두운
+패널은 그 자체로 어둡다고 알려집니다.
+
+이 생성기는 `@toonstrip/element`의 `describePanel`이며, 사이트에서 텍스트 트랜스크립트나
+`<figcaption>` 용도로 재사용할 수 있도록 함께 내보내집니다.
+
+## 잘 읽히는 대사 쓰기
+
+- 캐릭터의 표시 이름이 중요한 맥락이라면 텍스트 안에 직접 쓰세요. 라벨에는 문서에 있는
+  값 그대로인 id(`dan`)가 쓰입니다.
+- 박자(beat)는 말로 표현하세요. 대사가 없는 `reaction` 패널은 "reaction shot"으로만
+  읽히므로, 캡션을 넣어야 내용이 생깁니다.
+- 구두점은 관습적인 형태를 유지하세요. 스크린 리더는 마침표와 쉼표에서 멈추지, 말줄임표나
+  대시에서는 멈추지 않습니다.
+- 감정만으로 의미를 전달하지 마세요. `SAD`는 얼굴을 바꿀 뿐 라벨을 바꾸지 않습니다.
+
+## 엘리먼트 주변부
+
+- 스트립이 주변 텍스트를 보완하는 경우 `<figure>`로 감싸고 `<figcaption>`을 함께
+  쓰세요.
+- 캡션이나 타이틀에서 색상에 의존하지 마세요. 아트 자체가 어차피 흑백입니다.
+- 모션: 엘리먼트는 아무것도 애니메이션하지 않습니다. 리사이즈는 즉시 다시 그려집니다.
+
+## 알려진 한계
+
+- JavaScript가 꺼져 있을 때 보이는 텍스트 대체 수단이 없습니다. 라벨이 클라이언트
+  사이드에서 생성되기 때문입니다. 이 부분이 중요하다면 `toonstrip render`로 만든
+  `<noscript>` 이미지와 별도의 텍스트 트랜스크립트를 함께 두세요.
+- 포커스: 캔버스는 포커스를 받지 않으며 조작할 대상도 없으므로, 탭 이동 순서에서
+  건너뛰어집니다. 이미지로서는 올바른 동작입니다.

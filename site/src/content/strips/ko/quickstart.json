@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "panels": [
+    {
+      "backdrop": "field",
+      "camera": "medium",
+      "bodies": [
+        {
+          "character": "dan",
+          "emotion": {
+            "angle": 0,
+            "intensity": 0.8
+          },
+          "pose": "wave"
+        }
+      ],
+      "speakers": [
+        {
+          "speaker": "dan",
+          "balloon": "speech",
+          "text": "툰스트립에서 인사드려요!"
+        }
+      ]
+    }
+  ]
+}
