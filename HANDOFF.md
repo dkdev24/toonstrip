@@ -18,20 +18,21 @@ to `main` deploys prod (output `site/dist`; root `pnpm build` is the build).
 
 ## Last Session
 
-2026-09-05: Fixed `site`'s Playwright suite, landed audit #12, then completed the full
-upstream-port arc. Checked #3/#14/#16/#19/#28 against `grues-in-comic` instead of
-assuming portable: landed #14/#16/#19/#28 in `packages/core` (none needed a matching
-change there); ported #37 there too (verified `gate`/`density`, zero diff). **#3 closed**
-(user confirmed leaving `measureBalloon`/`goalWidth`/`stackBalloons` untouched — audit
-false positive, not deferred). Published the full chain: `core` 0.1.9, `element` 0.1.11,
-`astro` 0.1.13. Propagated to `danielkimdev-astro` (bumped dep, verified with a real
-browser render — canvases have real drawn pixel content, no console errors). All three
-repos pushed. 42/46 audit items resolved. See `WORKLOG.md` v0.15.4–v0.15.9.
+2026-09-05: Fixed `site`'s Playwright suite, landed audit #12, completed the upstream-port
+arc (published core/element/astro, propagated to `danielkimdev-astro`, all three repos
+pushed — see `WORKLOG.md` v0.15.4–v0.15.9), then landed the last two items, #8 and #46 —
+**`PONYTAIL_AUDIT.md` is now fully resolved, 46/46**. #46: `sheets.test.ts`'s 4th copy of
+a grid-sheet drawer replaced with a shared `sheet()` in `draw.mjs`, verified byte-identical
+fixture regen. #8: `resizable.tsx`'s Context/sizes-array indirection replaced with a
+3-track CSS grid; caught two real bugs in the process (grid needs a track for the handle,
+and the shared `.grid` utility's 24px gap collided with the literal class name) — the
+existing pixel-perfect drag Playwright assertion is what caught the first one. See
+`WORKLOG.md` v0.15.10.
 
 ## Next Actions
 
-1. **S9 Korean locale** per `SITE_DEV_PLAN.md` §13 — unblocked.
-2. `PONYTAIL_AUDIT.md`'s #8/#46 need a human call, not blocked on anything.
+1. **S9 Korean locale** per `SITE_DEV_PLAN.md` §13 — unblocked, no other backlog item
+   pending from this session's work.
 
 ## Open Issues
 

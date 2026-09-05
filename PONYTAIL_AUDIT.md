@@ -13,7 +13,8 @@ existing dep), `yagni` (abstraction with one implementation), `shrink` (same log
 
 ## Progress
 
-**41 of 46 applied (4 partial — see notes). ~700 generated lines and 7 deps fully dropped (2
+**43 of 46 applied (4 partial — see notes; the remaining 3 are #3/#6/#7, verified stale on
+re-check, not cut). ~700 generated lines and 7 deps fully dropped (2
 more moved to devDeps, 4 demoted), plus one published package (`@toonstrip/next`) deprecated;
 ~1,109 hand-written lines still on the table.** A row marked **done** in the table below is
 landed and the build is green; everything else is untouched.
@@ -25,6 +26,8 @@ landed and the build is green; everything else is untouched.
 | 2026-09-05 | #19 † | Deleted the `BalloonMetrics` interface + `canvasMetrics` factory from `balloon-layout.ts`; `BalloonInput` now carries `kind`/`ctx` directly, 6 call sites call `chromeFor`/`measureAtWidth`/`splitHeight`/`widestWord` directly. `packages/core/test/balloon-layout.test.ts` updated (9 construction sites). **Not portable to `grues-in-comic`**: it never had this injection abstraction — it already calls the `balloon.ts` functions directly, so there's nothing to converge | (this commit) |
 | 2026-09-05 | #28 † | Inlined `orderBodies` into its one caller `layoutAvatars` in `render.ts` — a plain `bodies.map((_, i) => n - 1 - i < i)`. **Nothing to port**: `grues-in-comic`'s `orderBodies` is a genuinely different, non-trivial N-body implementation (real flip-state computation), not the trivial wrapper toonstrip had; the two already diverged | (this commit) |
 | 2026-09-05 | #37 | `text.split(/\s+/).filter((w) => w.length > 0)` → `text.match(/\S+/g) ?? []`, five sites in `balloon.ts`. **Ported to `grues-in-comic`** (same 5-site pattern in its `web/src/comic/balloon.ts`) — `typecheck`/`test` (391 green) and `gate`/`density` both confirm zero diff, no ADR needed (no divergence, verified byte-identical tokenization) | `232d49e`, grues-in-comic (uncommitted, pending your OK) |
+| 2026-09-05 | #46 | `sheetImage()` (a 4th copy of "draw a labelled grid sheet") replaced with a new shared `sheet()` in `draw.mjs`, generalized to cover both `make-sheet-fixture.mjs`'s labelled/jittered/skip-blank usage and the test's simpler unconditional-grid usage (unifying required two real bugs to be caught and fixed first: a blank-cell-skip that dropped the gutter box too, and an out-of-range vs in-range-null distinction). Fixture regenerated and diffed byte-identical against the committed fixtures; 32/32 package tests green | (this commit) |
+| 2026-09-05 | #8 | `resizable.tsx`'s Context/`register()`-by-render-order indirection (a `sizes: [number,number]` array threaded per-panel) replaced with a 3-track CSS grid (`var(--split) auto 1fr`); panels no longer need their own size or index, only a `minSize` registered by render order. Two real bugs caught during the rewrite, not just refactored around: CSS Grid needs a track for the handle too (3 DOM children, not 2 — an earlier 2-track attempt auto-placed the handle and panel 2 into the same implicit column); and the shared `.grid` utility class collides with this component's own literal `"grid"` class name, inheriting an unwanted 24px gap (`display:grid` now set inline instead). Verified in a real browser (`agent-browser`): keyboard resize (arrows/shift/home/end) and pointer drag both confirmed live-correct via direct DOM inspection, screenshot shows correct panel proportions. All 8 Playwright specs green, including the one asserting a pixel-perfect 150px drag delta — the actual regression signal that caught the grid-track bug | (this commit) |
 | 2026-09-05 | #12 | `json-position.ts`'s hand-written JSON scanner replaced with a walk over `@codemirror/lang-json`'s own parse tree by JSON-pointer segment; ~41 lines net removed. Verified against `@toonstrip/schema`'s real validator output (missing-required, bad-enum, wrong-type-nested, additional-property cases) — every `instancePath` resolved to the same line as the old scanner. All 8 Playwright playground specs green, including the one exercising this path directly | (this commit) |
 | 2026-09-04 | #31 | Deleted `site/src/components/ui/scroll-area.tsx` (zero importers) and dropped `@radix-ui/react-scroll-area` from `site/package.json`; lockfile updated, `pnpm build` green, 23 pages built | `ee908f8` |
 | 2026-09-04 | #42 | Dropped the `codemirror` meta-package from `site/package.json`; all six `@codemirror/*` scoped packages the editor imports stay declared. `pnpm install` removed 3 packages, `pnpm build` green | (this commit) |
@@ -68,9 +71,6 @@ landed and the build is green; everything else is untouched.
 user decision 2026-09-05 — see below, keep `measureBalloon`/`goalWidth`/`stackBalloons` as
 public API and load-bearing fallback, permanently, not just deferred).
 
-**Skipped, needs a human call:** #8 (`resizable.tsx` rewrite touches drag/keyboard behavior,
-needs a browser check, not just a green build), #46 (`sheetImage()` merge needs new shared code
-in `draw.mjs` plus fixture-regen verification, `draw.mjs`'s current exports don't cover it).
 
 **#3 — closed, not a cut (2026-09-05):** not the safe cleanup the audit described. Two problems
 surfaced on inspection:

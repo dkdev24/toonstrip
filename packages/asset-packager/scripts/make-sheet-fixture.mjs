@@ -18,10 +18,14 @@
  *
  * Run: node scripts/make-sheet-fixture.mjs
  */
-import { createCanvas } from "@napi-rs/canvas";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { drawFace as drawFaceShared, drawTorso as drawTorsoShared, write as writeFile } from "./draw.mjs";
+import {
+  drawFace as drawFaceShared,
+  drawTorso as drawTorsoShared,
+  sheet as sharedSheet,
+  write as writeFile,
+} from "./draw.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "fixtures", "source-sheets");
 const CELL = 512;
@@ -95,44 +99,7 @@ function drawScene(ctx, edge, { sky, ground, feature, featureColor, horizon = 0.
   }
 }
 
-/** One sheet: white ground, painted gutters, a label band per cell. */
-function sheet({ columns, rows, names, draw, jitter = () => [0, 0] }) {
-  const canvas = createCanvas(columns * CELL, rows * CELL);
-  const ctx = canvas.getContext("2d");
-  ctx.fillStyle = "#ffffff";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  const band = CELL * LABEL_BAND;
-
-  names.forEach((name, index) => {
-    const column = index % columns;
-    const row = Math.floor(index / columns);
-    const originX = column * CELL;
-    const originY = row * CELL;
-
-    ctx.save();
-    ctx.translate(originX, originY);
-    ctx.strokeStyle = "#8a8a8a";
-    ctx.lineWidth = 3;
-    ctx.strokeRect(1.5, 1.5, CELL - 3, CELL - 3);
-    if (name) {
-      ctx.fillStyle = "#111111";
-      ctx.font = `bold ${Math.round(CELL * 0.05)}px sans-serif`;
-      ctx.fillText(name, CELL * 0.04, band * 0.72);
-
-      const [dx, dy] = jitter(index, name);
-      ctx.save();
-      ctx.beginPath();
-      ctx.rect(4, band, CELL - 8, CELL - band - 4);
-      ctx.clip();
-      ctx.translate(dx, band + dy);
-      draw(ctx, CELL - band, name, CELL);
-      ctx.restore();
-    }
-    ctx.restore();
-  });
-
-  return canvas.toBuffer("image/png");
-}
+const sheet = (options) => sharedSheet({ cell: CELL, labelBand: LABEL_BAND, ...options });
 
 const CHARACTER = { skin: "#f2d3b6", hair: "#2f2a45", shirt: "#7fa7c8" };
 
@@ -157,9 +124,9 @@ write(
     rows: 2,
     names: ["face-NEUTRAL", "face-HAPPY", "face-SAD", "torso-NEUTRAL", "torso-WAVE", null],
     jitter: (_index, name) => JITTER[name] ?? [0, 0],
-    draw: (ctx, edge, name) => {
-      if (name.startsWith("face")) drawFace(ctx, edge, { ...CHARACTER, ...FACE_POSES[name] });
-      else drawTorso(ctx, edge, { ...CHARACTER, ...TORSO_POSES[name] });
+    draw: (ctx, _index, inner, name) => {
+      if (name.startsWith("face")) drawFace(ctx, inner, { ...CHARACTER, ...FACE_POSES[name] });
+      else drawTorso(ctx, inner, { ...CHARACTER, ...TORSO_POSES[name] });
     },
   }),
 );
@@ -184,7 +151,7 @@ const sceneSheet = (scenes, columns) =>
     columns,
     rows: Math.ceil(scenes.length / columns),
     names: scenes.map((s) => s.id),
-    draw: (ctx, edge, name, width) => drawScene(ctx, edge, scenes.find((s) => s.id === name), width),
+    draw: (ctx, _index, inner, name, cell) => drawScene(ctx, inner, scenes.find((s) => s.id === name), cell),
   });
 
 write("backdrops/interiors.png", sceneSheet(INTERIORS, 2));

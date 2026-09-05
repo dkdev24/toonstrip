@@ -19,6 +19,7 @@ import { gridFor } from "../src/grid.js";
 import { register } from "../src/register.js";
 import { renderTemplate, DEFAULT_CHARACTER_CELLS } from "../src/template.js";
 import type { Raster } from "../src/image.js";
+import { sheet as sharedSheet } from "../scripts/draw.mjs";
 
 const FIXTURE = join(import.meta.dirname, "..", "fixtures", "source-sheets");
 
@@ -30,17 +31,8 @@ function messages(diagnostics: { message: string; file?: string }[]): string {
   return diagnostics.map((d) => `${d.file ?? ""} ${d.message}`).join("\n");
 }
 
-/**
- * Draws a labelled grid sheet on opaque white, the way a model returns one.
- * `cells` is row-major; a null cell is left blank.
- */
-function sheetImage({
-  columns,
-  rows,
-  cell = 320,
-  labelBand = 0.1,
-  draw,
-}: {
+/** Draws a labelled grid sheet on opaque white, the way a model returns one. */
+function sheetImage(options: {
   columns: number;
   rows: number;
   cell?: number;
@@ -51,24 +43,7 @@ function sheetImage({
     inner: number,
   ) => void;
 }): Buffer {
-  const canvas = createCanvas(columns * cell, rows * cell);
-  const ctx = canvas.getContext("2d");
-  ctx.fillStyle = "#ffffff";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  const band = cell * labelBand;
-  for (let index = 0; index < columns * rows; index++) {
-    ctx.save();
-    ctx.translate((index % columns) * cell, Math.floor(index / columns) * cell);
-    ctx.strokeStyle = "#909090";
-    ctx.lineWidth = 3;
-    ctx.strokeRect(1.5, 1.5, cell - 3, cell - 3);
-    ctx.save();
-    ctx.translate(0, band);
-    draw(ctx, index, cell - band);
-    ctx.restore();
-    ctx.restore();
-  }
-  return canvas.toBuffer("image/png");
+  return sharedSheet({ cell: 320, labelBand: 0.1, ...options }) as Buffer;
 }
 
 /** A head-ish blob with a neck stub, offset by (dx, dy). */

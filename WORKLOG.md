@@ -2164,3 +2164,54 @@ sibling repos (`grues-in-comic` v0.33.8, `danielkimdev-astro`) pushed with real
 verification at each step (typecheck/tests/gate/density in `grues-in-comic`; build +
 live browser render in `danielkimdev-astro`). Remaining open items: `PONYTAIL_AUDIT.md`
 #8/#46 (need a human call, unrelated to this arc), S9 Korean locale.
+
+## v0.15.10 — Ponytail audit #8/#46: resizable.tsx CSS grid, shared sheet() helper
+
+**Date:** 2026-09-05
+
+### Changes
+
+Landed the final two open `PONYTAIL_AUDIT.md` items, both flagged as needing a human call.
+
+**#46**: `packages/asset-packager/test/sheets.test.ts`'s `sheetImage()` (a 4th copy of "draw
+a labelled grid sheet on white with painted gutters") replaced with a new shared `sheet()`
+in `scripts/draw.mjs`, generalized to cover both `make-sheet-fixture.mjs`'s labelled/
+jittered/skip-blank-cell usage and the test's simpler unconditional-grid usage. Two real
+bugs caught while unifying (not just moving code): a naive "skip blank cells" implementation
+dropped the gutter box too (the original always draws it, only the label/content is
+conditional), and the iteration bound needs to be `names.length` when `names` is given
+(matching `Array.forEach`'s behavior) rather than always `columns * rows`, or an
+out-of-range cell gets a gutter box the original never drew. Caught via fixture-regen +
+byte-diff against the committed fixtures, not just a green test run. 32/32 package tests
+green.
+
+**#8**: `site/src/components/ui/resizable.tsx`'s Context-based `register()`-by-render-order
+indirection (a `sizes: [number, number]` array threaded through every panel, each doing its
+own `flex-basis` math) replaced with a 3-track CSS grid (`var(--split) auto 1fr`) — panels
+no longer carry their own size or index, only a `minSize` still registered by render order
+for drag-clamping. Two real bugs surfaced during the rewrite:
+- CSS Grid needs a track for the handle too — it's a DOM child of the same container as
+  the two panels, so a 2-column `var(--split) 1fr` template auto-places the handle and the
+  second panel into the same implicit column, breaking the split entirely.
+- The shared `.grid` utility class (`site/src/styles/components.css`) carries a 24px
+  `gap`, which collides with this component's own literal `"grid"` Tailwind-style class
+  name — inherited an unwanted 24px gap between tracks. Fixed by setting `display: grid`
+  directly in the inline style instead of relying on the shared class.
+
+Verified with a real browser (the `agent-browser` skill): keyboard resize (arrow keys,
+shift-step, Home/End) and pointer drag both confirmed correct via direct DOM/CSS
+inspection, plus a screenshot showing correct panel proportions and real content. The
+existing Playwright suite's pixel-perfect 150px-drag assertion (`playground.spec.ts:147`)
+is what actually caught the grid-track bug — a manual browser poke alone had missed it
+initially since percentage math looked plausible without the exact-pixel check.
+
+Net line count: `resizable.tsx` ended up 184 lines vs. the original 176 (a small net
+growth despite removing the Context/sizes-array machinery) — the CSS-grid migration
+needed its own bookkeeping (the gap-collision workaround, the 3-track comment) that ate
+into the audit's ~120-line estimate. The simplification is qualitative (no per-panel size
+lookup, no threaded index) more than a raw line-count win in this case.
+
+### Status
+
+All 46 `PONYTAIL_AUDIT.md` items now resolved: 43 applied (4 partial), 3 verified stale on
+re-check and correctly left uncut (#3, #6, #7). The audit is complete.

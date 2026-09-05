@@ -10,7 +10,10 @@
  * </ResizablePanelGroup>
  *
  * Sizes are percentages of the group. Exactly two panels and one handle are
- * supported, which is all the playground shell needs.
+ * supported, which is all the playground shell needs. A 3-track CSS grid
+ * (`var(--split) auto 1fr` — panel, handle, panel) does the sizing, so the
+ * first panel's share is the only thing tracked; panels need no size or
+ * index of their own.
  */
 import { GripVertical } from "lucide-preact";
 import { createContext, type ComponentChildren, type JSX } from "preact";
@@ -19,12 +22,11 @@ import { cn } from "../../lib/utils";
 
 interface GroupCtx {
   orientation: "horizontal" | "vertical";
-  sizes: [number, number];
+  split: number;
   min: [number, number];
-  setMin: (i: 0 | 1, v: number) => void;
-  register: () => 0 | 1;
-  resizeTo: (first: number) => void;
+  registerMin: (v: number) => void;
   groupRef: { current: HTMLDivElement | null };
+  resizeTo: (first: number) => void;
 }
 
 const Ctx = createContext<GroupCtx | null>(null);
@@ -39,34 +41,43 @@ interface GroupProps {
 }
 
 export function ResizablePanelGroup({ orientation = "horizontal", defaultLayout = [50, 50], onLayoutChange, className, children, ...rest }: GroupProps) {
-  const [sizes, setSizes] = useState<[number, number]>(defaultLayout);
+  const [split, setSplit] = useState(defaultLayout[0]);
   const min = useRef<[number, number]>([10, 10]);
-  const count = useRef(0);
+  const nextMin = useRef(0);
+  nextMin.current = 0;
   const groupRef = useRef<HTMLDivElement | null>(null);
-  count.current = 0;
+
   const ctx: GroupCtx = {
     orientation,
-    sizes,
+    split,
     min: min.current,
-    setMin: (i, v) => (min.current[i] = v),
-    register: () => (count.current++ === 0 ? 0 : 1),
+    registerMin: (v) => {
+      min.current[nextMin.current++ as 0 | 1] = v;
+    },
     groupRef,
     resizeTo: (first) => {
       const lo = min.current[0];
       const hi = 100 - min.current[1];
       const a = Math.round(Math.min(hi, Math.max(lo, first)) * 100) / 100;
-      const next: [number, number] = [a, Math.round((100 - a) * 100) / 100];
-      setSizes(next);
-      onLayoutChange?.(next);
+      setSplit(a);
+      onLayoutChange?.([a, Math.round((100 - a) * 100) / 100]);
     },
   };
+
+  const style = {
+    "--split": `${split}%`,
+    // Not the shared `.grid` utility class: it carries a 24px gap this needs
+    // to be exactly 0, so display:grid is set here directly instead.
+    display: "grid",
+    gap: 0,
+    // 3 tracks, not 2: the handle is a grid child too, sized to its own content.
+    gridTemplateColumns: orientation === "horizontal" ? "var(--split) auto 1fr" : undefined,
+    gridTemplateRows: orientation === "vertical" ? "var(--split) auto 1fr" : undefined,
+  } as unknown as JSX.CSSProperties;
+
   return (
     <Ctx.Provider value={ctx}>
-      <div
-        ref={groupRef}
-        data-orientation={orientation}
-        class={cn("flex h-full w-full min-h-0 min-w-0", orientation === "vertical" && "flex-col", className, rest.class)}
-      >
+      <div ref={groupRef} data-orientation={orientation} style={style} class={cn("h-full w-full min-h-0 min-w-0", className, rest.class)}>
         {children}
       </div>
     </Ctx.Provider>
@@ -82,12 +93,9 @@ interface PanelProps {
 
 export function ResizablePanel({ minSize = 10, className, children, ...rest }: PanelProps) {
   const ctx = useContext(Ctx)!;
-  const i = ctx.register();
-  ctx.setMin(i, minSize);
-  const size = ctx.sizes[i];
-  const style: JSX.CSSProperties = { flex: `0 0 ${size}%`, minWidth: 0, minHeight: 0 };
+  ctx.registerMin(minSize);
   return (
-    <div data-panel="" data-panel-size={size} style={style} class={cn("min-h-0 min-w-0 overflow-hidden", className, rest.class)}>
+    <div data-panel="" class={cn("min-h-0 min-w-0 overflow-hidden", className, rest.class)}>
       {children}
     </div>
   );
@@ -107,7 +115,7 @@ export function ResizableHandle({ withHandle, className, ...rest }: HandleProps)
 
   const pct = (clientX: number, clientY: number) => {
     const r = ctx.groupRef.current?.getBoundingClientRect();
-    if (!r) return ctx.sizes[0];
+    if (!r) return ctx.split;
     return vertical ? ((clientY - r.top) / r.height) * 100 : ((clientX - r.left) / r.width) * 100;
   };
 
@@ -132,8 +140,8 @@ export function ResizableHandle({ withHandle, className, ...rest }: HandleProps)
     const dec = vertical ? "ArrowUp" : "ArrowLeft";
     const inc = vertical ? "ArrowDown" : "ArrowRight";
     let next: number | null = null;
-    if (e.key === dec) next = ctx.sizes[0] - step;
-    else if (e.key === inc) next = ctx.sizes[0] + step;
+    if (e.key === dec) next = ctx.split - step;
+    else if (e.key === inc) next = ctx.split + step;
     else if (e.key === "Home") next = ctx.min[0];
     else if (e.key === "End") next = 100 - ctx.min[1];
     if (next === null) return;
@@ -146,7 +154,7 @@ export function ResizableHandle({ withHandle, className, ...rest }: HandleProps)
       role="separator"
       tabIndex={0}
       aria-orientation={vertical ? "horizontal" : "vertical"}
-      aria-valuenow={Math.round(ctx.sizes[0])}
+      aria-valuenow={Math.round(ctx.split)}
       aria-valuemin={ctx.min[0]}
       aria-valuemax={100 - ctx.min[1]}
       aria-label={rest["aria-label"] ?? "Resize"}

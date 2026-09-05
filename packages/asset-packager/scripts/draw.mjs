@@ -1,10 +1,12 @@
 /**
  * Shared canvas geometry for the two fixture generators (`make-fixture.mjs`,
- * `make-sheet-fixture.mjs`): a face and a torso, drawn with plain canvas
- * calls, no model involved. Each caller tunes its own proportions.
+ * `make-sheet-fixture.mjs`) and `sheets.test.ts`: a face, a torso, and a
+ * labelled grid sheet, drawn with plain canvas calls, no model involved.
+ * Each caller tunes its own proportions.
  */
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
+import { createCanvas } from "@napi-rs/canvas";
 
 export function write(root, relative, buffer) {
   const path = join(root, relative);
@@ -125,4 +127,52 @@ export function drawTorso(
   }
 
   return { cx, neck, halfWidth };
+}
+
+/**
+ * A labelled grid sheet on opaque white with painted gutters, the way a
+ * model returns one. Without `names`, every one of `columns * rows` cells is
+ * drawn unconditionally and unlabelled. With `names`, only its `names.length`
+ * cells are visited at all; a falsy entry still gets a gutter box but stops
+ * there (no label, no draw call), every other cell gets a bold label.
+ * `draw(ctx, index, inner, name, cell)` paints inside the label band;
+ * `jitter(index, name)` offsets it by a few pixels.
+ */
+export function sheet({ columns, rows, cell = 512, labelBand = 0, names, jitter = () => [0, 0], draw }) {
+  const canvas = createCanvas(columns * cell, rows * cell);
+  const ctx = canvas.getContext("2d");
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  const band = cell * labelBand;
+  const count = names ? names.length : columns * rows;
+
+  for (let index = 0; index < count; index++) {
+    const name = names?.[index];
+    ctx.save();
+    ctx.translate((index % columns) * cell, Math.floor(index / columns) * cell);
+    ctx.strokeStyle = "#8a8a8a";
+    ctx.lineWidth = 3;
+    ctx.strokeRect(1.5, 1.5, cell - 3, cell - 3);
+    if (names && !name) {
+      ctx.restore();
+      continue;
+    }
+    if (name) {
+      ctx.fillStyle = "#111111";
+      ctx.font = `bold ${Math.round(cell * 0.05)}px sans-serif`;
+      ctx.fillText(name, cell * 0.04, band * 0.72);
+    }
+
+    const [dx, dy] = jitter(index, name);
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(4, band, cell - 8, cell - band - 4);
+    ctx.clip();
+    ctx.translate(dx, band + dy);
+    draw(ctx, index, cell - band, name, cell);
+    ctx.restore();
+    ctx.restore();
+  }
+
+  return canvas.toBuffer("image/png");
 }
