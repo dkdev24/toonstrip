@@ -2109,3 +2109,33 @@ committed there, pending your OK (per `UPSTREAM_SYNC.md`'s Safety section).
 41/46 audit items applied. `packages/core` changed (#14/#16/#19/#28) — the npm publish
 cascade (`@toonstrip/core`→`element`→`astro`) and `danielkimdev-astro`'s dependency bump
 are still pending your confirmation, per `UPSTREAM_SYNC.md`.
+
+## v0.15.8 — Publish cascade: core@0.1.9, element@0.1.11, astro@0.1.13
+
+**Date:** 2026-09-05
+
+### Changes
+
+Published the #14/#16/#19/#28 cuts (v0.15.7) through the full npm chain per
+`UPSTREAM_SYNC.md`: `@toonstrip/core` 0.1.8→0.1.9, `@toonstrip/element` 0.1.10→0.1.11
+(repointed at core 0.1.9), `@toonstrip/astro` 0.1.12→0.1.13 (repointed at element 0.1.11)
+— published in that order with `pnpm publish`. Registry metadata lagged ~60s again
+(same propagation-lag pattern as v0.15.4); waited it out rather than assuming failure.
+
+Verified with a clean-room `npm install @toonstrip/astro @toonstrip/element
+@toonstrip/core` in a non-workspace directory: dependency chain resolves correctly
+(astro→element@0.1.11→core@0.1.9), `element` imports with no DOM present, astro's SSR
+renderer runs and produces real placeholder HTML, and `@toonstrip/core`'s export list
+confirms `selectPose` is gone (audit #14) while `measureBalloon` is still present (#3's
+resolution — kept, not cut).
+
+`packages/core` v0.15.7's #3 investigation resolved: user confirmed leaving
+`measureBalloon`/`goalWidth`/`stackBalloons` untouched permanently, not deferred.
+`PONYTAIL_AUDIT.md` #3 moved to "verified stale, not cut."
+
+### Status
+
+42/46 audit items resolved (41 applied + #3 closed as false positive). Full npm chain
+internally consistent again. Next: propagate to `danielkimdev-astro` (bump `@toonstrip/
+astro` dependency, install, build, verify with a real browser render, commit) — pending
+push confirmation, per `UPSTREAM_SYNC.md`.

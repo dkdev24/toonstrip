@@ -64,14 +64,16 @@ landed and the build is green; everything else is untouched.
 
 **Verified stale on re-check, not cut:** #6 (`pack-example` has a real external test importer,
 `core/test/pack-example.test.ts`), #7 (pack `types.ts` is deliberately schema-only per
-`TOONSTRIP_DEV_PLAN.md:92-93`, not a stray core copy).
+`TOONSTRIP_DEV_PLAN.md:92-93`, not a stray core copy), **#3** (false positive, confirmed via
+user decision 2026-09-05 — see below, keep `measureBalloon`/`goalWidth`/`stackBalloons` as
+public API and load-bearing fallback, permanently, not just deferred).
 
 **Skipped, needs a human call:** #8 (`resizable.tsx` rewrite touches drag/keyboard behavior,
 needs a browser check, not just a green build), #46 (`sheetImage()` merge needs new shared code
 in `draw.mjs` plus fixture-regen verification, `draw.mjs`'s current exports don't cover it).
 
-**#3 — attempted, stopped, needs a product decision (2026-09-05):** not the safe cleanup the
-audit described. Two problems surfaced on inspection:
+**#3 — closed, not a cut (2026-09-05):** not the safe cleanup the audit described. Two problems
+surfaced on inspection:
 1. `measureBalloon`/`goalWidth` (and their constants) are re-exported from `packages/core/src/
    index.ts`'s public barrel and have their own dedicated 6-test `describe` block in
    `balloon.test.ts` testing them as general-purpose text measurement, independent of the
@@ -93,9 +95,9 @@ audit described. Two problems surfaced on inspection:
 
 Untouched: `stackBalloons`, `speakerCorridor`, `clearOfFaces`, `HeadGeometry.faces`,
 `measureBalloon`, `goalWidth`, `TARGET_ASPECT`, `WIDTH_BIAS`, `LayoutResult`, the
-`layoutBalloons` guard. Needs your call before any further work: the intended fallback
-redesign (force-fit only the failing balloon vs. some other approach) and whether breaking the
-public `measureBalloon`/`goalWidth` API is actually wanted.
+`layoutBalloons` guard. **User decision (2026-09-05): leave as-is.** `measureBalloon`/
+`goalWidth` stay public API; `stackBalloons` stays the fallback engine, in both repos. Not
+deferred — closed.
 
 **#14, #16, #19, #28 — landed toonstrip-side, verified not portable to `grues-in-comic`
 (2026-09-05):** see the Progress table above for the per-item reasoning (each checked against
