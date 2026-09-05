@@ -10,7 +10,7 @@
     "preview": "astro preview",
     "check": "node scripts/check-page.mjs",
     "test": "node scripts/validate-strips.mjs",
-    "test:e2e": "playwright test",
+    "test:e2e": "node scripts/test-e2e.mjs",
     "test:budgets": "node scripts/check-budgets.mjs",
     "og": "node scripts/build-og.mjs"
   },

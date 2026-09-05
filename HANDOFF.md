@@ -18,21 +18,21 @@ to `main` deploys prod (output `site/dist`; root `pnpm build` is the build).
 
 ## Last Session
 
-2026-09-05: Fixed the last Open Issue from v0.15.3: `@toonstrip/astro` was published
-against guard-less `element@0.1.8`, crashing Astro's own SSG (`ReferenceError:
-HTMLElement is not defined`). No code change needed — `element@0.1.10` already had the
-SSR guard; astro's dep was just stale. Bumped astro to 0.1.12, republished with `pnpm
-publish`, verified clean-room. Full version set is now internally consistent — see
-`WORKLOG.md`'s v0.15.4 entry for the propagation-lag gotcha hit during verification
-(publish succeeded immediately but `npm view`/`install` kept resolving the old version
-for ~1 min; don't mistake that for a failed publish).
+2026-09-05: Fixed `site`'s Playwright suite (all 8 playground specs, `PONYTAIL_AUDIT.md`
+#42's caveat) — not a code bug. Astro 7's `astro preview` always forks a detached daemon
+and exits immediately, which Playwright's `webServer.command` can't track; a stale
+daemon from an unrelated project was also squatting on port 4321 and got silently reused
+via `reuseExistingServer`. Fixed with `site/scripts/test-e2e.mjs` (starts the daemon, waits, runs Playwright with
+the server already live, stops it after) and a repo-specific test port (43210). See
+`WORKLOG.md` v0.15.5. Also caught up public `CHANGELOG.md` (0.15.1–0.15.4 were missing)
+and republished `@toonstrip/astro` (v0.15.4).
 
 ## Next Actions
 
-1. **Fix `site`'s Playwright suite** — 8/8 playground specs fail, pre-existing. Blocks
-   #12 from being verified by more than a green build.
+1. **#12** (`json-position.ts` rewrite, `PONYTAIL_AUDIT.md`) — unblocked, not attempted.
 2. **Upstream port to `grues-in-comic`** per `UPSTREAM_SYNC.md`: #18/#37/#38 landed
-   toonstrip-side only; #3/#14/#16/#19/#28 never attempted.
+   toonstrip-side only; #3/#14/#16/#19/#28 never attempted — needs your go-ahead before
+   the publish cascade (`UPSTREAM_SYNC.md`'s Safety section).
 3. **S9 Korean locale** per `SITE_DEV_PLAN.md` §13 — unblocked.
 
 ## Open Issues
@@ -44,5 +44,7 @@ for ~1 min; don't mistake that for a failed publish).
   version — a same-version republish 403'ing as "already published" confirms it went
   through; don't assume failure from stale metadata.
 - `toonstrip pack validate` misses a missing torso (checks NEUTRAL only, source-side
-  validator does catch it); `site`'s 8 playground e2e specs all fail (pre-existing,
-  `NOTES.md` M1–M5 covers manual-only Playwright scripts).
+  validator does catch it).
+- This machine runs multiple Astro projects sharing one global `astro preview` daemon
+  lock/default port (4321); a manual preview here needs its own `--port` + `preview
+  stop` cleanup. `site`'s e2e suite already handles this itself (port 43210).

@@ -66,17 +66,22 @@ needs a browser check, not just a green build), #46 (`sheetImage()` merge needs 
 in `draw.mjs` plus fixture-regen verification, `draw.mjs`'s current exports don't cover it).
 
 **Not attempted — flagged:**
-- #12: `json-position.ts` rewrite — blocked on fixing `site`'s Playwright suite (see caveat
-  below), can't be verified by a passing browser test yet.
+- #12: `json-position.ts` rewrite — was blocked on the Playwright suite (fixed, see below),
+  now unblocked; not yet attempted.
 - #3, #14, #16, #19, #28 (†, upstream-shared `packages/core` files): applying the toonstrip-side
   edit is safe, but `UPSTREAM_SYNC.md` requires a manual port into `grues-in-comic` (with an ADR
   for #3's behavioral change, `gate`/`density` re-runs) and then a publish cascade through
   `@toonstrip/core`→`element`→`astro` — the publish/push steps need your confirmation per that
   doc's Safety section, so these were left for a dedicated session.
 
-**Caveat on #42's verification (still open):** `site`'s Playwright suite (`pnpm test:e2e`) fails
-all 8 playground specs, and it fails identically on a clean tree at `ee908f8` — pre-existing, not
-caused by any of these cuts. Fixing that suite is the prerequisite for confidently doing #12.
+**#42's verification caveat resolved (2026-09-05):** `site`'s Playwright suite (`pnpm test:e2e`)
+was never a code bug — Astro 7's `astro preview` always forks a detached background daemon and
+exits immediately, which Playwright's `webServer.command` can't track as a foreground process
+(reports "exited early"). `site/scripts/test-e2e.mjs` now starts the daemon itself, waits for it
+to answer, runs Playwright with `reuseExistingServer: true` (which sees it already up and never
+spawns `command`), then always stops the daemon after. `playwright.config.ts` also moved off port
+4321 (Astro's own default) to a repo-specific `43210`, since a stale daemon from an unrelated
+project on this machine was squatting on 4321 and got silently reused. All 8 specs pass now.
 
 ## Two standing caveats
 

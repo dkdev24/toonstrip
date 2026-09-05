@@ -1996,3 +1996,42 @@ already-published). Waited and re-verified rather than assuming the publish brok
 
 Done. `astro` is now the last package on the "internally consistent" version set;
 HANDOFF.md's Open Issues line for this is cleared.
+
+## v0.15.5 — Fix `site`'s Playwright suite (was pre-existing, not a code bug)
+
+**Date:** 2026-09-05
+
+### Changes
+
+Investigated the 8/8 `pnpm test:e2e` playground-spec failures flagged in `PONYTAIL_AUDIT.md`.
+Not a bug in any audited code: Astro 7's `astro preview` always forks a detached background
+daemon and the invoking process exits immediately after confirming it's up — Playwright's
+`webServer.command` expects the given command to *be* the long-running server, so it saw the
+immediate exit and reported "Process from config.webServer exited early" before ever reaching
+individual specs.
+
+A second, compounding issue during diagnosis: `playwright.config.ts` used port 4321, Astro's own
+default — a stale `astro preview` daemon from an unrelated project on this machine (`danielkimdev-
+astro`) was already bound to it, so `reuseExistingServer: true` silently reused *that* site
+instead of failing loudly, producing a page-snapshot with an unrelated `FontFamilyNotFound` error
+and zero `<comic-strip>` elements.
+
+Fixed:
+- `playwright.config.ts`: port moved from 4321 to a repo-specific `43210`.
+- `site/scripts/test-e2e.mjs` (new): starts the `astro preview --background` daemon itself, polls
+  the URL until it answers, runs Playwright (which sees the server already live via
+  `reuseExistingServer: true` and never invokes `command` at all, sidestepping the daemon/
+  foreground mismatch), then always stops the daemon afterward.
+- `site/package.json`: `test:e2e` now runs the new script instead of bare `playwright test`.
+
+Also stopped a stray 61-hour-old `astro preview` daemon left running for *this* repo (port 4323,
+from an earlier session) that was holding Astro's global preview-server lock — did not touch the
+unrelated project's process on 4321, out of scope.
+
+Verified: `pnpm --filter toonstrip-site test:e2e` passes 8/8 from a cold state (no daemon
+running beforehand), confirmed reproducible on a second run, confirmed the daemon is stopped
+afterward both times. Root `pnpm build` still green.
+
+### Status
+
+Done. `PONYTAIL_AUDIT.md`'s #42 caveat cleared; #12 (`json-position.ts` rewrite) is unblocked.
