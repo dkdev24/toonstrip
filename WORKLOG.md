@@ -1969,3 +1969,30 @@ Site/repo 0.15.3. 11 packages on npm, all internally consistent: schema 0.1.3
 cli 0.2.4, react 0.1.3, vue 0.1.2, next 0.1.2, packs 0.1.1, asset-packager 0.2.0. Full
 clean-room verification passed: no `workspace:*` strings anywhere, real code paths
 exercised (render a PNG, import with no DOM), not just successful imports.
+
+## v0.15.4 — `@toonstrip/astro` SSG crash fix
+
+**Date:** 2026-09-05
+
+### Changes
+
+Fixed the Open Issue from v0.15.3: `@toonstrip/astro@0.1.11` was published against
+`@toonstrip/element@0.1.8`, which lacked the SSR guard (`typeof HTMLElement !==
+"undefined"`) added around `ComicStripElement`'s class declaration. Any Astro site
+running `astro build` (Node, no DOM) crashed on `ReferenceError: HTMLElement is not
+defined` the moment the integration's client module was reached. No code changes needed
+— the guard already existed in `element@0.1.10`; astro's own package.json dependency was
+just stale. Bumped astro to 0.1.12, republished via `pnpm publish` (workspace:* correctly
+rewritten this time), verified with a clean-room `npm install @toonstrip/astro@0.1.12` in
+a non-workspace dir with no DOM present: imported `@toonstrip/element` directly (no
+throw) and called the SSR renderer's `renderToStaticMarkup` (real placeholder HTML back).
+
+First `pnpm publish` attempt reported success but `npm view`/`npm install` kept resolving
+to the old 0.1.11 for about a minute — registry metadata-CDN propagation lag, not a
+failed publish (confirmed by a same-version republish attempt correctly 403'ing as
+already-published). Waited and re-verified rather than assuming the publish broke.
+
+### Status
+
+Done. `astro` is now the last package on the "internally consistent" version set;
+HANDOFF.md's Open Issues line for this is cleared.
