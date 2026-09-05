@@ -6,6 +6,58 @@ shipped. Written for users; the engineering history behind each entry is in `WOR
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.15.4 — 2026-09-05
+
+**Packages:** `@toonstrip/astro` 0.1.12; everything else unchanged since 0.15.3.
+
+### Fixed
+
+- `@toonstrip/astro` no longer crashes an Astro static build (`astro build`) with
+  `ReferenceError: HTMLElement is not defined`. If you're on `@toonstrip/astro` 0.1.11 or
+  earlier, upgrade to 0.1.12.
+
+## 0.15.3 — 2026-09-05
+
+**Packages:** `@toonstrip/core` 0.1.8, `@toonstrip/cli` 0.2.4, `@toonstrip/element`
+0.1.10, `@toonstrip/vue` 0.1.2, `@toonstrip/react` 0.1.3, `@toonstrip/next` 0.1.2.
+
+### Fixed
+
+- A server-side rendering crash (`ReferenceError: HTMLElement is not defined`) is fixed in
+  `@toonstrip/element`, and inherited by `@toonstrip/react`, `@toonstrip/vue`, and
+  `@toonstrip/next` — all now safe to import with no DOM present (SSR, static builds,
+  tests).
+- A few versions published earlier the same day (`@toonstrip/react` 0.1.1,
+  `@toonstrip/cli` 0.2.2/0.2.3, `@toonstrip/element` 0.1.9, `@toonstrip/vue` 0.1.1) failed
+  to import at all and are deprecated on npm. Upgrade past them to the versions above.
+
+## 0.15.2 — 2026-09-05
+
+**Packages:** `@toonstrip/next` 0.1.2 (deprecated), `@toonstrip/react` 0.1.3,
+`@toonstrip/cli` 0.2.4.
+
+### Changed
+
+- **`@toonstrip/next` is deprecated.** Its `"use client"` `<ComicStrip>` now lives
+  directly in `@toonstrip/react`, and its SSR placeholder helper is `renderPlaceholder`
+  from `@toonstrip/cli`. Existing installs keep working — `next` is now a compatibility
+  re-export, not removed — but new Next.js projects should import from `react`/`cli`
+  directly.
+
+### Fixed
+
+- Internal cleanup across the rendering core, CLI, and asset packager (dead code,
+  duplicate helpers, a faster schema validator). No user-visible behavior change.
+
+## 0.15.1 — 2026-09-04
+
+**Packages:** `@toonstrip/asset-packager` 0.2.0 published.
+
+### Added
+
+- New docs page for `@toonstrip/asset-packager`: the full `init` → `validate` → `build
+  --preview` loop, both single-file and sheet inputs, and the CLI/library API.
+
 ## 0.15.0 — 2026-09-03
 
 **Packages:** `@toonstrip/asset-packager` 0.2.0 (built, not yet published); everything
