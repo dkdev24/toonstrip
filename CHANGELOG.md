@@ -8,7 +8,11 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## 0.15.6 — 2026-09-06
 
-**Packages:** `@toonstrip/asset-packager` 0.2.4; everything else unchanged since 0.15.5.
+**Packages:** `@toonstrip/asset-packager` 0.2.5; everything else unchanged since 0.15.5.
+(0.2.4 was published with an unresolved `workspace:*` dependency on
+`@toonstrip/core` — plain `npm publish` doesn't resolve the workspace
+protocol the way `pnpm publish` does, the same mistake 0.2.1 made. Broken
+for anyone installing it standalone; skip straight to 0.2.5.)
 
 ### Fixed
 
