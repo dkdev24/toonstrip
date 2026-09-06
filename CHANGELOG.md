@@ -6,6 +6,23 @@ shipped. Written for users; the engineering history behind each entry is in `WOR
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.15.5 — 2026-09-06
+
+**Packages:** `@toonstrip/asset-packager` 0.2.3; everything else unchanged since 0.15.4.
+
+### Fixed
+
+- `toonstrip-pack template`'s reference sheets no longer bake instructional
+  guide text (`"centre square is kept"`, `"horizon"`, `"chin rule — base of
+  neck stub sits here"`, etc.) into the cell content area at readable
+  contrast. Image models generating from the reference would sometimes
+  reproduce that text verbatim as if it were scene content, even though the
+  prompt explicitly says not to — text is a much easier thing for a model to
+  copy than "ignore this per an instruction." The graphical guides (dashed
+  horizon/centre-line, cell bounding boxes) are unchanged; only the spelled-out
+  captions inside the content area are gone. The cropped id-label header band
+  is unaffected.
+
 ## 0.15.4 — 2026-09-05
 
 **Packages:** `@toonstrip/astro` 0.1.12; everything else unchanged since 0.15.3.

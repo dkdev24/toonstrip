@@ -80,11 +80,6 @@ function drawFaceGuides(ctx: Ctx, w: number, h: number): void {
   ctx.stroke();
   // The neck stub: a short box hanging below the chin rule.
   ctx.strokeRect(centre - w * 0.075, chin, w * 0.15, h * 0.1);
-
-  ctx.fillStyle = LABEL;
-  ctx.font = `${Math.round(h * 0.05)}px sans-serif`;
-  ctx.fillText("chin rule — base of neck stub sits here", w * 0.05, chin - h * 0.02);
-  ctx.fillText("head ~70% of cell width", w * 0.05, h * 0.08);
 }
 
 function drawTorsoGuides(ctx: Ctx, w: number, h: number): void {
@@ -114,11 +109,6 @@ function drawTorsoGuides(ctx: Ctx, w: number, h: number): void {
   ctx.lineTo(centre - half, neck + h * 0.26);
   ctx.closePath();
   ctx.stroke();
-
-  ctx.fillStyle = LABEL;
-  ctx.font = `${Math.round(h * 0.05)}px sans-serif`;
-  ctx.fillText("neck rule — collar opening sits here", w * 0.05, neck - h * 0.02);
-  ctx.fillText("body runs off the bottom edge", w * 0.05, h * 0.97);
 }
 
 function drawBackdropGuides(ctx: Ctx, w: number, h: number): void {
@@ -131,11 +121,6 @@ function drawBackdropGuides(ctx: Ctx, w: number, h: number): void {
   ctx.stroke();
   ctx.setLineDash([]);
   ctx.strokeRect(w * 0.5 - h * 0.5, 0, h, h);
-  ctx.fillStyle = LABEL;
-  ctx.font = `${Math.round(h * 0.05)}px sans-serif`;
-  ctx.fillText("horizon", w * 0.04, h * 0.6);
-  ctx.fillText("full-bleed scene, no characters", w * 0.04, h * 0.96);
-  ctx.fillText("centre square is kept", w * 0.5 - h * 0.5 + h * 0.04, h * 0.08);
 }
 
 export function renderTemplate(options: TemplateOptions): Promise<TemplateResult> {
