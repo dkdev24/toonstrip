@@ -23,7 +23,7 @@ import {
 } from "./grid.js";
 import { register, NO_SHIFT } from "./register.js";
 import { alphaBox, alphaStats, readPng } from "./image.js";
-import { parsePartName, FILL_WINDOW, type AssetImageSpec, type PartKind } from "./spec.js";
+import { parsePartName, FACE_CHIN_FRACTION, FILL_WINDOW, type AssetImageSpec, type PartKind } from "./spec.js";
 import type { Diagnostic } from "./diagnostic.js";
 import type {
   BackdropSheetDecl, CharacterSheetDecl, SheetDecl, SourceBackdrop, SourceCharacter, SourcePart,
@@ -77,13 +77,20 @@ function enlargeWithoutClipping(
   return raster;
 }
 
+/** How far past nominal a label-banded row boundary may drift — the label sits
+ * almost flush against each row's own top edge (`template.ts`'s 3px inset), so
+ * any real boundary is within a few px of nominal; further than that is
+ * someone else's label, not a gutter. */
+const LABEL_ROW_FORWARD_DRIFT = 4;
+
 /** Cell boundaries on both axes, gutters found near where they were expected. */
 function gridBoundaries(sheet: Raster, grid: Grid, decl: SheetDecl, transparent: boolean) {
   const profiles = transparent ? alphaProfiles(sheet) : uniformityProfiles(sheet);
   const window = decl.gutterWindow ?? 0.2;
+  const rowForwardReach = decl.labelBand ? LABEL_ROW_FORWARD_DRIFT : undefined;
   return {
     x: boundaries(sheet.width, grid.columns, profiles.columns, window),
-    y: boundaries(sheet.height, grid.rows, profiles.rows, window),
+    y: boundaries(sheet.height, grid.rows, profiles.rows, window, rowForwardReach),
   };
 }
 
@@ -118,6 +125,23 @@ function trimCell(cell: Raster, decl: SheetDecl): Raster {
     width: banded.width - inset * 2,
     height: banded.height - inset * 2,
   });
+}
+
+/**
+ * A face is head-only (`docs/asset-image-spec.md` §3) — nothing below the
+ * chin line `template.ts`'s guide draws (`FACE_CHIN_FRACTION`). A model that
+ * reproduces the guide anyway — a neck stub, the guide's own dashed lines —
+ * has that erased before anything measures the cell, rather than letting it
+ * inflate the alpha box and drag the convention join down off the real chin.
+ */
+function eraseBelowChin(raster: Raster): Raster {
+  const cutY = Math.round(raster.height * FACE_CHIN_FRACTION);
+  if (cutY >= raster.height) return raster;
+  const data = new Uint8ClampedArray(raster.data);
+  for (let y = cutY; y < raster.height; y++) {
+    for (let x = 0; x < raster.width; x++) data[(y * raster.width + x) * 4 + 3] = 0;
+  }
+  return { width: raster.width, height: raster.height, data };
 }
 
 export interface SlicedBackdrops {
@@ -288,6 +312,7 @@ export async function sliceCharacterSheet(
       }
 
       let cell = trimCell(cropRaster(sheet, cellBox(x, y, columnIndex, rowIndex)), decl);
+      if (parsed.kind === "face") cell = eraseBelowChin(cell);
       if (tolerance !== null) keyBackground(cell, tolerance);
       // The gutter check happens later, on the cell *after* scale
       // normalization — a raw slice that runs into the gutter because the

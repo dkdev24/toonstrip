@@ -24,6 +24,17 @@ export interface AssetImageSpec {
   backdropSize: number;
   /** How far the head sinks into the collar, in cell-space px. */
   joinOverlap: number;
+  /**
+   * Pack-time factor a face is resampled by before packing, anchored on its
+   * own join point (so the join stays put — only the head shrinks). `1`
+   * (default) keeps the big-headed cartoon proportion every part's fill
+   * window is tuned for; a pack after realistic human proportions sets this
+   * below 1. Applied once, baked into the packed sheet — the renderer never
+   * scales a face independently of its torso (`@toonstrip/core`'s
+   * `figure.ts`), so this is the only place a head:body ratio can be
+   * authored. Overridable per character via `SourceCharacterDecl.faceScale`.
+   */
+  faceScale: number;
 }
 
 export const DEFAULT_SPEC: AssetImageSpec = {
@@ -31,7 +42,27 @@ export const DEFAULT_SPEC: AssetImageSpec = {
   minInput: 256,
   backdropSize: 512,
   joinOverlap: 0,
+  faceScale: 1,
 };
+
+/**
+ * Fraction of a face cell's drawable height (below its label band) that is
+ * head. `template.ts`'s guide draws the chin line here; a model that
+ * reproduces the guide (drawing a neck stub or its dashed lines below the
+ * chin, despite being told not to) has that content erased before measuring
+ * — a face is head-only, per `docs/asset-image-spec.md` §3.
+ */
+export const FACE_CHIN_FRACTION = 0.86;
+
+/**
+ * Fraction of a torso cell's drawable height where `template.ts`'s guide
+ * draws the neck line — headroom above it for a gesture pose's raised arm.
+ * Unlike `FACE_CHIN_FRACTION`, this isn't a hard content boundary (a torso's
+ * real neck line can legitimately sit higher or lower than the guide's own
+ * nominal position, and a raised arm may reach anywhere in that headroom), so
+ * nothing is erased against it — it's used only to draw the guide itself.
+ */
+export const TORSO_NECK_FRACTION = 0.25;
 
 /**
  * How much of its canvas a part's drawing is expected to occupy. Outside the

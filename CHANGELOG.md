@@ -6,6 +6,42 @@ shipped. Written for users; the engineering history behind each entry is in `WOR
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.15.7 — 2026-09-07
+
+**Packages:** `@toonstrip/asset-packager` 0.3.0; everything else unchanged since 0.15.6.
+
+### Added
+
+- `faceScale`: a pack-wide or per-character factor (`source.json`'s `spec.faceScale` /
+  `characters[].faceScale`) that resamples a face before packing, anchored on its own
+  join point (the chin), so the join doesn't move — only the head's size does. Default
+  `1` keeps every existing pack's big-headed cartoon proportion (`@toonstrip/pack-comic-chat`
+  unaffected); below `1` shrinks the head for a realistic human proportion. This is the
+  only place a head:body ratio is authored — `@toonstrip/core`'s renderer composites a
+  face onto its torso at a strict 1:1 pixel join and never scales one independently of
+  the other, by design, so proportion has to be baked into the packed sheet itself.
+
+### Fixed
+
+- A sheet's row-boundary detection (`grid.ts`'s `boundaries()`) could drift a row
+  boundary through the *next* row's printed label into its art, when the current row's
+  own content ran up to the nominal boundary with no genuine empty line nearby — the
+  search would keep looking past the label for the first empty line, landing well past
+  it. Confirmed in a packed character sheet's face slice: the trimmed "NEUTRAL" face box
+  contained the real face art *plus* a baked-in label from the row below, which
+  corrupted the convention join (bottom-center of the trimmed box) and produced a
+  floating-head gap on every character in the pack. A label-banded sheet now caps how
+  far a row boundary may drift past its nominal position, since the true boundary is
+  known (by the template's own generation contract) to sit within a few px of it.
+- A face is head-only per `docs/asset-image-spec.md` §3 — confirmed against
+  `@toonstrip/pack-comic-chat`'s actual reference art, which has zero neck (the written
+  spec previously said otherwise: "a short neck stub below the chin"). A model that
+  draws a neck stub anyway, or reproduces the guide's own dashed lines below the chin
+  despite being told not to, now has that erased before the cell is ever measured
+  (`sheet.ts`'s `eraseBelowChin`, using the same chin fraction `template.ts`'s guide
+  draws at). The guide itself no longer draws a neck-stub box, and the generated prompt
+  text no longer asks for one.
+
 ## 0.15.6 — 2026-09-06
 
 **Packages:** `@toonstrip/asset-packager` 0.2.5; everything else unchanged since 0.15.5.

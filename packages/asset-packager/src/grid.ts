@@ -96,16 +96,29 @@ export function uniformityProfiles(raster: Raster): Profiles {
  * boundary then pulled to the emptiest line within `window` of where it was
  * expected. A sheet with no visible gutters keeps the nominal division, which
  * is the correct fallback rather than a failure.
+ *
+ * `forwardReach` caps how far a boundary may be pulled *past* nominal,
+ * independent of `window`'s backward reach — used to keep a label-banded row
+ * boundary from drifting through the next row's own printed label (which sits
+ * almost flush against that row's top edge) into its art. Omit it to search
+ * the full `window` both ways, the historical behaviour.
  */
-export function boundaries(length: number, count: number, profile: Float64Array, window = 0.2): number[] {
+export function boundaries(
+  length: number,
+  count: number,
+  profile: Float64Array,
+  window = 0.2,
+  forwardReach?: number,
+): number[] {
   const nominal = length / count;
   const reach = Math.floor(nominal * window);
+  const forward = forwardReach ?? reach;
   const edges = [0];
   for (let i = 1; i < count; i++) {
     const expected = Math.round(i * nominal);
     let best = expected;
     let bestScore = -1;
-    for (let x = Math.max(1, expected - reach); x <= Math.min(length - 1, expected + reach); x++) {
+    for (let x = Math.max(1, expected - reach); x <= Math.min(length - 1, expected + forward); x++) {
       // Prefer the emptiest line, and among equals the one closest to nominal.
       const score = profile[x]! - Math.abs(x - expected) / (reach + 1) * 0.05;
       if (score > bestScore) {

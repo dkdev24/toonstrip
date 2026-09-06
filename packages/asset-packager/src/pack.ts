@@ -8,16 +8,24 @@
  * **Join derivation** is the part that can produce a valid-but-wrong pack, so
  * it is deliberately layered (dev plan §14): an explicit anchor in
  * `source.json` wins, else a magenta marker pixel in the art, else the
- * convention — a face joins at the bottom-centre of its drawing (the chin, or
- * the base of a neck stub), a torso at the top-centre of its (the neck line).
- * The join point is derived **once per character, from its NEUTRAL pose**, and
- * reused for every other pose in canvas space. That is why the spec asks for
- * the head and body to stay put across poses: a raised arm moves a torso's
- * alpha box, but must not move its neck.
+ * convention — a face joins at the bottom-centre of its drawing (the chin), a
+ * torso at the top-centre of its (the neck line). The join point is derived
+ * **once per character, from its NEUTRAL pose**, and reused for every other
+ * pose in canvas space. That is why the spec asks for the head and body to
+ * stay put across poses: a raised arm moves a torso's alpha box, but must not
+ * move its neck.
+ *
+ * **Proportion** happens once more, right before shelf-packing: a character
+ * (or the pack) may declare `faceScale`, resampled into every face part here
+ * (`applyFaceScale`) so the packed sheet's own pixels already carry the
+ * correct head:body ratio — the renderer (`@toonstrip/core`) never scales a
+ * face independently of its torso, by design, so this is the only place that
+ * ratio can be authored.
  */
 
 import type { PackedAvatar, PackedPart } from "@toonstrip/core";
-import { createCanvas, toCanvas, type Box } from "./image.js";
+import { alphaBox, createCanvas, toCanvas, type Box } from "./image.js";
+import { scaleContent } from "./grid.js";
 import type { MeasuredPart } from "./measure.js";
 import type { SourceCharacter } from "./source.js";
 import { NO_SHIFT } from "./register.js";
@@ -142,15 +150,36 @@ function packedPart(
 }
 
 /**
+ * Resamples every face-kind part by `factor`, anchored on its own join point
+ * (bottom-centre of its alpha box — the chin), so the chin's pixel position
+ * is invariant under the transform: only the head shrinks around it, nothing
+ * about the join changes. A no-op at `factor === 1`. Reuses `scaleContent`,
+ * the same primitive the intra-kind NEUTRAL/pose scale-correction pass in
+ * `sheet.ts` already resamples poses with — this is the same operation,
+ * driven by a declared proportion instead of an automatic drift correction.
+ */
+function applyFaceScale(parts: MeasuredPart[], factor: number): MeasuredPart[] {
+  if (factor === 1) return parts;
+  return parts.map((part) => {
+    if (part.part.kind !== "face" || !part.box) return part;
+    const anchor = { x: part.box.x + part.box.width / 2, y: part.box.y + part.box.height };
+    const raster = scaleContent(part.raster, factor, anchor);
+    return { ...part, raster, box: alphaBox(raster) };
+  });
+}
+
+/**
  * Packs one character. Errors are the caller's problem: run
  * {@link import("./validate.js").validateMeasured} first — this assumes a
  * NEUTRAL face and torso exist.
  */
 export async function packCharacter(
   character: SourceCharacter,
-  parts: MeasuredPart[],
+  measuredParts: MeasuredPart[],
   spec: AssetImageSpec,
 ): Promise<PackedCharacter> {
+  const faceScale = character.faceScale ?? spec.faceScale;
+  const parts = applyFaceScale(measuredParts, faceScale);
   const { placed, width, height } = shelfPack(parts);
   const canvas = createCanvas(width, Math.max(height, 1));
   const ctx = canvas.getContext("2d");

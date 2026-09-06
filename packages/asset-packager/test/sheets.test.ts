@@ -15,7 +15,7 @@ import { join } from "node:path";
 import { validatePack } from "@toonstrip/cli";
 import { analyze } from "../src/analyze.js";
 import { buildPack } from "../src/build.js";
-import { gridFor } from "../src/grid.js";
+import { boundaries, gridFor } from "../src/grid.js";
 import { register } from "../src/register.js";
 import { renderTemplate, DEFAULT_CHARACTER_CELLS } from "../src/template.js";
 import type { Raster } from "../src/image.js";
@@ -83,6 +83,30 @@ function sourceWith(files: Record<string, Buffer | string>, meta: Record<string,
   }
   return dir;
 }
+
+describe("a label-banded row boundary never drifts past its own label", () => {
+  it("keeps the nominal division rather than swallowing the next row's label", () => {
+    // Row 0's own art runs right up to the nominal boundary (no empty line
+    // there); row 1's printed label sits almost flush with its own top edge,
+    // then a genuinely empty gap follows before row 1's real content. The
+    // unconstrained search (no forwardReach) finds that gap and drifts the
+    // boundary through the whole label — reproducing the real bug found in
+    // a packed character sheet's face slice. Capping forward drift keeps it
+    // at nominal instead.
+    const length = 200;
+    const nominal = length / 2;
+    const profile = new Float64Array(length).fill(0.1);
+    for (let x = 116; x < 130; x++) profile[x] = 1.0; // row 1's pre-content gap
+    profile[0] = 1;
+    profile[length - 1] = 1;
+
+    const unconstrained = boundaries(length, 2, profile, 0.2);
+    expect(unconstrained[1]).toBeGreaterThan(110); // demonstrates the bug
+
+    const capped = boundaries(length, 2, profile, 0.2, 4);
+    expect(Math.abs(capped[1]! - nominal)).toBeLessThanOrEqual(4);
+  });
+});
 
 describe("grid shapes are declared, never assumed", () => {
   it("derives whichever dimension was left out", () => {

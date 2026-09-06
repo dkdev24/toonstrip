@@ -2267,3 +2267,77 @@ Build green, 44 pages (up from 24 pre-S9 — every EN route now has a `/ko/` cou
 **Not done**: axe accessibility audit and Lighthouse mobile score on `/ko/` routes
 (§13.6 exit criteria, not yet measured), and Daniel's own review/sign-off of the KO copy
 — both are the explicit remaining exit criteria and belong in a follow-up session.
+
+---
+
+## v0.15.7 — Odyssey pack review surfaced three real M15 bugs: label bleed, neck anatomy, no proportion knob
+
+**Date:** 2026-09-07
+
+**Packages:** `@toonstrip/asset-packager` 0.2.5 -> 0.3.0.
+
+Driven by WhatIfClassics building its Odyssey pack's full sheet set for the first time
+(`toonstrip-pack build --preview joins.png`) — the diagnostic showed every one of 5
+characters' heads floating well above their bodies. Three distinct, real bugs, not one:
+
+1. **Row-boundary label bleed** (`grid.ts`'s `boundaries()`). The row-axis search picks
+   the emptiest line within ±20% of nominal; when a row's own art runs up to the nominal
+   boundary with no genuine gutter there, it drifts past the next row's printed label
+   (drawn almost flush with that row's own top edge, per `template.ts`'s own generation
+   contract) to the first empty line after it — swallowing the whole label into the
+   current row's slice. Confirmed directly: the packed "NEUTRAL face" box for a real
+   character contained the actual face art *plus* a baked-in "face-HAPPY" label from the
+   row below, which corrupted the convention join (bottom-center of the trimmed box).
+   Fixed by capping the row axis's forward drift to a few px when a `labelBand` is
+   declared (`gridBoundaries` -> `boundaries`'s new optional `forwardReach`), since the
+   true boundary is known by construction to sit within a few px of nominal, never a
+   full window away. Regression test: a hand-crafted profile reproducing exactly this
+   shape (row 0 content at the boundary, a genuine gap only after row 1's label).
+2. **Face anatomy didn't match the actual reference implementation.** `docs/
+   asset-image-spec.md` said a face is a head "with a short neck stub below the chin" —
+   checked against `@toonstrip/pack-comic-chat`'s real `dan`/`anna` art (crop either
+   one's `face-NEUTRAL`) and the drawing has *zero* neck, ends right at the jaw; the
+   torso's own collar sits open (an empty background gap the head composites into, not
+   a drawn neck meeting the face's). The written spec had drifted from its own cited
+   reference. Corrected the doc, removed `template.ts`'s neck-stub guide box and its
+   prompt-text ask for one, and added `sheet.ts`'s `eraseBelowChin` — a sheet-sliced
+   face has anything below its own guide's chin line (`FACE_CHIN_FRACTION`, shared
+   between the guide-drawing and the crop) erased before it's ever measured, so a model
+   that draws a neck stub anyway (or reproduces the guide's own dashed lines past the
+   chin) doesn't ship it.
+3. **No way to author a realistic (non-cartoon) head:body proportion.** Every part is
+   independently normalized to `spec.cell` and alpha-trimmed — a part's output size is
+   purely `(its own ink-fill-fraction) * cell`, with native input resolution cancelling
+   out entirely. So face:torso proportion was controlled *only* by the fill-window
+   convention (face 50-98%, torso 55-100% of their own same-size canvas), which is
+   exactly why it always comes out big-headed: `@toonstrip/core`'s `figure.ts` composites
+   a face onto its torso at a strict 1:1 pixel join by deliberate design ("a face never
+   scales differently from the torso it is composited onto") — correctly not the place
+   to add a scale factor. Added `faceScale` (pack-wide `spec.faceScale`, per-character
+   override) instead, applied once in `pack.ts`'s `packCharacter()` before shelf-packing:
+   reuses the existing `scaleContent()` primitive (the same one the intra-kind
+   NEUTRAL/pose scale-correction pass already resamples poses with), anchored on the
+   face's own join point so the chin's pixel position — and the join — is invariant
+   under the resample; only the head's size changes. Zero changes to `@toonstrip/core`,
+   zero new `PackedPart` fields, zero risk to the `grues-in-comic` sync obligation
+   (`UPSTREAM_SYNC.md`) since nothing shared changed.
+
+A fourth issue was found but **not** fixed in shared code: some torso art (specifically
+odysseus's) has the guide's own dashed lines baked into its headroom margin (above the
+neck line), pulling that torso's alpha box — and its join — up off the true collar. A
+position-based crop (mirroring `eraseBelowChin`) broke the registration test, because
+(unlike a face's chin) a torso's neck line is *not* a hard content boundary — a gesture
+pose's raised arm legitimately uses that same headroom, and a fixed-fraction cut clips
+real art in a fixture whose neck sits at a different fraction. A color-based erase (match
+the guide's own grey) tried as a one-off script directly on Odyssey's source PNGs instead
+— reverted after it ate into odysseus's actual armor art (which happens to be a similar
+grey), corrupting his torso's alpha-box measurement badly enough to trigger a spurious
+2x auto-enlarge. Left as a known, character-specific art-cleanup item; Odyssey's pack
+default `faceScale: 0.6` (visually tuned) reads correctly on 4 of 5 characters, odysseus
+alone keeps a small visible gap until his torso art gets a manual touch-up.
+
+Verified: `pnpm -r run test` and `pnpm -r run build` green across the whole monorepo
+(only `asset-packager`'s own suite touched; `core`'s `render.test.ts`, real
+`pack-comic-chat` assets, unchanged and passing — confirms zero behavior change for any
+pack that doesn't set `faceScale`). Odyssey's real pack rebuilt and eyeballed via
+`--preview joins.png` at each step.

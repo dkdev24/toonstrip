@@ -146,6 +146,32 @@ describe("the fixture source pack", () => {
     expect(sunk.avatar.faces[0]!.cy).toBe(flush.avatar.faces[0]!.cy);
   });
 
+  it("resamples a face by faceScale, anchored on its own join point, torso untouched", async () => {
+    // A face never scales differently from its torso at render time
+    // (`@toonstrip/core`'s figure.ts) — proportion is authored here, once,
+    // baked into the packed sheet's own pixels.
+    const { source, measured } = await analyze(FIXTURE);
+    const character = source.characters[0]!;
+    const parts = measured.parts.get(character.id)!;
+    const full = await packCharacter(character, parts, { ...source.spec, faceScale: 1 });
+    const half = await packCharacter(character, parts, { ...source.spec, faceScale: 0.5 });
+
+    const fullFace = full.avatar.faces[0]!;
+    const halfFace = half.avatar.faces[0]!;
+    const near = (actual: number, expected: number) => expect(Math.abs(actual - expected)).toBeLessThanOrEqual(1);
+    near(halfFace.figure.width, fullFace.figure.width * 0.5);
+    near(halfFace.figure.height, fullFace.figure.height * 0.5);
+
+    // The join point is invariant under the scale: the face's own chin
+    // (its own cx/cy, the offset from its box to the join) scales the same way.
+    near(halfFace.cx, fullFace.cx * 0.5);
+    near(halfFace.cy, fullFace.cy * 0.5);
+
+    expect(half.avatar.torsos[0]!.figure).toEqual(full.avatar.torsos[0]!.figure);
+    expect(half.avatar.torsos[0]!.cx).toBe(full.avatar.torsos[0]!.cx);
+    expect(half.avatar.torsos[0]!.cy).toBe(full.avatar.torsos[0]!.cy);
+  });
+
   it("records emotion angles the renderer's wheel understands", async () => {
     const { characters } = await buildPack({ source: FIXTURE, out: tmp() });
     const faces = characters[0]!.avatar.faces;

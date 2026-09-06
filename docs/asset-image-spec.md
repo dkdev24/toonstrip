@@ -89,29 +89,44 @@ proportion the renderer is built around.
 
 This is the part that decides whether the head lands on the neck.
 
-**A face** is a head — skull, hair, features — with a **short neck stub** below
-the chin. Draw it:
+**A face** is **head-only** — skull, hair, features, ending at the jaw. No
+neck: checked against the actual reference art this format is ported from
+(`@toonstrip/pack-comic-chat`'s `dan`/`anna` — crop either one's `face-NEUTRAL`
+and the drawing stops right at the chin, nothing below it). Draw it:
 
 - centred horizontally,
 - filling 50–98% of the canvas width (outside that window is a warning),
-- with the **bottom edge of the neck stub** as the join point, so the drawing
-  ends there and nothing hangs below it,
+- with the **chin** — the bottom edge of the head silhouette — as the join
+  point, so the drawing ends there and nothing hangs below it,
 - not clipped at the top or the sides.
+
+The packager backs this up: a sheet-sliced face has anything below its own
+guide's chin line erased before it's ever measured (`FACE_CHIN_FRACTION`,
+`sheet.ts`'s `eraseBelowChin`) — a model that draws a neck stub anyway (or
+reproduces the guide's own dashed lines past the chin, despite being told not
+to) has it removed rather than shipped.
 
 **A torso** is a full standing body — shoulders, arms, torso, legs, down to
 bare feet or footwear — not a waist-cropped bust (this matches the format's
 Comic Chat origins: see e.g. `@toonstrip/pack-comic-chat`'s `dan`/`anna`
-sheets, full body with the head composited on separately). Draw it:
+sheets, full body with the head composited on separately). It has **no neck
+either** — the same reference art's collar sits open, an empty background
+gap the head composites into from behind, not a drawn neck meeting the
+face's. Draw it:
 
 - centred horizontally,
 - shoulders filling 55–100% of the canvas width, with room left above the
   shoulder line and to the sides — a gesture pose (`WAVE`, `POINTOTHER`, a
   raised arm) needs somewhere to go without clipping the canvas edge,
 - with the **collar opening below the top edge**, not touching it — leave
-  that headroom rather than pinning the neck line to the very top,
+  that headroom rather than pinning the neck line to the very top, and leave
+  it empty: nothing drawn there, not even a hint of neck,
 - **feet cut off by the bottom edge of the canvas.** A torso floating above
   the bottom earns a warning; the renderer crops figures at the panel floor,
   so the feet need to run off the bottom of the canvas, not stop short of it.
+
+Face and torso fill-percentage no longer have to match each other to get a
+correct head:body proportion — see `faceScale` below.
 
 **A backdrop** is a fully painted **square** image, at least 400×400 (512 is the
 default output size), with the horizon around the lower third — the renderer
@@ -137,9 +152,9 @@ When a pose cannot follow §3 — hair falling below the chin, a hunched
 shoulder — mark the join instead. Two ways, both beating the convention:
 
 1. **A marker pixel.** A single fully opaque magenta pixel (`#ff00ff`, alpha
-   255) at the join point: the base of the neck stub on a face, the neck line on
-   a torso. The packager finds it, uses it, and erases it before packing, so it
-   never reaches the sheet. Draw it only on the NEUTRAL pose — that is the one
+   255) at the join point: the chin on a face, the neck line on a torso. The
+   packager finds it, uses it, and erases it before packing, so it never
+   reaches the sheet. Draw it only on the NEUTRAL pose — that is the one
    the join is read from. (A marker larger than a dot earns a warning; it is
    averaged to its centroid.)
 
@@ -186,9 +201,11 @@ Spec knobs:
 | `minInput` | `256` | Smallest accepted input edge. |
 | `backdropSize` | `512` | Output backdrop edge. |
 | `joinOverlap` | `0` | Pixels (cell space) the head sinks into the collar. 3–6 usually reads better than 0. |
+| `faceScale` | `1` | Factor every face is resampled by before packing, anchored on its own join point (the chin) — the join itself doesn't move, only the head's size does. `1` keeps the big-headed cartoon proportion §2 describes (head and torso independently filling similar fractions of the same-size canvas gives a head nearly as wide as the shoulders). Below `1` shrinks the head for a more human proportion — Odyssey's cast uses `0.6`. This is the *only* place a head:body ratio is set: `@toonstrip/core`'s renderer composites a face onto its torso at a strict 1:1 pixel join and never scales one independently of the other, by design. |
 
 Per character: `name`, `type` (`COMPLEX`), `torsoFirst` (draw the torso over the
-face's collar instead of under it), `anchors`, `joinOverlap`.
+face's collar instead of under it), `anchors`, `joinOverlap`, `faceScale`
+(overrides the pack's default for this one character).
 
 ## 7. Errors vs warnings
 

@@ -15,6 +15,7 @@
 
 import { createCanvas } from "./image.js";
 import { gridFor, type Grid } from "./grid.js";
+import { FACE_CHIN_FRACTION, TORSO_NECK_FRACTION } from "./spec.js";
 
 export type TemplateKind = "character" | "backdrop";
 
@@ -64,10 +65,17 @@ type Ctx = ReturnType<ReturnType<typeof createCanvas>["getContext"]>;
 // instead of a symmetric, camera-facing one.
 const TURN_SHIFT = 0.06;
 
-/** Guides use the cell's real width and its height *below* the label band. */
+/**
+ * Guides use the cell's real width and its height *below* the label band.
+ * A face is head-only (`docs/asset-image-spec.md` §3) — the chin line is
+ * where the drawing ends, nothing guided or drawn below it. (The slicer
+ * erases anything a model draws past this line regardless — `sheet.ts`'s
+ * `eraseBelowChin`, same `FACE_CHIN_FRACTION` — but the guide shouldn't
+ * invite a neck stub in the first place.)
+ */
 function drawFaceGuides(ctx: Ctx, w: number, h: number): void {
   const centre = w * (0.5 + TURN_SHIFT);
-  const chin = h * 0.86;
+  const chin = h * FACE_CHIN_FRACTION;
   const rx = w * 0.27;
   const ry = h * 0.28;
   ctx.strokeStyle = GUIDE;
@@ -76,7 +84,7 @@ function drawFaceGuides(ctx: Ctx, w: number, h: number): void {
   ctx.setLineDash([6, 6]);
   ctx.beginPath();
   ctx.moveTo(centre, h * 0.04);
-  ctx.lineTo(centre, h * 0.98);
+  ctx.lineTo(centre, chin);
   ctx.stroke();
   ctx.beginPath();
   ctx.moveTo(w * 0.05, chin);
@@ -94,8 +102,6 @@ function drawFaceGuides(ctx: Ctx, w: number, h: number): void {
   ctx.lineTo(centre + rx * 1.18, chin - ry * 0.85);
   ctx.lineTo(centre + rx * 0.8, chin - ry * 0.55);
   ctx.stroke();
-  // The neck stub: a short box hanging below the chin rule.
-  ctx.strokeRect(centre - w * 0.075, chin, w * 0.15, h * 0.1);
 }
 
 /**
@@ -110,7 +116,7 @@ function drawTorsoGuides(ctx: Ctx, w: number, h: number): void {
   // Neck sits well below the top edge (not h*0.1) so a raised-arm gesture
   // (torso-WAVE, POINTOTHER, ...) has headroom to stay inside the cell
   // instead of clipping against the top guide.
-  const neck = h * 0.25;
+  const neck = h * TORSO_NECK_FRACTION;
   const shoulder = w * 0.325;
   // The near (right) side reads slightly larger/closer, the far (left)
   // side slightly smaller/set back — a 3/4-turn cue, not a frontal mirror.
@@ -277,8 +283,8 @@ Style: [describe the world once — palette, line weight, era, mood].`;
 
 Every cell is the same character, drawn at the same size and in the same style throughout — this is one character sheet, not ${names.length} separate drawings. Flat colour, clean hard-edged outlines, no shadows, no gradients, no background scenery. Every cell: 3/4 view, head and body turned to face screen-right, same angle throughout — not a frontal portrait (the renderer mirrors this art horizontally to face the other way when two characters share a scene, so it must start off-axis, not symmetric).
 
-- \`face-*\` cells: the head only — skull, hair, features — plus a short neck stub, and nothing wider than that stub (no shoulders, no collar, no chest — the torso cells supply those separately, and a face that already includes them will double up when composited). Centred, about 55% of the cell width, with the base of the stub on the dashed chin rule. The head must be the same size and in the same position in every face cell; only the eyes, brows and mouth change.
-- \`torso-*\` cells: a full standing body — shoulders, arms, torso, legs, down to bare feet or footwear — not a waist-cropped bust. No head, no neck, no chin: the drawing starts at the collarbone, where the face composites on separately. Centred, shoulders about 65% of the cell width, with clear empty margin above the shoulder line (a raised arm, e.g. torso-WAVE, must stay inside that margin, not extend past the cell edge) and to the sides, neck opening on the dashed neck rule, feet touching the bottom edge of the cell — not floating above it with dead space below. The body must be the same size and in the same position in every torso cell; only the arms change. Face and torso fill-percentage are matched on purpose: they set the head-to-shoulder proportion of the composited character, since both are drawn at native pixel scale onto the same-size canvas and neither is rescaled to match the other — keep the two ratios matched if you adjust either one.
+- \`face-*\` cells: the head only — skull, hair, features — nothing below the jaw (no neck, no shoulders, no collar, no chest — the torso cells supply those separately, and a face that draws any of them will double up when composited). Centred, about 55% of the cell width, ending exactly on the dashed chin rule — nothing drawn below it. The head must be the same size and in the same position in every face cell; only the eyes, brows and mouth change.
+- \`torso-*\` cells: a full standing body — shoulders, arms, torso, legs, down to bare feet or footwear — not a waist-cropped bust. No head, no neck, no chin: the drawing starts at the collarbone, and the neck opening on the dashed neck rule stays empty (background) — the head composites into that opening from behind, it does not draw its own neck to meet it. Centred, shoulders about 65% of the cell width, with clear empty margin above the shoulder line (a raised arm, e.g. torso-WAVE, must stay inside that margin, not extend past the cell edge) and to the sides, feet touching the bottom edge of the cell — not floating above it with dead space below. The body must be the same size and in the same position in every torso cell; only the arms change. Face and torso fill-percentage both matter for their own sake — a face too small or a torso too cropped in its own cell reads as poorly composed — but they no longer have to match each other: the packer resamples the face independently (\`faceScale\` in \`source.json\`) to set the actual head-to-shoulder proportion, so draw each cell to fill its own window well and let that setting do the proportion work.
 
 Cells, in order: ${names.join(", ")}.
 

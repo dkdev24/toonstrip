@@ -71,6 +71,8 @@ export interface SourceCharacterDecl {
   anchors?: { face?: AnchorPoint; torso?: AnchorPoint };
   /** Per-character override of the spec's head-into-collar overlap. */
   joinOverlap?: number;
+  /** Per-character override of the spec's `faceScale`. */
+  faceScale?: number;
   /** One image holding this character's poses as a grid of cells. */
   sheet?: CharacterSheetDecl;
 }
