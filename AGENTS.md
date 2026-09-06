@@ -67,3 +67,11 @@ Update them at the end.
   the shared rendering logic and drift apart unless a fix is manually ported both ways;
   a `packages/core` fix must also cascade through `@toonstrip/element`/`@toonstrip/astro`
   and into `danielkimdev-astro` — that doc is the checklist for all of it.
+- **Publish with `pnpm publish` (from inside the package directory), never plain
+  `npm publish`.** This is a pnpm workspace — internal deps use `"workspace:*"`, which
+  `pnpm publish` resolves to the real current version before publishing and plain `npm
+  publish` does not, shipping the literal string to the registry instead. Breaks the
+  package for anyone installing it standalone (`EUNSUPPORTEDPROTOCOL`). Happened twice
+  (`@toonstrip/asset-packager` 0.2.1 and again at 0.2.4) before this rule was written.
+  After publishing, `npm view <pkg>@<version> dependencies` to confirm no `workspace:*`
+  leaked through.

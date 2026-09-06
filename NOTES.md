@@ -380,3 +380,102 @@ resolved as items get addressed. Newest at bottom, grouped by milestone.
 - **PNG export re-renders instead of reading canvases** (see M7 S1 note): it reproduces the
   element's per-panel figure freeze, so it should match on-screen figures; not pixel-
   verified against the element's own paint yet.
+
+## M15 (external use: WhatIfClassics Odyssey PoC)
+
+Findings from a real downstream consumer — a toonstrip illustration PoC for
+WhatIfClassics's Odyssey story pack (`whatifclassics/story-pack-generator/toonstrip-poc`,
+5 characters via `toonstrip-pack template --kind character` + Gemini). Sheet input (M15)
+had not been exercised end-to-end by a real character roster before; this is what broke.
+
+- **`toonstrip-pack template`'s character guide never documented which way a character
+  should face, and its own guide shapes were dead-symmetric** (a plain circle for the
+  head, a bilaterally-symmetric torso outline) — but `@toonstrip/core`'s `drawFigure`
+  mirrors a figure's own art horizontally to face the other way in a two-shot (`mirror`
+  transform); it never redraws or re-angles anything. A model handed a symmetric
+  reference sheet has every reason to draw a symmetric, camera-facing character, which
+  then can't be mirrored convincingly — every generated sheet came back frontal. Fixed in
+  `template.ts`: the guide now biases toward a 3/4, screen-right-facing pose (a profile
+  notch on the face, an asymmetric near/far body outline on the torso), and the prompt
+  text says so explicitly. Neither `docs/asset-image-spec.md` nor `docs/asset-sheets.md`
+  mentioned this convention at all — worth a doc pass beyond what `template.ts`'s prompt
+  text now covers inline.
+- **`docs/asset-image-spec.md` §3 said a torso is "shoulders to waist"** — checked
+  against the actual ported Comic Chat art (`@toonstrip/pack-comic-chat`'s `dan`/`anna`
+  sheets) and that's wrong: the real format is a full standing body, head composited on
+  separately, feet cut off by the canvas edge, never a waist-cropped bust. Fixed the spec
+  doc and `template.ts`'s guide (now draws shoulders → arms → tapered torso → two legs
+  reaching the bottom edge) to match reality.
+- **The torso guide gave zero headroom above the shoulder line**, so any of the tool's
+  own `DEFAULT_CHARACTER_CELLS` gesture poses (`torso-WAVE`, `POINTOTHER`, `POINTSELF`,
+  `DOUBLEPOINT`, `SHRUG`) had nowhere to put a raised or extended arm without clipping the
+  cell edge — not an Odyssey-specific problem, every default-template user hits this.
+  Fixed by leaving real margin above the shoulders and to the sides in the guide.
+- **A toonstrip character is a single figure, full stop** — the join/mirror machinery
+  (one neck anchor, one bounding box mirrored as a unit) has no representation for
+  multiple bodies in one sprite. Odyssey's design called for an anonymous "sailor crowd"
+  reaction shot; the fix wasn't a packager change but a design one — one generic sailor
+  character, with a scene needing several placed as multiple `Body` entries in one panel
+  (the renderer's `layoutAvatars` already scales/spaces/mirrors a multi-body row on its
+  own). Worth a line in `docs/asset-image-spec.md` or `docs/packs.md` saying so explicitly
+  for the next person who reaches for a "crowd sprite."
+- **Sheet-sourced poses had no scale-consistency enforcement beyond a warn-and-hope-a-
+  person-notices check** (`SCALE_TOLERANCE`, `FILL_WINDOW`) — for AI-generated art this is
+  the single biggest source of friction: Gemini does not reliably hit a target fill
+  percentage or hold scale across cells in one sheet, and manually re-prompting per
+  violation doesn't converge. Replaced the warn-only path with real auto-correction in
+  `sheet.ts`: each kind's `NEUTRAL` cell is rescaled toward the fill window's midpoint
+  (not just when clearly out of bounds — a character balanced right on the window's edge
+  still tips a sibling pose outside it on its own), then every other pose of that kind is
+  rescaled to match `NEUTRAL` if it drifted more than 12%. Cut our real pack from 6 errors
+  / 87 warnings down to 0 errors / 16 warnings; every mechanical "runs into the
+  gutter"/"clipped" warning eliminated, only genuine fill-window shortfalls remain (see
+  below).
+- **Scaling must anchor on the bottom-centre of the drawing, not its true geometric
+  centre** — the actual join lives at the bottom for both kinds (a face's neck-stub base,
+  a torso's feet), and scaling about the true centre pulls a torso's feet up away from
+  the bottom edge it's required to touch. Hit this as a live regression mid-session
+  (normalizing toward the fill window's midpoint started shrinking already-fine torsos
+  and introducing new "floating torso" warnings on previously-clean characters) before
+  switching the anchor.
+- **The gutter-bleed check ran on the raw slice, before any scale correction** — a slice
+  that ran into the gutter only because the drawing was oversized is exactly what the
+  scale correction fixes, so checking before that ran flagged a problem already about to
+  be resolved. Moved the check to run after normalization instead.
+- **Enlarging needs an analytic starting point, not pure geometric backoff from the
+  unconstrained target.** First attempt started from the desired (often huge, 2-2.5x)
+  factor and backed off ×0.75 per attempt for a fixed number of attempts; for a torso with
+  very little headroom above the head, the safe factor (~1.1x) was much smaller than the
+  backoff could reach within its attempt budget, so it silently gave up and applied *zero*
+  enlargement rather than the largest safe partial one. Fixed by computing the safe bound
+  analytically (solving for the factor that lands each edge exactly on the canvas
+  boundary) and using a short empirical refinement only to catch resampling smoothing
+  bleeding a drawing a pixel or two past that exact prediction.
+- **Own bug, caught via a debug trace, not inspection**: the enlarge-safety check used
+  `top: kind === "face"` (only check the top edge for faces), when the actual
+  gutter-check rule it needs to match is the reverse — top is checked for *both* kinds,
+  and only *bottom* is exempted for torsos (they're allowed to run off it by design). Cost
+  a full round of "fixed" warnings reappearing before the edge selection was corrected.
+- **A torso can be geometrically incapable of reaching the fill window's minimum** if the
+  source art was drawn with too little headroom above the head — no packager cleverness
+  manufactures margin that was never drawn. Three of Odyssey's five characters
+  (Eurylochus, Hermes, Sailors) land at 32-54% width against the required 55-100% after
+  the largest safe auto-enlarge; Daniel's call was to ship as-is rather than chase it
+  further (lower `FILL_WINDOW.torso`'s floor, or redraw those three with more headroom).
+- **A "no head"/"no shoulders" violation in already-generated sheet art is fixable by
+  direct pixel post-processing** instead of a full Gemini re-generation — these are
+  opaque-white-background sheets keyed at build time (`keyBackground: true`), so painting
+  the offending region white (matching the background) works without touching alpha
+  directly. The crop line has to be *measured* against the actual art (color-transition
+  sampling at a few x/y percentages), not guessed as a uniform percentage, and — the
+  expensive lesson — it must account for any gesture pose whose hand/arm extends into the
+  region being erased (a uniform full-width horizontal cut removed a raised `torso-WAVE`
+  hand right along with the head on the first attempt; fixed by measuring the actual
+  hand/head footprints and cutting only the head's own x-range).
+- **Publishing mistake, twice** — see `CHANGELOG.md`'s 0.15.6 entry and the new rule in
+  `AGENTS.md`: `@toonstrip/asset-packager` was published via plain `npm publish` instead
+  of `pnpm publish`, shipping an unresolved literal `"workspace:*"` dependency to the
+  registry (broken for anyone installing standalone). Happened at 0.2.1 (fixed as 0.2.2,
+  before this session) and again at 0.2.4 (fixed as 0.2.5, this session) despite the first
+  instance already being on record — the fact existed in the repo but wasn't checked
+  against before publishing.
