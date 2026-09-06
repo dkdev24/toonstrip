@@ -1,6 +1,6 @@
 {
   "name": "@toonstrip/asset-packager",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Turns a directory of per-pose PNGs into a valid toonstrip asset pack: validates them against the asset image spec, packs sprite sheets, derives join anchors, writes pack.json and per-character manifests.",
   "license": "MIT",
   "type": "module",
