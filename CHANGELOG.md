@@ -6,6 +6,59 @@ shipped. Written for users; the engineering history behind each entry is in `WOR
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.15.6 — 2026-09-06
+
+**Packages:** `@toonstrip/asset-packager` 0.2.4; everything else unchanged since 0.15.5.
+
+### Fixed
+
+- `toonstrip-pack template`'s character-sheet guide and default prompt text
+  described a "shoulders to waist" bust, which doesn't match this format's
+  Comic Chat origins — the real ported roster (`@toonstrip/pack-comic-chat`'s
+  `dan`/`anna`, etc.) is a full standing body, head composited on separately,
+  feet cut off by the canvas edge. The guide now draws a full figure
+  (shoulders, arms, legs, feet) instead of a waist-cropped torso, and
+  `docs/asset-image-spec.md` §3 is corrected to match.
+- The same guide was dead-symmetric (a plain circle for the head, a
+  bilaterally-symmetric body outline) with no visual cue for which way the
+  character faces, even though the renderer mirrors a figure's own art
+  horizontally to face the other way in a two-shot (`drawFigure`'s `mirror`
+  transform) rather than redrawing or re-angling anything. A model
+  reproducing a symmetric guide has every reason to draw a symmetric,
+  camera-facing character, which then can't be mirrored convincingly. The
+  guide (and the auto-generated prompt text) now bias toward a 3/4,
+  screen-right-facing pose: a profile notch on the face, an asymmetric
+  near/far body outline on the torso.
+- The torso guide gave zero headroom above the shoulder line, so any of the
+  tool's own default gesture poses (`torso-WAVE`, `POINTOTHER`, ...) had
+  nowhere to put a raised or extended arm without it clipping the cell edge.
+  The guide (and prompt text) now leave real margin above the shoulders and
+  to the sides for that.
+
+### Added
+
+- Sheet-sourced characters are now auto-corrected for scale instead of only
+  warned about. Each kind's `NEUTRAL` cell is rescaled toward the middle of
+  the pack's fill window (was: left alone unless clearly outside it, which
+  let a character balanced right on the window's edge tip a sibling pose
+  outside it independently), then every other pose of that kind is rescaled
+  to match `NEUTRAL` if it drifted more than 12% (was: warned and left for a
+  person to notice and re-prompt an image model to fix). Both scale about
+  the bottom-centre of the drawing — where the actual join lives for both
+  kinds (a face's neck-stub base, a torso's feet) — so correcting scale
+  can't pull a torso's feet away from the bottom edge it's required to
+  touch. Enlarging backs off (analytically first, with a short empirical
+  refinement for resampling bleed) to whatever the drawing's own headroom
+  actually allows rather than clipping past it or giving up on any
+  enlargement at all when the ideal target isn't reachable. A correction
+  over 50% still gets a diagnostic, reworded from "this pose won't
+  composite right, fix it" to "auto-corrected, worth a glance."
+- The sheet slicer's "drawing runs into the gutter" check now runs after
+  scale normalization instead of on the raw slice — a slice that ran into
+  the gutter only because the drawing was oversized is exactly what the
+  scale correction above fixes, so checking before that ran was flagging a
+  problem already about to be resolved.
+
 ## 0.15.5 — 2026-09-06
 
 **Packages:** `@toonstrip/asset-packager` 0.2.3; everything else unchanged since 0.15.4.

@@ -55,12 +55,21 @@ const LABEL = "#5a5a5a";
 
 type Ctx = ReturnType<ReturnType<typeof createCanvas>["getContext"]>;
 
+// The renderer mirrors a figure's own art to face the *other* way in a
+// two-shot (`drawFigure`'s `mirror` transform) — it never redraws or
+// re-angles anything. So the base art has to start off-axis, facing one
+// way, or there is nothing to mirror *from*. TURN_SHIFT biases every guide
+// (face and torso alike) toward screen-right by the same amount, so a
+// model reproducing the guide's silhouette copies an already-turned pose
+// instead of a symmetric, camera-facing one.
+const TURN_SHIFT = 0.06;
+
 /** Guides use the cell's real width and its height *below* the label band. */
 function drawFaceGuides(ctx: Ctx, w: number, h: number): void {
-  const centre = w / 2;
+  const centre = w * (0.5 + TURN_SHIFT);
   const chin = h * 0.86;
-  const rx = w * 0.35;
-  const ry = h * 0.36;
+  const rx = w * 0.27;
+  const ry = h * 0.28;
   ctx.strokeStyle = GUIDE;
   ctx.lineWidth = 2;
 
@@ -78,14 +87,35 @@ function drawFaceGuides(ctx: Ctx, w: number, h: number): void {
   ctx.beginPath();
   ctx.ellipse(centre, chin - ry, rx, ry, 0, 0, Math.PI * 2);
   ctx.stroke();
+  // A profile hint on the leading (right) side — a plain circle reads as a
+  // head facing the camera; this notch is what says "facing that way".
+  ctx.beginPath();
+  ctx.moveTo(centre + rx * 0.75, chin - ry * 1.15);
+  ctx.lineTo(centre + rx * 1.18, chin - ry * 0.85);
+  ctx.lineTo(centre + rx * 0.8, chin - ry * 0.55);
+  ctx.stroke();
   // The neck stub: a short box hanging below the chin rule.
   ctx.strokeRect(centre - w * 0.075, chin, w * 0.15, h * 0.1);
 }
 
+/**
+ * A full standing figure — shoulders down through arms and legs to bare
+ * feet — not a waist-cropped bust. Matches the original Comic Chat art
+ * this format is ported from (see e.g. `pack-comic-chat`'s `dan`/`anna`
+ * sheets: full body, head composited on separately, feet cut off by the
+ * canvas's bottom edge). No head here; that is the face guide's job.
+ */
 function drawTorsoGuides(ctx: Ctx, w: number, h: number): void {
-  const centre = w / 2;
-  const neck = h * 0.1;
-  const half = w * 0.42;
+  const centre = w * (0.5 + TURN_SHIFT);
+  // Neck sits well below the top edge (not h*0.1) so a raised-arm gesture
+  // (torso-WAVE, POINTOTHER, ...) has headroom to stay inside the cell
+  // instead of clipping against the top guide.
+  const neck = h * 0.25;
+  const shoulder = w * 0.325;
+  // The near (right) side reads slightly larger/closer, the far (left)
+  // side slightly smaller/set back — a 3/4-turn cue, not a frontal mirror.
+  const nearScale = 1.08;
+  const farScale = 0.86;
   ctx.strokeStyle = GUIDE;
   ctx.lineWidth = 2;
 
@@ -100,14 +130,38 @@ function drawTorsoGuides(ctx: Ctx, w: number, h: number): void {
   ctx.stroke();
 
   ctx.setLineDash([]);
+  // Torso: shoulders -> waist -> hips.
+  const waistY = neck + h * 0.22;
+  const hipY = neck + h * 0.32;
   ctx.beginPath();
-  ctx.moveTo(centre - half * 0.32, neck);
-  ctx.lineTo(centre + half * 0.32, neck);
-  ctx.lineTo(centre + half, neck + h * 0.26);
-  ctx.lineTo(centre + half * 0.82, h);
-  ctx.lineTo(centre - half * 0.82, h);
-  ctx.lineTo(centre - half, neck + h * 0.26);
+  ctx.moveTo(centre - shoulder * 0.32, neck);
+  ctx.lineTo(centre + shoulder * 0.32, neck);
+  ctx.lineTo(centre + shoulder * nearScale, neck + h * 0.08);
+  ctx.lineTo(centre + shoulder * 0.55 * nearScale, waistY);
+  ctx.lineTo(centre + shoulder * 0.62 * nearScale, hipY);
+  ctx.lineTo(centre - shoulder * 0.62 * farScale, hipY);
+  ctx.lineTo(centre - shoulder * 0.55 * farScale, waistY);
+  ctx.lineTo(centre - shoulder * farScale, neck + h * 0.08);
   ctx.closePath();
+  ctx.stroke();
+  // Arms: hanging from each shoulder point to roughly waist height.
+  ctx.beginPath();
+  ctx.moveTo(centre + shoulder * nearScale, neck + h * 0.08);
+  ctx.lineTo(centre + shoulder * 1.15 * nearScale, waistY);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(centre - shoulder * farScale, neck + h * 0.08);
+  ctx.lineTo(centre - shoulder * 1.1 * farScale, waistY * 0.97);
+  ctx.stroke();
+  // Legs: two separate limbs from the hips to bare feet at the bottom
+  // edge (feet touch h — not a dead-space gap — so the drawing is "cut
+  // off by the canvas edge", matching the validator's floating-torso check).
+  const gap = shoulder * 0.08;
+  ctx.beginPath();
+  ctx.moveTo(centre + gap, hipY);
+  ctx.lineTo(centre + shoulder * 0.5 * nearScale, h);
+  ctx.moveTo(centre - gap, hipY);
+  ctx.lineTo(centre - shoulder * 0.42 * farScale, h);
   ctx.stroke();
 }
 
@@ -221,10 +275,10 @@ Style: [describe the world once — palette, line weight, era, mood].`;
 
   return `${shared}
 
-Every cell is the same character, drawn at the same size and in the same style throughout — this is one character sheet, not ${names.length} separate drawings. Flat colour, clean hard-edged outlines, no shadows, no gradients, no background scenery.
+Every cell is the same character, drawn at the same size and in the same style throughout — this is one character sheet, not ${names.length} separate drawings. Flat colour, clean hard-edged outlines, no shadows, no gradients, no background scenery. Every cell: 3/4 view, head and body turned to face screen-right, same angle throughout — not a frontal portrait (the renderer mirrors this art horizontally to face the other way when two characters share a scene, so it must start off-axis, not symmetric).
 
-- \`face-*\` cells: the head only — skull, hair, features — plus a short neck stub, centred, about 70% of the cell width, with the base of the stub on the dashed chin rule. The head must be the same size and in the same position in every face cell; only the eyes, brows and mouth change.
-- \`torso-*\` cells: shoulders to waist, centred, about 85% of the cell width, neck opening on the dashed neck rule, body running off the bottom edge of the cell. The body must be the same size and in the same position in every torso cell; only the arms change.
+- \`face-*\` cells: the head only — skull, hair, features — plus a short neck stub, and nothing wider than that stub (no shoulders, no collar, no chest — the torso cells supply those separately, and a face that already includes them will double up when composited). Centred, about 55% of the cell width, with the base of the stub on the dashed chin rule. The head must be the same size and in the same position in every face cell; only the eyes, brows and mouth change.
+- \`torso-*\` cells: a full standing body — shoulders, arms, torso, legs, down to bare feet or footwear — not a waist-cropped bust. No head, no neck, no chin: the drawing starts at the collarbone, where the face composites on separately. Centred, shoulders about 65% of the cell width, with clear empty margin above the shoulder line (a raised arm, e.g. torso-WAVE, must stay inside that margin, not extend past the cell edge) and to the sides, neck opening on the dashed neck rule, feet touching the bottom edge of the cell — not floating above it with dead space below. The body must be the same size and in the same position in every torso cell; only the arms change. Face and torso fill-percentage are matched on purpose: they set the head-to-shoulder proportion of the composited character, since both are drawn at native pixel scale onto the same-size canvas and neither is rescaled to match the other — keep the two ratios matched if you adjust either one.
 
 Cells, in order: ${names.join(", ")}.
 

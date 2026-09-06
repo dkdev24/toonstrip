@@ -235,6 +235,25 @@ export function resizeRaster(raster: Raster, edge: number): Raster {
   return { width: edge, height: edge, data: data as unknown as Uint8ClampedArray };
 }
 
+/**
+ * Scale a raster's drawn content by `factor` about `centre`, keeping the
+ * canvas the same size (transparent elsewhere). Used to correct a pose
+ * drawn at the wrong scale — relative to its character's NEUTRAL cell, or
+ * to the pack's fill window — instead of leaving the mismatch as something
+ * a person has to notice and re-prompt an image model to fix.
+ */
+export function scaleContent(raster: Raster, factor: number, centre: { x: number; y: number }): Raster {
+  const source = toCanvas(raster);
+  const canvas = createCanvas(raster.width, raster.height);
+  const ctx = canvas.getContext("2d");
+  ctx.translate(centre.x, centre.y);
+  ctx.scale(factor, factor);
+  ctx.translate(-centre.x, -centre.y);
+  ctx.drawImage(source, 0, 0);
+  const { data } = ctx.getImageData(0, 0, raster.width, raster.height);
+  return { width: raster.width, height: raster.height, data: data as unknown as Uint8ClampedArray };
+}
+
 /** The largest centred square inside a raster. */
 export function centreSquare(raster: Raster): Box {
   const edge = Math.min(raster.width, raster.height);

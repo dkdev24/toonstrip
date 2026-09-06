@@ -98,15 +98,20 @@ the chin. Draw it:
   ends there and nothing hangs below it,
 - not clipped at the top or the sides.
 
-**A torso** is shoulders to waist:
+**A torso** is a full standing body — shoulders, arms, torso, legs, down to
+bare feet or footwear — not a waist-cropped bust (this matches the format's
+Comic Chat origins: see e.g. `@toonstrip/pack-comic-chat`'s `dan`/`anna`
+sheets, full body with the head composited on separately). Draw it:
 
 - centred horizontally,
-- filling 55–100% of the canvas width,
-- with the **neck line at the top edge of the drawing** — the collar opening,
-  where the stub will land,
-- **cut off by the bottom edge of the canvas.** A torso floating above the
-  bottom earns a warning; the renderer crops figures at the panel floor, so a
-  torso needs to run off the bottom of its own canvas.
+- shoulders filling 55–100% of the canvas width, with room left above the
+  shoulder line and to the sides — a gesture pose (`WAVE`, `POINTOTHER`, a
+  raised arm) needs somewhere to go without clipping the canvas edge,
+- with the **collar opening below the top edge**, not touching it — leave
+  that headroom rather than pinning the neck line to the very top,
+- **feet cut off by the bottom edge of the canvas.** A torso floating above
+  the bottom earns a warning; the renderer crops figures at the panel floor,
+  so the feet need to run off the bottom of the canvas, not stop short of it.
 
 **A backdrop** is a fully painted **square** image, at least 400×400 (512 is the
 default output size), with the horizon around the lower third — the renderer
