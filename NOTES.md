@@ -479,3 +479,184 @@ had not been exercised end-to-end by a real character roster before; this is wha
   before this session) and again at 0.2.4 (fixed as 0.2.5, this session) despite the first
   instance already being on record — the fact existed in the repo but wasn't checked
   against before publishing.
+
+## Post-M15: Odysseus scratch test (ad hoc reference + template, ChatGPT/Gemini)
+
+A separate, smaller experiment from the M15 WhatIfClassics work above — Daniel's own
+one-character trial (`odyssseus`, a Bronze Age Greek warrior-king), run casually against
+ChatGPT and Gemini directly rather than through the `story-pack-generator` pipeline.
+Discarded; no code or pack committed. Recorded here because the failure modes are useful
+even though the attempt wasn't.
+
+- **A full-sheet regeneration collapsed all 22 face-grid expressions to one**, keeping
+  Bolo's reference face-grid positions but applying a single emotion everywhere — only
+  fixed by regenerating the face grid as its own isolated pass, separate from the torso
+  sheet, with each cell's target expression stated explicitly rather than "keep the
+  reference's expression" (singular) applied to a 22-cell grid.
+- **Character description text biases generation even in a face-only crop**: including
+  the body/armor/cloak wording in the prompt for a face-only regeneration made the model
+  draw a neck and collar under the chin despite an explicit "no neck" instruction, even
+  though the reference crops it was shown were genuinely head-only. Stripping all
+  clothing/body wording from the face-only prompt (keeping only head-relevant
+  descriptors) reduced but did not eliminate the leakage.
+- **Ad hoc reference images (informal contact-sheet crops of Bolo, not
+  `toonstrip-pack template`'s output) have no labels or gutters**, so
+  `asset-packager`'s sheet-input auto-slicer doesn't apply to them at all — had to
+  alpha-blob-detect each sprite by hand and classify it by eye against a generated
+  contact sheet, which defeats the point of automated packing. Switching to
+  `toonstrip-pack template`'s actual labeled grid (tried once, with ChatGPT) didn't reach
+  a built pack before the attempt was shelved.
+- **Two of the packager's real tolerances are narrower than they look from the docs
+  alone** (confirmed by reading the code, not assumed): `eraseBelowChin` (`sheet.ts`)
+  cuts a fixed horizontal line at a set fraction of cell height, not a shape-aware trim of
+  the actual drawn chin; `register()` (`register.ts`) is a translation-only (dx/dy)
+  silhouette-overlap search within ±14% of cell width, with no scale or rotation
+  correction, optimizing total silhouette agreement rather than the join point
+  specifically. The *separate* scale-normalization pass added in the M15 work above
+  (`SCALE_TOLERANCE`/`FILL_WINDOW` rescaling in `sheet.ts`) does address scale drift
+  between poses, but that work still needed manual pixel touch-up and still shipped 3 of
+  5 characters under the required fill window — i.e. even a much more thorough,
+  code-level effort than this scratch test didn't get a fully clean result, which is the
+  real takeaway, not any single missing feature.
+- **Conclusion Daniel reached**: precise, human-controlled art (hand-drawn, or a
+  vector-rigged base with exact anchor points for the join/chin/collar) is the realistic
+  path for new packs going forward, not further prompt iteration. Programmatically
+  generated vector art was considered and set aside too — it can nail geometry exactly,
+  but the actual bottleneck is producing appealing, consistent illustrated content across
+  many poses, which relocates to either a human authoring parametric rules (more work
+  than drawing) or a generative model filling in the vectors (the same non-determinism
+  problem again).
+
+## Post-M15: how the original Comic Chat actually produced its coordinate data
+
+Microsoft open-sourced Comic Chat's source (`github.com/microsoft/comic-chat`, MIT) in
+July 2026. Cloned it to check a specific question: how did the original 1996-98 pipeline
+convert Jim Woodring's hand-drawn art into the per-pose join coordinates, without any of
+the registration/scale-correction machinery `asset-packager` has? Answer, confirmed
+directly in the source, not inferred:
+
+- **There is no algorithm.** `v2.5-beta-1/avatar.h:103-121` defines `FACEREC`/`BODYREC`
+  — `poseID, emotion, intensity, xCX, yCX, delta_xCX, delta_yCX, faceX, faceY` — which is
+  almost field-for-field what `bolo.json`'s `cx`/`cy`/`cxDelta`/`cyDelta` already is
+  (toonstrip's manifest schema is a near-verbatim port of this exact struct). Those
+  numbers were never computed: `artifacts/avtools/avatarfilerdoc.cpp`'s `LoadFaces`/
+  `LoadTorsos` (lines 257-333) parse a plain-text build script — one `FOREGROUND
+  <bitmap> <emotion> <intensity> <xCX> <yCX> <delta_xCX> <delta_yCX> <faceX> <faceY>`
+  line per pose — read token by token. A human measured or eyeballed each finished
+  bitmap and typed the pixel offsets in by hand, for every pose of all ~15 characters.
+  No mouse-drag editor, no image analysis, anywhere in the tool (`avatarfilerview.cpp`
+  has no mouse/paint handlers at all — it's a record browser, not a placement UI).
+  `avbfile.cpp`/`avbfile2.cpp` just zlib-compresses the named bitmaps (Node's built-in
+  `zlib`, no exotic format) and packs them with the human-supplied numbers into the
+  binary `.AVB`.
+- **This both confirms and sharpens the earlier conclusion**: Comic Chat's original
+  precision came 100% from a human specifying exact numbers per pose on top of
+  already-consistent art — never from any registration/detection step. It also surfaces
+  a real regression: `FACEREC`'s per-pose `delta_xCX`/`delta_yCX` let every individual
+  pose get its own hand-tuned nudge, while `asset-packager`'s current `source.json`
+  `anchors` (`pack.ts:74`) is one anchor per **character**, derived once from NEUTRAL and
+  reused everywhere — less granular than the format it's descended from.
+
+Three follow-up questions Daniel raised, checked against the code:
+
+1. **Can a custom pack skip npm entirely and be hosted on any web server?** Already true
+   today for the browser path. `@toonstrip/element`'s `.packs` is `string[]` of base
+   URLs, fetched with plain `fetch()`/`Image()` (`packages/element/src/load-pack.ts`,
+   documented at `docs/packs.md:147-155`) — `el.packs = ["https://example.com/my-pack/"]`
+   works now, no npm publish needed, and the React/Vue/Next wrappers just forward this
+   prop through. The one gap: `@toonstrip/astro`'s high-level `toonstrip({packs:[...]})`
+   integration (`integration.ts:71`) only accepts npm package specifiers, resolved from
+   `node_modules` — someone on Astro specifically would need to bypass that integration
+   (use the element directly, or self-place files under `public/`) until it's taught to
+   accept a raw URL too.
+2. **Bring the packager's join logic to parity with the original tool, and can it emit
+   `.AVB`?** Per-pose anchor override (mirroring `delta_xCX`/`delta_yCX`) is a scoped,
+   worthwhile addition. A real `.AVB` writer is mechanically feasible (zlib + a fixed
+   tagged-record layout, now fully documented by the actual C++ source) but nothing in
+   this repo currently decodes `.AVB` either — `pack-comic-chat`'s PNGs came from an
+   external process, likely the community `comicchat/comicchat` project (worth checking
+   for an existing decoder before writing one). Open question before committing to this:
+   is the goal *importing* someone else's existing `.avb` art (decoder only, smaller
+   scope) or *exporting* for interop with the actual 1996/98 client (near-zero real
+   audience today)? Changes the scope significantly either way.
+3. **Can AI automate the "measure the finished drawing, type the numbers" step?**
+   Genuinely more tractable than generating the character sheet itself — this is a
+   measurement/localization task on art that's already fixed and already correct
+   (hand-drawn or vector-rigged), not a reconstruct-under-constraints task. Realistic
+   expectation: current vision-language models are still imprecise at exact pixel
+   coordinates (a known weakness of pointing/grounding tasks), so likely lands as
+   "AI proposes the number, human corrects it" rather than unattended — but the error
+   margin that leaves is exactly what `register()`'s ±14% search and a per-pose anchor
+   override (above) are built to absorb. Worth a small prototype.
+
+Not yet started on any of the three — Daniel to prioritize before work begins.
+
+## Post-M15: sharing/monetizing packs — single-file format decision
+
+The non-npm custom-pack loading (question 1 above) and `.AVB` support (question 2) turn
+out to be one idea: Daniel's actual goal is a **sharing/marketplace scenario** — someone
+builds a pack (hand-drawn or AI-generated), shares it as one downloadable file, others
+load that single file directly into the playground or their own site, and a creator can
+optionally sell a premium pack on a marketplace or on toonstrip's own site. Daniel's
+instinct was that `.AVB` suits a single-file download/purchase better than a plain `.zip`.
+
+**Decision: `.zip` (branded with a custom extension, e.g. `.toonpack`), not `.AVB`.**
+
+- `.AVB`'s masked-DIB + zlib scheme exists to fake transparency on a format with no
+  native alpha channel — a real 1996 constraint, gone now. Reviving it means lossily
+  re-encoding PNGs into that scheme and back, for no benefit over PNG's own alpha, and
+  hardcoding the manifest to a fixed-field 1996 struct instead of the JSON schema
+  toonstrip already owns and can version/extend.
+- `.zip` already solves "bundle `pack.json` + `characters/` + `backdrops/` into one
+  file." `fflate` (small, no heavy new dependency) unzips client-side; PNGs can be
+  stored via `STORE` (not `DEFLATE`) inside the zip since they're already compressed,
+  avoiding double-compression waste. A branded extension on a plain zip is the same
+  trick `.docx`/`.epub`/Unity's `.unitypackage` use.
+- Smaller lift too: `@toonstrip/element`'s `load-pack.ts` already assembles a `Cast`
+  from `pack.json` + manifest + PNG entries fetched over HTTP one at a time (see
+  question 1's finding above) — a `.zip` loader is one new code path (fetch bytes,
+  unzip in memory, feed the same entries into that existing assembly logic) versus a
+  `.AVB` writer, which is a real binary encoder built from scratch referencing the
+  original C++ source, with no decoder anywhere in this repo to start from either.
+
+**Monetization is a separate concern from the container format.** "Sellable premium
+pack" is a distribution/access-gating problem — a purchase flow handing out a download
+link or a signed token, on toonstrip's own site or a third-party marketplace — not
+something the file format itself provides. That decision (how a purchase gates the
+download) is still fully open and independent of the `.zip`-vs-`.AVB` choice.
+
+## Post-M15: AI-assisted join-point measurement — POC, then shipped
+
+Prototyped question 3 from the Comic Chat archaeology entry above: can AI measure a
+finished drawing's join point accurately enough to stand in for the original pipeline's
+"human eyeballs it and types the numbers" step?
+
+**Method.** Picked Hugh — a character whose `cx`/`cy` hadn't appeared anywhere earlier
+in the session, for a genuinely blind test, not Bolo (already seen). Cropped 4 faces + 4
+torsos straight from the real production sheet at native resolution, overlaid a
+pixel-coordinate grid on each, and recorded a visual estimate of the join point (chin
+bottom-centre for faces, collar top-centre for torsos) *before* reading `hugh.json`'s
+actual `cx`/`cy`.
+
+**Result.** Faces and non-gesture torsos landed 3-9% of canvas dimension off the real
+value — comfortably inside `register()`'s existing ±14% correction window, and better
+than the scale drift AI-generated art was producing. One clear miss: torso WAVE (raised
+arm) at 12.6% y-error — a raised arm grows the alpha bounding box upward, shifting local
+coordinate `0,0`, and the estimate anchored on the visually dominant hand instead of the
+body's own collar line. That failure mode turns out not to matter: both the original
+`FACEREC`/`BODYREC` format and this packager already derive the join **once from
+NEUTRAL** and reuse it for every other pose (`pack.ts:74`) — AI only ever needs to
+measure the two poses this test scored best on, never the gesture poses.
+
+**Verdict: GO.** Shipped the next step rather than just filing the finding — a new
+`toonstrip-pack anchor-guide <source-dir> <character-id> [--out <dir>]` CLI command
+(`asset-packager/src/anchor-guide.ts`, wired in `bin.ts`, 3 tests in
+`test/anchor-guide.test.ts`, all passing). It renders a character's `face`/`torso`
+NEUTRAL art at native resolution with a pixel grid burned in — the same artifact used in
+the POC above — for a human (or a vision model shown the image) to read the join point
+off and paste into `source.json`'s `anchors`. Deliberately does **not** call any model
+itself: `asset-packager`'s own contract is "offline and deterministic, no model call, no
+network" (`index.ts`), so the measuring step stays outside the tool, same as this POC
+did it. Scoped to per-pose files only for now — a sheet-sourced NEUTRAL cell has no
+standalone native-resolution file to guide against, and the command refuses clearly
+rather than guiding the down-sliced cell (tested).

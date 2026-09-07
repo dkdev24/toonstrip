@@ -3,6 +3,7 @@ import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { basename, dirname, join } from "node:path";
 import { analyze } from "./analyze.js";
 import { buildPack } from "./build.js";
+import { renderAnchorGuide } from "./anchor-guide.js";
 import { renderTemplate, type TemplateKind } from "./template.js";
 import { promptChecklist, sourceJsonScaffold } from "./templates.js";
 import type { Diagnostic } from "./validate.js";
@@ -14,6 +15,7 @@ function usage(): never {
   toonstrip-pack build <source-dir> --out <pack-dir> [--preview <joins.png>] [--force]
   toonstrip-pack template --out <ref.png> [--kind character|backdrop] [--ids a,b,c]
                           [--columns N] [--rows N] [--cell 512] [--label-band 0.1]
+  toonstrip-pack anchor-guide <source-dir> <character-id> [--out <dir>]
 
 A source dir holds source.json plus either individual PNGs
 (characters/<id>/<kind>-<EMOTION>.png, backdrops/<id>.png) or sheets declared in
@@ -82,6 +84,47 @@ async function main(): Promise<number> {
     console.log(JSON.stringify(result.declaration, null, 2));
     console.log(`\nPrompt the image model with the sheet above and:\n`);
     console.log(result.prompt);
+    return 0;
+  }
+
+  if (command === "anchor-guide") {
+    const characterId = argv[2];
+    if (!target || target.startsWith("--") || !characterId) usage();
+    const outDir = flag(argv, "out") ?? target;
+    mkdirSync(outDir, { recursive: true });
+
+    const { source } = await analyze(target);
+    const character = source.characters.find((c) => c.id === characterId);
+    if (!character) {
+      console.error(`FAIL: no character "${characterId}" in ${target}`);
+      return 1;
+    }
+
+    let wrote = 0;
+    for (const kind of ["face", "torso"] as const) {
+      try {
+        const result = await renderAnchorGuide(character, kind);
+        const outPath = join(outDir, `${characterId}-${kind}-anchor-guide.png`);
+        writeFileSync(outPath, result.png);
+        console.log(`wrote ${outPath} (${result.width}x${result.height}, from ${result.file})`);
+        wrote++;
+      } catch (err) {
+        console.error(`  - ${(err as Error).message}`);
+      }
+    }
+    if (wrote === 0) return 1;
+
+    console.log(`\nShow the image(s) above to a vision model (or read the grid yourself) and ask`);
+    console.log(`for the face's chin point / torso's collar-opening point, in the printed pixel`);
+    console.log(`grid. A human should confirm or nudge whatever comes back — this is a proposal,`);
+    console.log(`not ground truth. Paste the resulting x,y into source.json:\n`);
+    console.log(
+      JSON.stringify(
+        { characters: [{ id: characterId, anchors: { face: { x: 0, y: 0 }, torso: { x: 0, y: 0 } } }] },
+        null,
+        2,
+      ),
+    );
     return 0;
   }
 

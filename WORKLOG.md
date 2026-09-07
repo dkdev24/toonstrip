@@ -2341,3 +2341,93 @@ Verified: `pnpm -r run test` and `pnpm -r run build` green across the whole mono
 `pack-comic-chat` assets, unchanged and passing — confirms zero behavior change for any
 pack that doesn't set `faceScale`). Odyssey's real pack rebuilt and eyeballed via
 `--preview joins.png` at each step.
+
+---
+
+## v0.15.8 — AI-generated pack attempt shelved; Comic Chat source archaeology; `anchor-guide` shipped
+
+**Date:** 2026-09-08
+
+**Packages:** `@toonstrip/asset-packager` 0.3.0 -> 0.4.0.
+
+A separate, smaller experiment from the WhatIfClassics/Odyssey work above: a one-off
+attempt at a new character ("Odysseus", a Bronze Age Greek warrior-king) run casually
+against ChatGPT and then Gemini, first with an ad hoc reference image, then with
+`toonstrip-pack template`'s own labeled guide grid. Discarded — no code committed. Full
+blow-by-blow in `NOTES.md`'s "Post-M15: Odysseus scratch test" and the two entries
+following it, but the short version: whole-sheet regeneration collapsed all 22 face
+expressions to one; character description text (armor, cloak) biased even a
+face-only regeneration into drawing a neck; and two of the packager's real tolerances
+are narrower than the docs alone suggest — `eraseBelowChin` (`sheet.ts`) cuts a fixed
+horizontal line, not a shape-aware trim of the actual chin, and `register()`
+(`register.ts`) is a translation-only silhouette search (±14%, no scale/rotation
+correction) that optimizes total agreement rather than the join point specifically.
+Conclusion: precise, human-controlled art (hand-drawn or a vector-rigged base with exact
+anchor points) is the realistic path forward, not further prompt iteration.
+
+That conclusion prompted a real question: how did the *original* Comic Chat solve this,
+with 1996 tooling and no registration algorithm at all? Microsoft open-sourced the full
+source (`github.com/microsoft/comic-chat`, MIT, 2026-07); cloned and checked directly
+rather than guessing. Answer: it didn't solve it algorithmically. `v2.5-beta-1/avatar.h`'s
+`FACEREC`/`BODYREC` structs (`poseID, emotion, intensity, xCX, yCX, delta_xCX, delta_yCX,
+faceX, faceY`) are almost field-for-field what `bolo.json`'s `cx`/`cy`/`cxDelta`/`cyDelta`
+already is — and `artifacts/avtools/avatarfilerdoc.cpp`'s `LoadFaces`/`LoadTorsos` parse
+those numbers straight out of a plain-text build script (one `FOREGROUND <bitmap>
+<emotion> <intensity> <xCX> <yCX> <delta_xCX> <delta_yCX> <faceX> <faceY>` line per
+pose). A person measured the finished bitmap and typed the offsets in by hand, for every
+pose of all ~15 characters — no mouse-drag editor, no image analysis anywhere in the
+"AvatarFiler" tool. This also surfaced a real regression: `FACEREC`'s per-pose
+`delta_xCX`/`delta_yCX` let every pose get its own hand-tuned nudge, while this
+packager's `anchors` (`pack.ts:74`) is one anchor per character, derived once from
+NEUTRAL — less granular than the format it's descended from.
+
+Three follow-up questions got checked against the actual code rather than assumed:
+
+1. Loading a custom pack without npm — already true today. `@toonstrip/element`'s
+   `.packs` is plain `string[]` of base URLs, fetched with `fetch()`/`Image()`
+   (`load-pack.ts`, documented at `docs/packs.md:147-155`). Only `@toonstrip/astro`'s
+   high-level integration is npm-specifier-only right now.
+2. Bringing the packager to parity with the original + emitting real `.AVB` — the
+   per-pose anchor override is worth adding; a `.AVB` writer is mechanically feasible
+   (zlib + a fixed tagged-record layout, now fully documented by the C++ source) but nothing
+   in this repo decodes `.AVB` today either, and the real value (import someone else's art
+   vs. export for a defunct client) needs deciding before investing.
+3. Automating the "measure and type the numbers" step with AI — prototyped, see below.
+
+Separately, Daniel connected the non-npm loading question to a bigger idea: creators
+sharing/selling asset packs as a single downloadable file. Decision reached: `.zip`
+(branded `.toonpack`), not `.AVB` — `.AVB`'s masked-DIB+zlib scheme exists to fake alpha
+on a format that had none, a real 1996 constraint that's gone now; reviving it means
+lossily re-encoding PNGs for no benefit and hardcoding the manifest to a fixed 1996
+struct instead of the JSON schema this project already owns. `fflate` unzips client-side
+with no heavy new dependency; PNGs can be stored via `STORE` since they're already
+compressed. Monetization (a purchase flow gating the download) is a separate, still-open
+decision from the container format either way.
+
+**The POC, then the ship.** Tested question 3 directly: picked Hugh — a character whose
+`cx`/`cy` hadn't appeared anywhere earlier in the session, for a genuinely blind test —
+cropped 4 faces + 4 torsos at native resolution from the real production sheet, overlaid
+a pixel grid, and recorded a visual estimate of the join point *before* reading
+`hugh.json`'s actual values. Result: faces and non-gesture torsos landed 3-9% of canvas
+dimension off, comfortably inside `register()`'s ±14% window; the one clear miss was
+torso WAVE (raised arm) at 12.6% y-error, because a raised arm grows the alpha bounding
+box upward and shifts where local `0,0` sits — the estimate anchored on the visually
+dominant hand instead of the body's own collar line. That failure mode turns out not to
+matter: both the original format and this packager already derive the join once from
+NEUTRAL and reuse it for every other pose, so AI only ever needs to measure the two poses
+this test scored best on.
+
+Shipped the next step rather than just filing the finding: `toonstrip-pack anchor-guide
+<source-dir> <character-id> [--out <dir>]` (`src/anchor-guide.ts`, wired in `bin.ts`).
+Renders a character's `face`/`torso`-NEUTRAL art at native resolution with the same
+pixel-grid overlay used in the POC, for a human (or a vision model shown the image) to
+read the join point off and paste into `source.json`'s `anchors` — deliberately calls no
+model itself, keeping the packager's "offline, deterministic" contract intact. Scoped to
+per-pose files only: a sheet-sourced NEUTRAL cell has no standalone native-resolution
+file to guide against, and the command refuses clearly rather than guiding the
+down-sliced cell (tested). 3 new tests in `test/anchor-guide.test.ts`; `pnpm build` and
+`pnpm test` both green (37/37) for the whole package.
+
+Not published yet — `@toonstrip/asset-packager@0.4.0` carries both this session's
+`anchor-guide` and the prior session's `faceScale`/join fixes, still pending (`HANDOFF.md`
+Next Actions).
