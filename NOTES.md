@@ -660,3 +660,117 @@ network" (`index.ts`), so the measuring step stays outside the tool, same as thi
 did it. Scoped to per-pose files only for now — a sheet-sourced NEUTRAL cell has no
 standalone native-resolution file to guide against, and the command refuses clearly
 rather than guiding the down-sliced cell (tested).
+
+## Post-M16 research: why part-by-part generation keeps failing, and the rig-first fix
+
+Follow-up to the two shelved attempts above (Odysseus scratch test, AI-assisted
+join-point measurement). Went looking at how 2D games solve the same problem, since
+sprite rigs have exactly our constraint: many separately drawn parts that have to hinge
+at an agreed point.
+
+**Finding: no 2D pipeline asks the artist to hit a coordinate.** Spine and DragonBones
+have the rigger place pivots in an editor after the art exists and export them as JSON.
+Unity's 2D PSD Importer makes *layer names* the contract and keeps each layer's own
+transform. Godot's cutout pivot is a node property. In all three the joint is metadata
+authored against finished art. We have been asking an image model to do the one thing
+that pipeline was designed never to require of a human.
+
+Our packager is already shaped correctly for this: `anchors` is the pivot metadata,
+`register()` is the residual correction, and `pack.ts` derives the join once from
+NEUTRAL. What is missing is an automated measuring step between generation and packing,
+in place of the human or vision model reading `anchor-guide`'s pixel grid.
+
+Buildable prior art, all of it outside the packager's offline/deterministic contract and
+therefore authoring-time only:
+
+- **AnimatedDrawings** (Meta, MIT, ACM TOG 2023) — detection, segmentation, pose
+  estimation to rig on hand-drawn figures, estimator fine-tuned on 178k amateur drawings.
+  Its neck keypoint is our face/torso join.
+- **See-through** (SIGGRAPH 2026) — one anime character image to up to 23 body-part
+  layers, exported as a layered PSD.
+- **LayerDiffuse** — native transparent-PNG generation, retires the background-removal
+  noise that broke Odyssey's `torso-NEUTRAL` headroom.
+- **DWPose/OpenPose ControlNet** on a fixed canvas — keeps poses registered without a
+  sheet.
+
+Written up as **M16 in `TOONSTRIP_DEV_PLAN.md` §16** with a staged plan (S0 validate the
+estimator against known joins, S1 `anchor-guide --measure`, S2 native alpha, S3 automated
+head/torso split, S4 fixed-canvas pose control). S0 is a half-day blind test with a hard
+pass condition (±14%, the same bar the human POC cleared); a fail there kills M16 before
+any code ships. Not started.
+
+## M16 S0 result: light estimator passes, scanline cut does not
+
+Ran S0 against `odyssey-poc/figures.png` (3x3 whole-figure Odysseus sheet, 1254px, so
+418px cells and ~54px heads). Scripts and env notes kept in `odyssey-poc/s0/`.
+
+**Estimator: MediaPipe Pose, not AnimatedDrawings.** No torch, no detectron, no model
+download beyond the 30MB bundled tflite. 9/9 cells detected, shoulder visibility 1.00 on
+every one, at 54px heads on flat cartoon art. AnimatedDrawings was never needed for the
+gate. (Trap: mediapipe 1.0.1 aborts on macOS arm64 in `TensorsToDetectionsCalculator`
+via Metal even with the CPU delegate. 0.10.21's legacy `mp.solutions.pose` works.)
+
+**Condition 1, neck keypoint within ±14%: PASS, wide.** Neck line (narrowest opaque row
+between the mouth and the shoulder midpoint) landed at cell y 51-67 across nine cells, a
+16px spread = **4.3% of cell height**, against `register()`'s ±14%. The sheet's own
+geometry was tighter still: figure height 360-361px (0.3% spread), figure top y 42-43.
+Worth noting the estimator beat the geometric narrowest-row proxy I scored it against —
+where the two disagreed most (`HAPPY-wave`, `NEUTRAL-neutral`) the proxy was the one
+fooled, by a raised hand and a cape fold.
+
+**Condition 2, seamless recomposite: CONDITIONAL.** The neck join itself is clean — cut
+and recomposited at the measured anchor the neck is continuous at 5x zoom, no offset, no
+gap (`odyssey-poc/seam-zoom.png`), which follows from both halves coming from one
+drawing. But **a horizontal scanline cut is not a head/torso split**: everything above
+the neck line goes into the face part, including cape and shoulder pixels either side of
+the neck. Align that face by its own bbox and the borrowed shoulder travels with the
+head, leaving a hole in the torso (visible top-left of the first tile in
+`seam-check.png`). The fix is a region cut, not a line cut — take the connected component
+containing the head, or segment it — which moves work into S3 that S0 assumed was free.
+
+**Also confirmed, incidentally:** packing these by `pack.ts`'s default bbox rule (face
+bottom-centre onto torso top-centre) skews the head sideways on gesture poses, because an
+extended arm drags the torso's bbox centre off the body. Explicit `anchors` fix it. This
+is the same reason the format derives the join from NEUTRAL only, now visible.
+
+**Two things the sheet got wrong, neither fatal to S0:** heads are 54px against
+`spec.cell`'s 256, so these pixels cannot ship (the predicted 2K-vs-4K failure, §16.1);
+and the figures came out near-frontal rather than the 3/4 screen-right the prompt asked
+for, which matters because the renderer mirrors art horizontally.
+
+## M16 S0 rerun at 4K: estimator holds, scanline cut amputates
+
+Regenerated `odyssey-poc/figures.png` at 4096px (cells 1267x1200, figures filling 98-100%
+of cell height) and reran the S0 scripts. Three things changed and one correction to the
+entry above.
+
+**Estimator: unchanged, 9/9, and scale-invariant.** Neck line spread 52px = **4.3% of
+cell height**, the same figure the 1254px sheet gave. Condition 1 stands.
+
+**Resolution: improved but still short.** Heads are 159-202px tall, 13-17% of figure
+height, so **0.62-0.79x of `spec.cell`'s 256** — a ~1.4x upscale rather than the 4.7x the
+1254px sheet demanded. Tolerable for flat line art, not ideal. Clearing 256 outright needs
+~1700px cells: a 2x2 grid at 4K (cell 2048, heads ~320) or a 3x3 at 5K. The figures also
+came out realistically proportioned (head ~1/6.5 of body), not the big-headed cartoon
+proportion the fill windows are tuned for, which is what `faceScale` exists for.
+
+**Two scale-dependent bugs in the S0 scripts, both real lessons for S1/S3:**
+
+1. **`cv2.floodFill` without `FLOODFILL_FIXED_RANGE` erased 97.6% of a cell at 4K.** The
+   default compares each pixel to its *neighbour*, so it walks down the figure's
+   antialiased outline, which at 4K is spread over enough pixels that every step stays
+   inside tolerance. Comparing against the seed colour instead stops at the line. Any
+   background-removal step in this pipeline needs fixed-range plus a largest-connected-
+   component filter (349 stray specks otherwise).
+2. **A fixed pixel noise floor does not survive a resolution change.** The
+   narrowest-row search used `width > 2`, which at 4K let specks win and threw the cut
+   spread from 4.3% to 27.7%. Proportional floors only.
+
+**Correction to the entry above.** The torso shoulder-hole reported there was mostly that
+flood-fill bug, not cut geometry. With the alpha fixed, a face recomposites onto *its own*
+torso with no hole. **The scanline finding survives anyway, and the proof is better**:
+`odyssey-poc/crossmix.png` composites one pose's face onto another's torso, which is what
+the format exists to do (9 faces x 6 torsos), and `torso HAPPY-wave` under a different
+face **loses its raised hand at the wrist** — the hand crossed the neck line, so the cut
+filed it under "face", and swapping the face amputates it. A region cut is still required;
+the failing case is a limb crossing the cut line, not a cape beside it.

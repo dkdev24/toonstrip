@@ -17,3 +17,7 @@ site/.astro/
 packages/schema/src/schema-data.ts
 site/test-results/
 site/playwright-report/
+
+# M16 S0 intermediates, regenerable from figures.png via odyssey-poc/s0/
+odyssey-poc/cells/
+odyssey-poc/cells-split/

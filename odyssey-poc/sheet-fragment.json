@@ -1,0 +1,12 @@
+{
+  "sheet": {
+    "file": "characters/odysseus/sheet.png",
+    "layout": [
+      ["face-NEUTRAL", "face-HAPPY", "face-COY", "face-BORED", "face-SCARED"],
+      ["face-SAD", "face-ANGRY", "face-SHOUT", "face-LAUGH", "torso-NEUTRAL"],
+      ["torso-WAVE", "torso-POINTOTHER", "torso-POINTSELF", "torso-DOUBLEPOINT", "torso-SHRUG"]
+    ],
+    "labelBand": 0.1,
+    "keyBackground": true
+  }
+}

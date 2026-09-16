@@ -558,3 +558,149 @@ pipeline unchanged; a sliced cell enters it as if it had been a file all along.
 The `SKILL.md` section from M14 gains the two-reference prompt pattern (template for
 layout, character reference for identity) alongside the per-pose one. As in M14, the
 skill authors prompts and the package never sees one.
+
+## 16. Rig-first asset generation (M16)
+
+M14 and M15 both ask the image model to draw *to the spec*: a face on its own canvas with
+the chin where the packager expects it, a torso whose collar line sits at the top centre.
+Two shelved attempts (NOTES.md "Odysseus scratch test", "AI-assisted join-point
+measurement") established the limit. A diffusion model can reliably draw a coherent whole
+figure; it cannot reliably place a body part at a target coordinate, and no amount of
+prompt discipline or template overlay fixes that, because the constraint is spatial and
+the model is not.
+
+Every 2D game rigging pipeline sidesteps the same problem the same way, and none of them
+solves it by constraining the artist:
+
+- **Spine / DragonBones.** Art is drawn freely at any size; a rigger places bones and
+  pivots in an editor afterwards and the rig ships as JSON alongside the images. The
+  image never encodes the joint.
+- **Unity 2D PSD Importer.** One layered PSD where *layer names* are the contract, not
+  pixel positions. Each layer keeps its own transform on import and the Skinning Editor
+  places the bones.
+- **Godot cutout.** Pivot is a node property set after the sprite exists.
+
+The join point is metadata authored against finished art, never a drawing constraint.
+This packager already has that shape: `anchors` in `source.json` is our pivot metadata,
+`register()` absorbs the residual, and `pack.ts` derives the join once from NEUTRAL. The
+missing piece is not a better prompt. It is an automated **measuring step between
+generation and packing**, replacing the human or vision model currently reading
+`anchor-guide`'s pixel grid.
+
+The prior art makes that step buildable rather than research:
+
+- **AnimatedDrawings** (Meta, MIT licensed, ACM TOG 2023) runs detection, segmentation and
+  **pose estimation to rig** on arbitrary hand-drawn human figures, with a detector and
+  pose estimator fine-tuned on 178k amateur drawings. Its neck and shoulder keypoints are
+  precisely our face/torso join.
+- **See-through** (SIGGRAPH 2026) decomposes a single anime character image into up to 23
+  semantic body-part layers and exports a layered PSD. Head/torso separation from one
+  generated image, no per-part prompting.
+- **LayerDiffuse** (latent transparency) generates native transparent PNGs, removing the
+  background-removal noise that has already cost us one character's torso
+  (`WORKLOG.md` v0.15.7, guide-line noise baked into the headroom).
+- **OpenPose/DWPose ControlNet** on a fixed canvas keeps separately generated poses
+  registered to each other, which is what M15's sheet mode buys structurally.
+
+**The target pipeline.** Generate one whole coherent figure per pose, then decompose and
+measure it, instead of generating parts and hoping they land:
+
+1. Generate a whole figure per pose, native alpha, fixed canvas.
+2. Split head and torso on the detected neck line.
+3. Detect the neck joint and write it to `source.json`'s `anchors`.
+4. Hand off to the existing packer unchanged; `register()` absorbs the residual.
+
+### 16.1 Staged plan
+
+Each stage is independently useful and independently abandonable. Stop at any stage that
+does not pay for itself.
+
+- **S0 — Generate a whole-figure sheet, then validate the estimator against it (half a
+  day, no code shipped).** M14/M15 sheets draw faces and torsos as separate cells, and a
+  deliberately headless torso is close to a worst case for a pose estimator trained on
+  whole human figures, so S0 needs its own input. Generate a **3x3 sheet of nine complete
+  standing figures** (`odyssey-poc/prompt-figures.txt`), each cell one emotion paired with
+  one arm pose, allocated so all nine emotions and all six torso poses are covered in nine
+  cells rather than the fifteen a separated sheet needs:
+
+  ```
+  NEUTRAL/neutral   HAPPY/wave        COY/pointother
+  BORED/shrug       SCARED/pointself  LAUGH/doublepoint
+  SAD/neutral       ANGRY/neutral     SHOUT/neutral
+  ```
+
+  Then run AnimatedDrawings' `image_to_animation.py` per cell and check its predicted neck
+  keypoint against the join `pack.ts` derives for the equivalent art. **Two pass
+  conditions, both required:**
+
+  1. The neck keypoint lands within `register()`'s ±14% window, the same bar the human POC
+     cleared.
+  2. Cutting head from torso at that keypoint and recompositing through the existing
+     `joinOverlap` leaves no visible seam. A whole figure has a real neck drawn into one of
+     the two halves, which the separated-parts contract never had to hide.
+
+  **Fail either and M16 stops**; nothing downstream is worth building.
+
+  **Result (2026-09-17): GO, with one scope change.** Condition 1 passed wide and
+  cheaply: **MediaPipe Pose**, not AnimatedDrawings, detected 9/9 cells at 54px heads
+  with full shoulder confidence, and the neck line it implies varies by 4.3% of cell
+  height across the nine, against a ±14% window. No torch dependency, so S1's estimator
+  is a 30MB tflite rather than a research checkpoint. Condition 2 passed at the join and
+  failed around it: the neck itself recomposites seamlessly, but a horizontal cut sweeps
+  cape and shoulder pixels into the face part, so **S3 must cut by region, not by
+  scanline**, and that work is no longer optional to the split. Full measurements in
+  `NOTES.md`, scripts in `odyssey-poc/s0/`.
+
+  **Rerun at 4K (same day) confirmed both halves of that result.** The estimator is
+  scale-invariant: 9/9 again, neck spread still 4.3% of cell height. Heads came out at
+  0.62-0.79x of `spec.cell`'s 256, a ~1.4x upscale rather than the 1254px sheet's 4.7x —
+  usable for flat line art, and a 2x2 grid at 4K clears 256 outright if it is not. The
+  region-cut requirement was re-proved on the case that actually matters: composite one
+  pose's face onto another pose's torso, which is the whole point of a 9x6 pack, and
+  `torso HAPPY-wave` loses its raised hand at the wrist, because the hand crossed the
+  neck line and the scanline filed it under "face" (`odyssey-poc/crossmix.png`). Two
+  scale-dependent bugs worth carrying into S1 and S3 are recorded in `NOTES.md`:
+  `cv2.floodFill` needs `FLOODFILL_FIXED_RANGE` or it eats the figure at high
+  resolution, and every pixel threshold in the measuring path has to be proportional.
+
+  Known constraint, and the most likely reason to fail on image quality rather than on the
+  estimator: a whole figure puts the head at roughly one seventh of cell height, so a
+  2048px sheet yields a ~97px head against `spec.cell`'s 256 and the faces are unusable.
+  Generate at 4K (~195px heads) or fall back to §15's hybrid: one whole-figure sheet to
+  drive the split and the measurement, one heads-only sheet referenced to it for the face
+  pixels. Note also that nothing loads a whole-figure sheet today. S0 slices it by hand;
+  a declared sheet kind for it is S3's problem, not S0's.
+- **S1 — `anchor-guide --measure` (1-2 days).** Turn the passing estimator into an opt-in
+  flag that writes the measured anchor straight into `source.json` rather than rendering a
+  grid for a human. Hard constraint: `asset-packager` stays offline and deterministic with
+  no model call and no network (`index.ts` contract), so the estimator lives in a separate
+  optional package or a skill-driven script, and the packager only ever consumes the
+  numbers. Same NEUTRAL-only scope as today's `anchor-guide`.
+- **S2 — Native-alpha generation (half a day).** Swap the generation step to LayerDiffuse
+  so parts arrive with real alpha. Prompt-authoring stays in `SKILL.md`; the packager is
+  untouched. Retires the auto-crop and guide-line-noise class of bug.
+- **S3 — Automated head/torso split (2-3 days, no longer optional to the split).**
+  See-through or SAM2 cutting on the S0 neck keypoint, **by region rather than by
+  scanline** — S0 established that a straight cut at the neck line hands the face part
+  the cape and shoulders either side of the neck, which then travel with the head and
+  punch a hole in the torso. So one generated figure yields both parts. Collapses the
+  per-part prompt count from nine-plus to one per pose and removes the last place where
+  identity can drift between a face and its own torso.
+- **S4 — Fixed-canvas pose control (half a day, optional).** DWPose ControlNet templates
+  so poses within a character stay registered without a sheet. Only worth doing if S3
+  lands and the per-pose path is being used in preference to M15 sheets.
+
+Non-goals, restated against §0: none of this puts model inference inside any shipped
+runtime package. The generation and measurement steps are authoring-time tooling. The
+library still renders caller-supplied data, and `asset-packager` still packs finished
+pixels deterministically.
+
+Sources: [Spine](https://en.esotericsoftware.com/spine-in-depth),
+[DragonBones](https://dragonbones.github.io/en/animation.html),
+[Unity 2D PSD Importer](https://docs.unity3d.com/Packages/com.unity.2d.animation@9.0/manual/ex-psd-importer.html),
+[Godot cutout](https://docs.huihoo.com/godotengine/godot-docs/godot/tutorials/2d/cutout_animation.html),
+[AnimatedDrawings paper](https://dl.acm.org/doi/fullHtml/10.1145/3592788) /
+[code](https://github.com/facebookresearch/AnimatedDrawings),
+[See-through](https://github.com/shitagaki-lab/see-through),
+[LayerDiffuse](https://arxiv.org/abs/2402.17113),
+[ComfyUI pose ControlNet](https://docs.comfy.org/tutorials/controlnet/pose-controlnet-2-pass).

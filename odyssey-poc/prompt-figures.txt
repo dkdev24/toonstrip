@@ -1,0 +1,58 @@
+Whole-figure sheet for M16 (rig-first pipeline). Unlike `prompt.txt`, this sheet draws
+complete characters, head attached to body, and the head/torso split is measured and cut
+afterwards by the pipeline rather than prompted for. See `TOONSTRIP_DEV_PLAN.md` §16.
+
+Output at the largest resolution the model supports (4K preferred, 2048px minimum). Each
+cell holds a full standing figure, so the head is roughly one seventh of cell height: at
+4096px the head lands near 195px against the packer's 256px cell, at 2048px it lands near
+97px and the faces will be too soft to use. Resolution is the binding constraint on this
+sheet.
+
+---
+
+Draw a 3 columns x 3 rows character sheet, 9 cells, equal cell sizes, thin gutters
+between cells, on a plain flat mid-grey background. Print each cell's label in a small
+band at the top of that cell. Do not draw guide lines.
+
+Every cell is the same character, drawn at the same size and in the same style
+throughout — this is one character sheet, not 9 separate drawings. Flat colour, clean
+hard-edged outlines, no shadows, no gradients, no background scenery, no ground shadow.
+Every cell: 3/4 view, head and body turned to face screen-right, same angle throughout —
+not a frontal portrait (the renderer mirrors this art horizontally to face the other way
+when two characters share a scene, so it must start off-axis, not symmetric).
+
+Each cell holds ONE complete standing figure: head, neck, shoulders, arms, torso, legs,
+down to footwear, feet touching the bottom edge of the cell, not floating above it with
+dead space below. The head is attached to the body and the neck is drawn normally — this
+is a whole character, not a separated part.
+
+Hold these three things identical in all 9 cells, because the pipeline measures the neck
+join from one cell and reuses it for all of them:
+
+1. **Figure scale.** The same character height in every cell, to within a couple of
+   percent. Do not zoom in or out between cells.
+2. **Head position.** The head occupies the same place in every cell, at the same size
+   and the same tilt. Only the eyes, brows and mouth change between cells.
+3. **Collar line.** The shoulders and the base of the neck sit at the same height in
+   every cell. Arms move; the collar does not.
+
+A raised arm must stay inside the cell with clear margin, not extend past the cell edge
+or into the label band.
+
+Cells, in reading order, each named `<emotion>-<pose>`:
+
+Row 1: NEUTRAL-neutral, HAPPY-wave, COY-pointother
+Row 2: BORED-shrug, SCARED-pointself, LAUGH-doublepoint
+Row 3: SAD-neutral, ANGRY-neutral, SHOUT-neutral
+
+The first half of each name is the facial expression. The second half is what the arms
+are doing: `neutral` arms rest at the sides, `wave` one arm raised in greeting,
+`pointother` one arm extended pointing away from the body, `pointself` one hand indicating
+the character's own chest, `doublepoint` both arms extended pointing outward, `shrug` both
+palms turned up at waist height, shoulders raised. The face and the arms are independent:
+draw the named expression and the named arm pose together in the same figure.
+
+Character: Bronze Age Greek warrior-king, early-to-mid 30s, lean muscular build, olive
+skin, short dark curly beard and matching cropped curly hair, bronze cuirass over a
+weathered red-brown tunic, a sea-blue cloak clasped at one shoulder, bare legs, leather
+sandals, bold black outlines.
