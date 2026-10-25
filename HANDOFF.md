@@ -18,11 +18,12 @@ stripped). M0–M15 done, 11 packages on npm, site live at
 
 ## Last Session
 
-2026-10-25: site only, no package change. Google Analytics (`G-GM9XTWX924`) loads only after Accept in a cookie
-banner (`site/src/components/site/Consent.astro`, key `toonstrip-consent`, prod host only; pattern from
-doverunner-lab). New `/privacy/` + `/ko/privacy/` (`PrivacyPage.astro`, copy in `site/src/data/privacy.ts`),
-footer link. `site/public/_headers` CSP now allows the GA hosts. Share-link `#` fragment verified not sent to GA.
-Tested against the real hostname locally; live domain, GA Realtime, phone width not checked. (Earlier: M16 S0 GO, `NOTES.md`.)
+2026-10-25: site only, no package change. GA (`G-GM9XTWX924`) loads only after Accept in a cookie banner
+(`site/src/components/site/Consent.astro`, key `toonstrip-consent`, prod host only); `/privacy/` + `/ko/privacy/`
+(`site/src/data/privacy.ts`); CSP in `site/public/_headers` allows GA. Verified live after deploy. **Pages had skipped every
+build since 2026-09-08**: watch paths used `**`, Cloudflare only supports `*` (`skip_reason: path_config`). Fixed with
+`cf pages edit` to `site/*`, `packages/*`, `CHANGELOG.md`, `pnpm-lock.yaml`, `wrangler.toml`; docs-only commits still skip.
+Check a deploy with `cf pages deployments list --project-name toonstrip`. Detail: `WORKLOG.md`. (Earlier: M16 S0 GO, `NOTES.md`.)
 
 ## Next Actions
 

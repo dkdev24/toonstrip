@@ -4,6 +4,32 @@ Persistent project history. Append entries; do not edit past entries.
 
 ---
 
+## Site: Google Analytics consent, privacy page, Pages watch paths (no version bump)
+
+**Date:** 2026-10-25
+
+### Changes
+
+- Google Analytics 4 (`G-GM9XTWX924`) loads only after Accept in a cookie banner (`site/src/components/site/Consent.astro`,
+  `localStorage` `toonstrip-consent`, production host only; pattern from doverunner-lab's `Consent.tsx`). New `/privacy/` and
+  `/ko/privacy/` (`PrivacyPage.astro`, copy in `site/src/data/privacy.ts`), footer link. `site/public/_headers` CSP now allows
+  the GA hosts (`script-src` googletagmanager; `img-src`/`connect-src` `*.google-analytics.com`, `*.analytics.google.com`).
+- Share links keep the strip in the URL `#` fragment; verified by intercepting the real collect request that GA's `dl` omits it,
+  and the privacy page says so. Korean copy written directly, not legally reviewed.
+- **Cloudflare Pages skipped every build from 2026-09-08 to 2026-10-25** (`skip_reason: path_config`): the dashboard's build watch
+  paths were `site/**` and `packages/**`, but Cloudflare's wildcard is a single `*` (it crosses folders); `**` matches nothing, so
+  no push matched. The `**` came from `SITE_DEV_PLAN.md` §9, now corrected. Set via `cf pages edit` (full source config passed
+  back so nothing else changed) to `site/*`, `packages/*`, `CHANGELOG.md`, `pnpm-lock.yaml`, `wrangler.toml`, then retried the
+  `c29a9c0` deployment. Docs-only commits are still skipped by design.
+
+### Status
+
+Build and `test:budgets` pass; live site checked after the deploy: `/privacy/` and `/ko/privacy/` 200, CSP header has the GA
+hosts, Accept loads gtag and sends a collect hit with no CSP errors (one test pageview landed in the property). Not checked:
+GA Realtime by Daniel, phone width, the bottom banner overlapping the playground until a choice is made.
+
+---
+
 ## v0.15.0 — M15: sheet input for `@toonstrip/asset-packager`
 
 **Date:** 2026-09-03
