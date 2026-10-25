@@ -356,8 +356,11 @@ Match `danielkimdev-astro` exactly unless a reason is written down here.
   - Build output directory: `site/dist`.
   - Package manager: add `"packageManager": "pnpm@10.x"` to the root `package.json`;
     Pages honours it. Node: `.node-version` at the root with `20` (matches `ci.yml`).
-  - Build watch paths (include): `site/**`, `packages/**`, `CHANGELOG.md`,
-    `pnpm-lock.yaml`, so a docs-only or worklog-only commit does not trigger a build.
+  - Build watch paths (include): `site/*`, `packages/*`, `CHANGELOG.md`,
+    `pnpm-lock.yaml`, `wrangler.toml`, so a docs-only or worklog-only commit does not
+    trigger a build. Cloudflare's wildcard is a single `*` (it already crosses folders);
+    `**` is not supported and matches nothing, which skipped every build from 2026-09-08
+    to 2026-10-25 (`skip_reason: path_config`).
   - Environment: `SITE_E2E` unset (Playwright does not run in the Pages build).
 - **`wrangler.toml` at the repo root**, not in `site/`, because the Git integration
   reads it from the project root directory: `name = "toonstrip"`,
