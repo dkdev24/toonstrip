@@ -1,0 +1,137 @@
+---
+// Cookie consent for Google Analytics. GA loads only after Accept, only on the production host
+// (previews and localhost send nothing). The choice lives in localStorage `toonstrip-consent`; the
+// privacy page's [data-consent-reset] button clears it so the banner asks again. Pages here are full
+// loads (no view transitions), so init runs once per page.
+import { getLangFromUrl, useTranslations } from "../../i18n/utils";
+import { getLocalizedPath } from "../../i18n/utils";
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+---
+
+<div class="consent" role="region" aria-label={t("consent.label")} hidden>
+  <p>{t("consent.text")} <a href={getLocalizedPath("/privacy/", lang)}>{t("consent.policy")}</a></p>
+  <div class="consent__actions">
+    <button type="button" data-consent="denied">{t("consent.decline")}</button>
+    <button type="button" data-consent="granted" class="consent__accept">{t("consent.accept")}</button>
+  </div>
+</div>
+
+<script>
+  const KEY = "toonstrip-consent";
+  const GA_ID = "G-GM9XTWX924";
+  const HOSTS = ["toonstrip.danielkimdev.com"];
+  const banner = document.querySelector<HTMLElement>(".consent");
+
+  function load() {
+    const w = window as unknown as { dataLayer: unknown[] };
+    w.dataLayer = w.dataLayer || [];
+    // gtag.js needs the `arguments` object itself, so a plain function, not an arrow
+    function gtag(..._: unknown[]) {
+      w.dataLayer.push(arguments);
+    }
+    gtag("js", new Date());
+    gtag("config", GA_ID);
+    const s = document.createElement("script");
+    s.async = true;
+    s.src = `https://www.googletagmanager.com/gtag/js?id=${GA_ID}`;
+    document.head.append(s);
+  }
+
+  let stored: string | null = null;
+  let usable = true;
+  try {
+    stored = localStorage.getItem(KEY);
+  } catch {
+    usable = false; // storage blocked: no banner on every page, no tag
+  }
+
+  if (HOSTS.includes(location.hostname) && usable) {
+    if (stored === "granted") load();
+    else if (stored !== "denied" && banner) banner.hidden = false;
+  }
+
+  banner?.addEventListener("click", (e) => {
+    const choice = (e.target as HTMLElement).closest<HTMLElement>("[data-consent]")?.dataset.consent;
+    if (choice !== "granted" && choice !== "denied") return;
+    try {
+      localStorage.setItem(KEY, choice);
+    } catch {}
+    banner.hidden = true;
+    if (choice === "granted") load();
+  });
+
+  // Privacy page: forget the choice (a reload drops an already-loaded tag).
+  document.querySelectorAll("[data-consent-reset]").forEach((b) =>
+    b.addEventListener("click", () => {
+      try {
+        localStorage.removeItem(KEY);
+      } catch {}
+      location.reload();
+    }),
+  );
+</script>
+
+<style>
+  .consent {
+    position: fixed;
+    right: var(--space-16);
+    bottom: var(--space-16);
+    left: var(--space-16);
+    z-index: 90;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-16) var(--space-24);
+    max-width: 720px;
+    margin: 0 auto;
+    padding: var(--space-16) var(--space-24);
+    border: 1px solid var(--rule-strong);
+    border-radius: var(--radius-lg);
+    background: var(--paper-raised);
+    color: var(--ink);
+    box-shadow: var(--shadow);
+    font-size: var(--text-small);
+    line-height: 1.55;
+  }
+  .consent[hidden] {
+    display: none;
+  }
+  .consent p {
+    flex: 1 1 280px;
+    margin: 0;
+  }
+  .consent a {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .consent__actions {
+    display: flex;
+    gap: var(--space-8);
+  }
+  .consent button {
+    min-height: 40px;
+    padding: 0 var(--space-16);
+    border: 1px solid var(--rule-strong);
+    border-radius: var(--radius-md);
+    background: transparent;
+    color: var(--ink);
+    font: inherit;
+    cursor: pointer;
+  }
+  .consent button:hover {
+    border-color: var(--ink-3);
+  }
+  .consent button.consent__accept {
+    border-color: var(--accent);
+    background: var(--accent);
+    color: var(--accent-ink);
+    font-weight: 600;
+  }
+  .consent button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+</style>

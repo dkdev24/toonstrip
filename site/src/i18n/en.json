@@ -13,7 +13,8 @@
     "npm": "npm",
     "notice": "The default asset pack includes Microsoft Comic Chat character and backdrop art, redistributed under the MIT License. COMIC CHAT is a trademark of Microsoft Corporation; toonstrip is independent and not affiliated with or endorsed by Microsoft. See",
     "noticeLinkLabel": "NOTICE",
-    "noticeSuffix": "."
+    "noticeSuffix": ".",
+    "privacy": "Privacy"
   },
   "lang": {
     "switchTo": "한국어",
@@ -178,5 +179,17 @@
     "presetFill": "Fill",
     "columnUnit": "column",
     "columnUnitPlural": "columns"
+  },
+  "consent": {
+    "label": "Cookie consent",
+    "text": "This site uses Google Analytics cookies to see which pages are read, only if you accept.",
+    "policy": "Privacy policy",
+    "accept": "Accept",
+    "decline": "Decline"
+  },
+  "privacy": {
+    "title": "Privacy policy",
+    "description": "What the toonstrip website collects: Google Analytics, hosting logs, the playground, and what stays in your browser.",
+    "resetCookies": "Change cookie settings"
   }
 }

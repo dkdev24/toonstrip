@@ -2,6 +2,7 @@
 import { Font } from "astro:assets";
 import Header from "../components/site/Header.astro";
 import Footer from "../components/site/Footer.astro";
+import Consent from "../components/site/Consent.astro";
 import ThemeScript from "../components/site/ThemeScript.astro";
 import { getAltLocale, getLocalizedPath, useTranslations, type Lang } from "../i18n/utils";
 import "../styles/global.css";
@@ -67,6 +68,7 @@ const fullTitle = isRoot
       <slot />
     </main>
     {!bare && <Footer lang={lang} />}
+    <Consent />
   </body>
 </html>
 

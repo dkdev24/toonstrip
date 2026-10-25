@@ -1,6 +1,6 @@
 ---
 import { coreVersion } from "../../lib/version";
-import { useTranslations, type Lang } from "../../i18n/utils";
+import { getLocalizedPath, useTranslations, type Lang } from "../../i18n/utils";
 
 interface Props {
   lang?: Lang;
@@ -15,7 +15,8 @@ const t = useTranslations(lang);
       <strong>toonstrip</strong> <span class="mono">v{coreVersion}</span> · {t("footer.license")} ·
       <a href="https://github.com/dkdev24/toonstrip">{t("footer.github")}</a> ·
       <a href="https://www.npmjs.com/org/toonstrip">{t("footer.npm")}</a> ·
-      <a href="https://danielkimdev.com">danielkimdev.com</a>
+      <a href="https://danielkimdev.com">danielkimdev.com</a> ·
+      <a href={getLocalizedPath("/privacy/", lang)}>{t("footer.privacy")}</a>
     </p>
     <p class="site-footer__notice">
       {t("footer.notice")} <a href="https://github.com/dkdev24/toonstrip/blob/main/NOTICE">{t("footer.noticeLinkLabel")}</a>{t("footer.noticeSuffix")}

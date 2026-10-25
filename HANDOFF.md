@@ -18,15 +18,11 @@ stripped). M0–M15 done, 11 packages on npm, site live at
 
 ## Last Session
 
-2026-09-16/17: Researched why AI-generated packs keep missing the packager's precision
-needs. Answer from 2D game rigging (Spine, DragonBones, Unity PSD Importer, Godot): the
-joint is metadata authored against finished art, never a drawing constraint. Our
-`anchors`/`register()` join is already that shape; the missing piece is an automated
-measuring step. Filed as **M16** (`TOONSTRIP_DEV_PLAN.md` §16, 5 stages). Then
-ran **S0** on a new 3x3 whole-figure Odysseus sheet, at 1254px then 4096px: **GO** —
-MediaPipe (no torch) hit 9/9 cells both times, 4.3% neck spread vs ±14%. Seam test passed
-at the join, killed the scanline cut. `NOTES.md`; scripts `odyssey-poc/s0/`. No package
-code changed.
+2026-10-25: site only, no package change. Google Analytics (`G-GM9XTWX924`) loads only after Accept in a cookie
+banner (`site/src/components/site/Consent.astro`, key `toonstrip-consent`, prod host only; pattern from
+doverunner-lab). New `/privacy/` + `/ko/privacy/` (`PrivacyPage.astro`, copy in `site/src/data/privacy.ts`),
+footer link. `site/public/_headers` CSP now allows the GA hosts. Share-link `#` fragment verified not sent to GA.
+Tested against the real hostname locally; live domain, GA Realtime, phone width not checked. (Earlier: M16 S0 GO, `NOTES.md`.)
 
 ## Next Actions
 

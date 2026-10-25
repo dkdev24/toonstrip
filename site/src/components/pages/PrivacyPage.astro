@@ -1,0 +1,66 @@
+---
+// Shared privacy page (EN/KO), fed by `lang`. Copy lives in data/privacy.ts.
+import Base from "../../layouts/Base.astro";
+import { useTranslations, type Lang } from "../../i18n/utils";
+import { PRIVACY } from "../../data/privacy";
+
+interface Props {
+  lang?: Lang;
+}
+const { lang = "en" } = Astro.props;
+const t = useTranslations(lang);
+const page = PRIVACY[lang];
+---
+
+<Base title={t("privacy.title")} description={t("privacy.description")} lang={lang}>
+  <article class="privacy">
+    <h1>{t("privacy.title")}</h1>
+    <p class="caption">{page.updated}</p>
+    {page.intro.map((p) => <p>{p}</p>)}
+    {
+      page.sections.map((s) => (
+        <section>
+          <h2>{s.heading}</h2>
+          {s.body.map((p) => <p>{p}</p>)}
+          {s.bullets && <ul>{s.bullets.map((b) => <li>{b}</li>)}</ul>}
+          {s.reset && (
+            <p>
+              <button type="button" class="reset" data-consent-reset>
+                {t("privacy.resetCookies")}
+              </button>
+            </p>
+          )}
+        </section>
+      ))
+    }
+  </article>
+</Base>
+
+<style>
+  .privacy {
+    max-width: 44rem;
+    padding-bottom: var(--space-32);
+  }
+  .privacy h2 {
+    margin-top: var(--space-48);
+  }
+  .privacy ul {
+    padding-left: var(--space-24);
+  }
+  .privacy li {
+    margin-block: var(--space-8);
+  }
+  .reset {
+    min-height: 40px;
+    padding: 0 var(--space-16);
+    border: 1px solid var(--rule-strong);
+    border-radius: var(--radius-md);
+    background: transparent;
+    color: var(--ink);
+    font: inherit;
+    cursor: pointer;
+  }
+  .reset:hover {
+    border-color: var(--ink-3);
+  }
+</style>

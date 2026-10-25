@@ -13,7 +13,8 @@
     "npm": "npm",
     "notice": "기본 에셋 팩에는 Microsoft Comic Chat의 캐릭터와 배경 아트가 포함되어 있으며, MIT 라이선스 조건에 따라 재배포됩니다. COMIC CHAT은 Microsoft Corporation의 상표이며, toonstrip은 Microsoft와 무관한 독립 프로젝트로 Microsoft의 후원이나 승인을 받지 않았습니다. 자세한 내용은",
     "noticeLinkLabel": "NOTICE",
-    "noticeSuffix": " 문서를 참고하세요."
+    "noticeSuffix": " 문서를 참고하세요.",
+    "privacy": "개인정보처리방침"
   },
   "lang": {
     "switchTo": "English",
@@ -178,5 +179,17 @@
     "presetFill": "채우기",
     "columnUnit": "컬럼",
     "columnUnitPlural": "컬럼"
+  },
+  "consent": {
+    "label": "쿠키 동의",
+    "text": "이 사이트는 어떤 페이지가 읽히는지 파악하려고 Google Analytics 쿠키를 사용하며, 동의하신 경우에만 작동합니다.",
+    "policy": "개인정보처리방침",
+    "accept": "동의",
+    "decline": "거부"
+  },
+  "privacy": {
+    "title": "개인정보처리방침",
+    "description": "toonstrip 웹사이트가 수집하는 정보: Google Analytics, 호스팅 로그, 플레이그라운드, 브라우저에 저장되는 값.",
+    "resetCookies": "쿠키 설정 변경"
   }
 }
