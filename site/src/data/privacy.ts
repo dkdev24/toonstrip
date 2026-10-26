@@ -9,7 +9,7 @@ export interface PrivacySection {
   reset?: boolean;
 }
 
-export const CONTACT_EMAIL = "danielkimdev24@gmail.com";
+export const CONTACT_EMAIL = "contact@danielkimdev.com";
 
 export const PRIVACY: Record<Lang, { updated: string; intro: string[]; sections: PrivacySection[] }> = {
   en: {
