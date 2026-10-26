@@ -6,6 +6,16 @@ shipped. Written for users; the engineering history behind each entry is in `WOR
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.15.9 — 2026-10-26
+
+**Packages:** none published; every package is unchanged since 0.15.8.
+
+### Changed
+
+- The repository now builds and tests on Node 24 LTS (`.nvmrc` 24.22.1, root `engines` `>=24`,
+  `@types/node` `^24`). Node 22 reaches end of life on 2027-04-30; Node 24.22.1 also carries the
+  Brotli decoder fix for CVE-2026-111497. No runtime or API change.
+
 ## 0.15.7 — 2026-09-07
 
 **Packages:** `@toonstrip/asset-packager` 0.3.0; everything else unchanged since 0.15.6.

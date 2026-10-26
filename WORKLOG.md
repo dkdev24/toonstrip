@@ -4,6 +4,19 @@ Persistent project history. Append entries; do not edit past entries.
 
 ---
 
+## v0.15.9 — Node 24 migration (no package changes)
+
+**Date:** 2026-10-26
+
+### Changes
+
+- `.nvmrc` 24.22.1, `.node-version` 24, root `engines.node` `>=24`, `@types/node` `^24` in the five packages that declare it; lockfile refreshed.
+- Verified on Node 24.22.1: `pnpm install`, `pnpm test`, `pnpm build` (incl. `examples/next-app`) pass. Cloudflare Pages has no `NODE_VERSION` override, so it follows `.nvmrc`; the deploy on `da1e084` succeeded.
+- Trigger: Node2Shell (CVE-2026-111497, Brotli decoder out-of-bounds write; fixed in 22.23.4 / 24.22.1 / 26.12.1). Plan: basecamp `NODE24-MIGRATION.md`.
+- First git tag and GitHub release for this repo. Package versions unchanged.
+
+---
+
 ## Site: Google Analytics consent, privacy page, Pages watch paths (no version bump)
 
 **Date:** 2026-10-25

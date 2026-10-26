@@ -4,9 +4,10 @@ Cross-session context memory. Update this file at the end of every session.
 
 ## Current Version
 
-**0.15.8** (npm: schema 0.1.3, core 0.1.9, element 0.1.11, astro 0.1.13, packs 0.1.1,
+**0.15.9** (repo; npm: schema 0.1.3, core 0.1.9, element 0.1.11, astro 0.1.13, packs 0.1.1,
 asset-packager **0.4.0** (unpublished, see Next Actions), cli 0.2.4, react 0.1.3,
 vue 0.1.2, next 0.1.2)
+Toolchain: Node 24 (`.nvmrc` 24.22.1) since 0.15.9; first git tag + GitHub release.
 
 ## Project Status
 
