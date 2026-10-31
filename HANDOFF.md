@@ -19,12 +19,12 @@ stripped). M0–M15 done, 11 packages on npm, site live at
 
 ## Last Session
 
-2026-10-31 (docs fix, **not pushed**): fixed 45 broken `npx toonstrip` /
+2026-10-31 (docs fix, **pushed 15:17 KST per Daniel's approval**): fixed 45 broken `npx toonstrip` /
 `npx toonstrip-pack` invocations across 13 files — those package names don't exist on npm;
 rewritten as `npx -p @toonstrip/cli toonstrip …` / `npx -p @toonstrip/asset-packager
 toonstrip-pack …` (both verified via `--help`). FAQ "How big is it?" now says ~36 KB
 gzipped (measured on published builds). Workspace + site build green (46 pages).
-Committed as `1164a83`; push pending Daniel's approval (main = prod).
+Committed as `1164a83`; pushed 15:17 KST per Daniel's approval (main = prod).
 
 ## Previous Session
 2026-10-25: site only (GA consent banner + `/privacy/`, CSP; fixed Pages watch paths
