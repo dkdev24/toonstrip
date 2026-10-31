@@ -19,12 +19,16 @@ stripped). M0–M15 done, 11 packages on npm, site live at
 
 ## Last Session
 
-2026-10-25: site only, no package change. GA (`G-GM9XTWX924`) loads only after Accept in a cookie banner
-(`site/src/components/site/Consent.astro`, key `toonstrip-consent`, prod host only); `/privacy/` + `/ko/privacy/`
-(`site/src/data/privacy.ts`); CSP in `site/public/_headers` allows GA. Verified live after deploy. **Pages had skipped every
-build since 2026-09-08**: watch paths used `**`, Cloudflare only supports `*` (`skip_reason: path_config`). Fixed with
-`cf pages edit` to `site/*`, `packages/*`, `CHANGELOG.md`, `pnpm-lock.yaml`, `wrangler.toml`; docs-only commits still skip.
-Check a deploy with `cf pages deployments list --project-name toonstrip`. Detail: `WORKLOG.md`. (Earlier: M16 S0 GO, `NOTES.md`.)
+2026-10-31 (docs fix, **not pushed**): fixed 45 broken `npx toonstrip` /
+`npx toonstrip-pack` invocations across 13 files — those package names don't exist on npm;
+rewritten as `npx -p @toonstrip/cli toonstrip …` / `npx -p @toonstrip/asset-packager
+toonstrip-pack …` (both verified via `--help`). FAQ "How big is it?" now says ~36 KB
+gzipped (measured on published builds). Workspace + site build green (46 pages).
+Committed as `1164a83`; push pending Daniel's approval (main = prod).
+
+## Previous Session
+2026-10-25: site only (GA consent banner + `/privacy/`, CSP; fixed Pages watch paths
+`**` → `*`). Detail in WORKLOG.md.
 
 ## Next Actions
 
@@ -34,15 +38,13 @@ Check a deploy with `cf pages deployments list --project-name toonstrip`. Detail
    0.7x of `spec.cell` 256). Next: start **S1** (`anchor-guide --measure`). S3's cut must
    be region-based — a scanline amputates a raised hand on face swap
    (`odyssey-poc/crossmix.png`). Details in `NOTES.md`.
-3. `.zip`-pack loader and/or per-pose anchor overrides; neither started. 4. Carried over:
-   Odysseus `torso-NEUTRAL` touch-up, KO copy + axe/Lighthouse on `/ko/` (§13.6).
+3. `.zip`-pack loader / per-pose anchor overrides (unstarted); Odysseus `torso-NEUTRAL`
+   touch-up; KO copy + axe/Lighthouse on `/ko/` (§13.6).
 
 ## Open Issues
 
 - **Publish with `pnpm publish`, never `npm publish`** (`workspace:*` deps; verify with
   `npm view <pkg>@<version> dependencies`).
 - `toonstrip pack validate` misses a missing torso (checks NEUTRAL only).
-- `anchor-guide` only guides per-pose files, not a sheet-sourced NEUTRAL cell; refuses
-  clearly rather than guiding the wrong image. Unscoped, not a bug.
 - Odyssey's `torso-NEUTRAL.png` has guide-line noise in its headroom, pulling its join off
   the true collar. Needs manual touch-up (auto-crop reverted, `WORKLOG.md` v0.15.7).
