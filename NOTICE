@@ -7,6 +7,7 @@ via packages/pack-comic-chat:
 Microsoft Comic Chat
 Copyright (c) Microsoft Corporation
 Licensed under the MIT License
+Source: https://github.com/microsoft/comic-chat (MIT, no separate asset license)
 
 Microsoft Comic Chat's avatar and backdrop art is redistributed in converted
 form: the fifteen character sprite sheets under packages/pack-comic-chat/characters/

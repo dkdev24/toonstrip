@@ -3,7 +3,7 @@
 ## Microsoft Comic Chat
 
 - Original client: Microsoft Comic Chat (comic strip-style chat client, 1996-2003)
-- License: MIT
+- License: MIT (verified against https://github.com/microsoft/comic-chat, 2026-10-31)
 - Imported: 2026-09-01, via `packages/pack-comic-chat`
 - Source of the converted art:
   - Character roster: already-decoded, already-packed sprite sheets and pose
