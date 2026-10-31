@@ -41,7 +41,7 @@ Astro의 클라이언트 디렉티브는 모두 사용할 수 있습니다. `cli
 태그뿐입니다. 컴포넌트에는 서버 사이드 캔버스가 없으므로, 클라이언트 쪽에서 함께
 생성되는 엘리먼트의 `aria-label`을 제외하면 자바스크립트 없이는 아무 콘텐츠도 나오지
 않습니다. 정적 이미지(오픈 그래프, RSS, `<noscript>` 대체 콘텐츠)가 필요하다면
-`@toonstrip/cli`의 `npx toonstrip render strip.json --out strip.png`로 빌드 시점에 같은
+`@toonstrip/cli`의 `npx -p @toonstrip/cli toonstrip render strip.json --out strip.png`로 빌드 시점에 같은
 문서를 렌더링하면 됩니다. 이 명령은 엘리먼트와 동일한 레이아웃 정책과 피규어 선택
 로직을 사용합니다.
 

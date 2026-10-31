@@ -47,7 +47,7 @@ Astro 컴포넌트에서는 그렇지 않습니다. 서버는 비활성 상태�
 바랍니다.
 
 ```
-npx toonstrip render strip.json --out strip.png --width 1200
+npx -p @toonstrip/cli toonstrip render strip.json --out strip.png --width 1200
 ```
 
 ## Astro 없이도 쓸 수 있나요?
@@ -58,7 +58,7 @@ npx toonstrip render strip.json --out strip.png --width 1200
 
 ## 용량은 얼마나 되나요?
 
-엘리먼트와 코어, 스키마 검증기를 합쳐도 gzip 기준 수십 킬로바이트 수준입니다.
+엘리먼트와 코어, 스키마 검증기를 합치면 gzip 기준 약 36 KB입니다(배포된 빌드 기준 실측).
 스프라이트 시트는 문서에서 실제로 쓰인 캐릭터별로만 받아오므로, 캐릭터 세 명짜리
 스트립이라면 팩 전체가 아니라 시트 세 장과 배경 하나만 로드됩니다.
 

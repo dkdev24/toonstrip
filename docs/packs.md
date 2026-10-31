@@ -116,7 +116,7 @@ actually match the PNG's own dimensions.
 ## Validating a pack
 
 ```
-npx toonstrip pack validate ./my-pack
+npx -p @toonstrip/cli toonstrip pack validate ./my-pack
 ```
 
 (or, inside this monorepo during development: `node packages/cli/dist/bin.js

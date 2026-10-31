@@ -17,21 +17,21 @@ npm install -D @toonstrip/asset-packager
 
 ```sh
 # 1. scaffold a source pack
-npx toonstrip-pack init ./my-source --name my-pack
+npx -p @toonstrip/asset-packager toonstrip-pack init ./my-source --name my-pack
 
 # 1b. generating with an image model? get a reference sheet to prompt with
-npx toonstrip-pack template --out ref.png
+npx -p @toonstrip/asset-packager toonstrip-pack template --out ref.png
 
 # 2. draw or generate the poses into ./my-source/characters/<id>/
 #    following docs/asset-image-spec.md, then check them
-npx toonstrip-pack validate ./my-source
+npx -p @toonstrip/asset-packager toonstrip-pack validate ./my-source
 
 # 3. build, and look at the join preview before shipping
-npx toonstrip-pack build ./my-source --out ./my-pack --preview joins.png
+npx -p @toonstrip/asset-packager toonstrip-pack build ./my-source --out ./my-pack --preview joins.png
 
 # 4. the output is a normal pack
-npx toonstrip pack validate ./my-pack
-npx toonstrip render strip.json --out strip.png --pack ./my-pack
+npx -p @toonstrip/cli toonstrip pack validate ./my-pack
+npx -p @toonstrip/cli toonstrip render strip.json --out strip.png --pack ./my-pack
 ```
 
 ## Sheet input
@@ -43,8 +43,8 @@ one image, many scenes.
 
 ```sh
 # a reference sheet to prompt with; prints the source.json fragment and a prompt
-npx toonstrip-pack template --out ref.png
-npx toonstrip-pack template --out scenes.png --kind backdrop --ids hall,cellar,attic --columns 2
+npx -p @toonstrip/asset-packager toonstrip-pack template --out ref.png
+npx -p @toonstrip/asset-packager toonstrip-pack template --out scenes.png --kind backdrop --ids hall,cellar,attic --columns 2
 ```
 
 ```json

@@ -43,7 +43,7 @@ static PNG (Open Graph images, RSS, `<noscript>` fallbacks) use the CLI, which r
 same renderer in Node:
 
 ```
-npx toonstrip render strip.json --out strip.png --width 1200
+npx -p @toonstrip/cli toonstrip render strip.json --out strip.png --width 1200
 ```
 
 ## Can I use it outside Astro?
@@ -54,7 +54,8 @@ be a few lines each.
 
 ## How big is it?
 
-The element plus core plus the schema validator is a few tens of kilobytes gzipped.
+The element plus core plus the schema validator is about 36 KB gzipped (measured on the
+published builds).
 Sprite sheets are fetched per character actually used in a document, so a three-character
 strip loads three sheets and one backdrop, not the whole pack.
 

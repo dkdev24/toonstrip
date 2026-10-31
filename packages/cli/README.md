@@ -62,8 +62,8 @@ figure selection as the browser element. Useful for Open Graph images, RSS embed
 `<noscript>` fallback.
 
 ```
-npx toonstrip render strip.json --out strip.png
-npx toonstrip render strip.json --out strip.png --width 900 --scale 2 --pack ./my-pack --transparent
+npx -p @toonstrip/cli toonstrip render strip.json --out strip.png
+npx -p @toonstrip/cli toonstrip render strip.json --out strip.png --width 900 --scale 2 --pack ./my-pack --transparent
 ```
 
 | Flag | Default | Meaning |

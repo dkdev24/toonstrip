@@ -230,16 +230,16 @@ Then run the packager (the join preview is not optional — it is the only thing
 catches a head that lands off the neck):
 
 ```
-npx toonstrip-pack init ./my-source --name my-pack
+npx -p @toonstrip/asset-packager toonstrip-pack init ./my-source --name my-pack
 # ...write the PNGs into ./my-source/characters/<id>/ ...
-npx toonstrip-pack validate ./my-source
-npx toonstrip-pack build ./my-source --out ./my-pack --preview joins.png
-npx toonstrip pack validate ./my-pack
-npx toonstrip render doc.json --out strip.png --pack ./my-pack
+npx -p @toonstrip/asset-packager toonstrip-pack validate ./my-source
+npx -p @toonstrip/asset-packager toonstrip-pack build ./my-source --out ./my-pack --preview joins.png
+npx -p @toonstrip/cli toonstrip pack validate ./my-pack
+npx -p @toonstrip/cli toonstrip render doc.json --out strip.png --pack ./my-pack
 ```
 
 Inside the toonstrip monorepo, use `node packages/asset-packager/dist/bin.js` instead of
-`npx toonstrip-pack`.
+`npx -p @toonstrip/asset-packager toonstrip-pack`.
 
 ### Sheets: one image, many assets
 
@@ -247,8 +247,8 @@ When the model accepts a reference image, generate a grid instead of separate fi
 **The grid shape is yours** — declare it; nothing is fixed at 3x3.
 
 ```
-npx toonstrip-pack template --out ref-character.png
-npx toonstrip-pack template --out ref-scenes.png --kind backdrop --ids hall,cellar,attic,kitchen --columns 2
+npx -p @toonstrip/asset-packager toonstrip-pack template --out ref-character.png
+npx -p @toonstrip/asset-packager toonstrip-pack template --out ref-scenes.png --kind backdrop --ids hall,cellar,attic,kitchen --columns 2
 ```
 
 Each run prints the `source.json` fragment for that sheet **and** a prompt skeleton with

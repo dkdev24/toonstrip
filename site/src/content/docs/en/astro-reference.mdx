@@ -41,7 +41,7 @@ first thing the reader needs.
 Only the tag. There is no server-side canvas in the component, so there is no content
 without JavaScript beyond the element's `aria-label`s, which are generated client-side too.
 For a static image (Open Graph, RSS, a `<noscript>` fallback) render the same document at
-build time with `npx toonstrip render strip.json --out strip.png` from `@toonstrip/cli`; it
+build time with `npx -p @toonstrip/cli toonstrip render strip.json --out strip.png` from `@toonstrip/cli`; it
 uses the same layout policy and figure selection as the element.
 
 ## Limitations
