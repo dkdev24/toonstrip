@@ -2470,3 +2470,11 @@ down-sliced cell (tested). 3 new tests in `test/anchor-guide.test.ts`; `pnpm bui
 Not published yet — `@toonstrip/asset-packager@0.4.0` carries both this session's
 `anchor-guide` and the prior session's `faceScale`/join fixes, still pending (`HANDOFF.md`
 Next Actions).
+
+---
+
+## 2026-10-31 — AEO pass, npx docs fix, repo made public (no release)
+
+- **AEO pass** (`f4d5649`, pushed): `FAQPage` JSON-LD on `/docs/faq/` (EN+KO, parsed from the `## question` mdx via `site/src/lib/faq-schema.ts`; `Docs.astro` forwards a `head` slot to `Base.astro`) + `SoftwareApplication` JSON-LD on the homepage; homepage FAQ section (4 Q&As, natural KO copy) + full-FAQ link; `noindex` on EN+KO 404s; `docs/index.astro` description now i18n; README got the "Why not an image?" comparison table + FAQ. Build green (46 pages); JSON-LD verified (12 Q&As EN+KO); budgets + validate-strips pass.
+- **Docs fix:** 45 broken `npx toonstrip` invocations fixed across 13 files; FAQ size ~36 KB gzipped.
+- **Repo made public** (`dkdev24/toonstrip`, after the checks in grues-in-comic's WORKLOG and siteready's): no secrets or internal identifiers in the tree or history; all 111 commits rewritten from the company email to the `dkdev24` GitHub noreply address and tag `v0.15.9` re-created (force-push); `SECURITY.md` and `.github/workflows/ci.yml` (build, lint, test; build before lint because `schema-data.ts` is generated) added; secret scanning + push protection on. `NOTICE`/`THIRD_PARTY.md` link the upstream Comic Chat repo (MIT, verified). Old commit SHAs may stay reachable on GitHub until its GC (support can purge). The history rewrite also dropped the local `odyssey-poc/s0` absolute paths and a `doverunner-lab` mention from the current tree only.

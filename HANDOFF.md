@@ -19,17 +19,9 @@ stripped). M0–M15 done, 11 packages on npm, site live at
 
 ## Last Session
 
-2026-10-31 (AEO pass, **not pushed**): FAQPage JSON-LD on `/docs/faq/` (EN+KO, parsed from
-the `## question` mdx via new `site/src/lib/faq-schema.ts`; `Docs.astro` forwards a `head`
-slot to `Base.astro`) + SoftwareApplication JSON-LD on homepage; homepage FAQ section
-(4 Q&As, natural KO copy) + full-FAQ link; `noindex` on EN+KO 404s; `docs/index.astro`
-description now i18n; README gained the "Why not an image?" comparison table + FAQ.
-Build green (46 pages); JSON-LD verified (12 Q&As EN+KO); budgets + validate-strips pass.
-Committed as `f4d5649`; push pending (main = prod).
-
-## Previous Session
-2026-10-31 (docs fix, pushed 15:17 KST): 45 broken `npx toonstrip` invocations fixed across
-13 files; FAQ size → ~36 KB gzipped. Detail in WORKLOG.md.
+2026-10-31 (AEO pass, docs fix, **repo now public**; all pushed): JSON-LD/FAQ/README pass and the
+`npx` docs fix (WORKLOG "2026-10-31"). `dkdev24/toonstrip` was made public: commit history rewritten to the
+GitHub noreply email (hashes changed; re-clone other machines), `SECURITY.md` + CI added, secret scanning on.
 
 ## Next Actions
 
