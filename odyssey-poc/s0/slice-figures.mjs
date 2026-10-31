@@ -3,7 +3,7 @@
 // kind is deferred to M16 S3.
 import { createCanvas, loadImage } from "@napi-rs/canvas";
 import { mkdirSync, writeFileSync } from "node:fs";
-const ROOT = "/Users/daniel/Sites/toonstrip/odyssey-poc";
+const ROOT = new URL("..", import.meta.url).pathname.replace(/\/$/, "");
 const img = await loadImage(`${ROOT}/figures.png`);
 const W=img.width,H=img.height,cw=W/3,ch=H/3;
 const src=createCanvas(W,H),sctx=src.getContext("2d");sctx.drawImage(img,0,0);

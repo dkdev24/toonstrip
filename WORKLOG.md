@@ -24,7 +24,7 @@ Persistent project history. Append entries; do not edit past entries.
 ### Changes
 
 - Google Analytics 4 (`G-GM9XTWX924`) loads only after Accept in a cookie banner (`site/src/components/site/Consent.astro`,
-  `localStorage` `toonstrip-consent`, production host only; pattern from doverunner-lab's `Consent.tsx`). New `/privacy/` and
+  `localStorage` `toonstrip-consent`, production host only). New `/privacy/` and
   `/ko/privacy/` (`PrivacyPage.astro`, copy in `site/src/data/privacy.ts`), footer link. `site/public/_headers` CSP now allows
   the GA hosts (`script-src` googletagmanager; `img-src`/`connect-src` `*.google-analytics.com`, `*.analytics.google.com`).
 - Share links keep the strip in the URL `#` fragment; verified by intercepting the real collect request that GA's `dl` omits it,

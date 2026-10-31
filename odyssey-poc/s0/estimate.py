@@ -5,7 +5,8 @@ import glob, os, sys
 import numpy as np, cv2
 import mediapipe as mp
 
-CELLS = "/Users/daniel/Sites/toonstrip/odyssey-poc/cells"
+ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
+CELLS = os.path.join(ROOT, "cells")
 UPSCALE = int(sys.argv[1]) if len(sys.argv) > 1 else 1
 
 pose = mp.solutions.pose.Pose(static_image_mode=True, model_complexity=2,

@@ -5,8 +5,9 @@
 import os
 import numpy as np, cv2, mediapipe as mp
 
-CELLS="/Users/daniel/Sites/toonstrip/odyssey-poc/cells"
-SPLIT="/Users/daniel/Sites/toonstrip/odyssey-poc/cells-split"
+ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
+CELLS=os.path.join(ROOT, "cells")
+SPLIT=os.path.join(ROOT, "cells-split")
 PICK=["NEUTRAL-neutral","HAPPY-wave","LAUGH-doublepoint"]
 
 def bbox(rgba):
@@ -54,5 +55,5 @@ for name in PICK:
         cv2.line(c,(0,py),(W,py),(0,255,255,255),1)
         tiles.append(c)
 sheet=np.hstack([np.vstack(tiles[i::2]) for i in (0,1)])
-cv2.imwrite("/Users/daniel/Sites/toonstrip/odyssey-poc/seam-check.png",sheet)
+cv2.imwrite(os.path.join(ROOT, "seam-check.png"),sheet)
 print("wrote odyssey-poc/seam-check.png", sheet.shape)

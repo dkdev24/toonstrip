@@ -1,7 +1,9 @@
 """The decisive S0 test: the pack format composites any face onto any torso, so put
 one character's face on another pose's torso and see what the scanline cut carried over."""
+import os
 import numpy as np, cv2
-SPLIT="/Users/daniel/Sites/toonstrip/odyssey-poc/cells-split"
+ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
+SPLIT=os.path.join(ROOT, "cells-split")
 PAIRS=[("NEUTRAL-neutral","BORED-shrug"),("SHOUT-neutral","HAPPY-wave"),
        ("ANGRY-neutral","LAUGH-doublepoint"),("SAD-neutral","SAD-neutral")]
 def trim(a):
@@ -27,5 +29,5 @@ for fname,tname in PAIRS:
     cv2.putText(c,f"face {fname}",(8,18),cv2.FONT_HERSHEY_SIMPLEX,0.40,(255,255,255,255),1)
     cv2.putText(c,f"torso {tname}",(8,34),cv2.FONT_HERSHEY_SIMPLEX,0.40,(120,220,255,255),1)
     tiles.append(c)
-cv2.imwrite("/Users/daniel/Sites/toonstrip/odyssey-poc/crossmix.png",np.hstack(tiles))
+cv2.imwrite(os.path.join(ROOT, "crossmix.png"),np.hstack(tiles))
 print("wrote odyssey-poc/crossmix.png")

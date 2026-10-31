@@ -3,8 +3,9 @@ the shoulder line, and split into face-*/torso-* parts the packer could consume.
 import glob, os
 import numpy as np, cv2, mediapipe as mp
 
-CELLS = "/Users/daniel/Sites/toonstrip/odyssey-poc/cells"
-OUT   = "/Users/daniel/Sites/toonstrip/odyssey-poc/cells-split"
+ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
+CELLS = os.path.join(ROOT, "cells")
+OUT   = os.path.join(ROOT, "cells-split")
 os.makedirs(OUT, exist_ok=True)
 pose = mp.solutions.pose.Pose(static_image_mode=True, model_complexity=2,
                               min_detection_confidence=0.2)
