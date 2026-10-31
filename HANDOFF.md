@@ -19,16 +19,17 @@ stripped). M0–M15 done, 11 packages on npm, site live at
 
 ## Last Session
 
-2026-10-31 (docs fix, **pushed 15:17 KST per Daniel's approval**): fixed 45 broken `npx toonstrip` /
-`npx toonstrip-pack` invocations across 13 files — those package names don't exist on npm;
-rewritten as `npx -p @toonstrip/cli toonstrip …` / `npx -p @toonstrip/asset-packager
-toonstrip-pack …` (both verified via `--help`). FAQ "How big is it?" now says ~36 KB
-gzipped (measured on published builds). Workspace + site build green (46 pages).
-Committed as `1164a83`; pushed 15:17 KST per Daniel's approval (main = prod).
+2026-10-31 (AEO pass, **not pushed**): FAQPage JSON-LD on `/docs/faq/` (EN+KO, parsed from
+the `## question` mdx via new `site/src/lib/faq-schema.ts`; `Docs.astro` forwards a `head`
+slot to `Base.astro`) + SoftwareApplication JSON-LD on homepage; homepage FAQ section
+(4 Q&As, natural KO copy) + full-FAQ link; `noindex` on EN+KO 404s; `docs/index.astro`
+description now i18n; README gained the "Why not an image?" comparison table + FAQ.
+Build green (46 pages); JSON-LD verified (12 Q&As EN+KO); budgets + validate-strips pass.
+Committed as `f4d5649`; push pending (main = prod).
 
 ## Previous Session
-2026-10-25: site only (GA consent banner + `/privacy/`, CSP; fixed Pages watch paths
-`**` → `*`). Detail in WORKLOG.md.
+2026-10-31 (docs fix, pushed 15:17 KST): 45 broken `npx toonstrip` invocations fixed across
+13 files; FAQ size → ~36 KB gzipped. Detail in WORKLOG.md.
 
 ## Next Actions
 
@@ -36,8 +37,7 @@ Committed as `1164a83`; pushed 15:17 KST per Daniel's approval (main = prod).
    ships `anchor-guide` plus the earlier `faceScale`/join fixes).
 2. **M16 S0 is GO, confirmed at 4K** (MediaPipe, 9/9, 4.3% neck spread vs ±14%; heads
    0.7x of `spec.cell` 256). Next: start **S1** (`anchor-guide --measure`). S3's cut must
-   be region-based — a scanline amputates a raised hand on face swap
-   (`odyssey-poc/crossmix.png`). Details in `NOTES.md`.
+   be region-based — a scanline amputates a raised hand on face swap (`odyssey-poc/crossmix.png`). Details in `NOTES.md`.
 3. `.zip`-pack loader / per-pose anchor overrides (unstarted); Odysseus `torso-NEUTRAL`
    touch-up; KO copy + axe/Lighthouse on `/ko/` (§13.6).
 
