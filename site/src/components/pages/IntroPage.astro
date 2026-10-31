@@ -81,9 +81,62 @@ import { ComicStrip } from "@toonstrip/astro";
 const description = ko
   ? "호출자가 넘긴 데이터로 코믹 스트립을 렌더링하는, 프레임워크에 바로 얹을 수 있는 라이브러리입니다. Astro를 지원하며 MIT 라이선스입니다."
   : "A framework-embeddable library that renders comic strips from caller-supplied data as live, responsive canvas widgets. Astro-ready, MIT.";
+
+const homeJsonLd = JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  name: "toonstrip",
+  applicationCategory: "DeveloperApplication",
+  operatingSystem: "Web",
+  url: "https://toonstrip.danielkimdev.com/",
+  description,
+  license: "https://opensource.org/licenses/MIT",
+  offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+}).replace(/<\//g, "<\\/");
+
+const faqs: { q: string; a: string }[] = ko
+  ? [
+      {
+        q: "toonstrip이 코믹을 대신 그려 주나요?",
+        a: "아니요. toonstrip은 건네받은 JSON 문서를 렌더링만 합니다. 대사, 감정, 연출은 작성자 본인이나 스크립트, 원한다면 직접 호출한 언어 모델의 몫입니다.",
+      },
+      {
+        q: "서버에서도 렌더링되나요?",
+        a: "Astro 컴포넌트는 서버에서 비활성 태그만 내보내고 실제 그리기는 브라우저가 합니다. 정적 PNG가 필요하면 같은 렌더러를 Node에서 실행하는 CLI를 쓰면 됩니다.",
+      },
+      {
+        q: "상업적으로 사용해도 되나요?",
+        a: "네. 코드는 MIT이고, 기본 팩의 Comic Chat 아트도 MIT 조건으로 재배포됩니다.",
+      },
+      {
+        q: "용량은 얼마나 되나요?",
+        a: "엘리먼트, 코어, 스키마 검증기를 합쳐 gzip 기준 약 36KB입니다. 스프라이트 시트는 문서에서 실제로 쓰는 캐릭터 것만 내려받습니다.",
+      },
+    ]
+  : [
+      {
+        q: "Does toonstrip generate the comic for me?",
+        a: "No. toonstrip only renders the JSON document you give it — the dialogue, emotions, and direction are yours, your script's, or an LLM you call yourself.",
+      },
+      {
+        q: "Does it render on the server?",
+        a: "The Astro component emits an inert tag on the server and the browser draws. For static PNGs, the CLI runs the same renderer in Node.",
+      },
+      {
+        q: "Can I use it commercially?",
+        a: "Yes. The code is MIT, and the default pack's Comic Chat art is redistributed under MIT terms.",
+      },
+      {
+        q: "How big is it?",
+        a: "About 36 KB gzipped for element + core + schema validator; sprite sheets load per character actually used.",
+      },
+    ];
 ---
 
 <Base title="toonstrip" description={description} lang={lang}>
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={homeJsonLd} />
+  </Fragment>
   <!-- 1. Hero -->
   <section class="hero">
     <p class="caption">toonstrip <span class="mono">v{coreVersion}</span> · MIT · {ko ? "Astro 연동" : "Astro integration"}</p>
@@ -263,6 +316,25 @@ const description = ko
       <figcaption>{ko ? "같은 엔진으로 Zork 플레이스루를 렌더링하는 Grues in Comic." : "Grues in Comic, rendering a Zork playthrough with the same engine."}</figcaption>
     </figure>
   </section>
+
+  <!-- 8. FAQ -->
+  <section class="section" id="faq">
+    <div class="section__intro">
+      <p class="caption">{ko ? "자주 묻는 질문" : "FAQ"}</p>
+      <h2>{ko ? "짧게 답합니다." : "Short answers."}</h2>
+    </div>
+    <div class="faq">
+      {faqs.map((f) => (
+        <div>
+          <h3>{f.q}</h3>
+          <p>{f.a}</p>
+        </div>
+      ))}
+    </div>
+    <p class="faq__more">
+      <a href={getLocalizedPath("/docs/faq/", lang)}>{ko ? "FAQ 전체 보기 →" : "Read the full FAQ →"}</a>
+    </p>
+  </section>
 </Base>
 
 <style>
@@ -428,5 +500,22 @@ const description = ko
     margin-top: var(--space-8);
     font-size: var(--text-caption);
     color: var(--ink-2);
+  }
+
+  .faq {
+    display: grid;
+    gap: var(--space-24);
+    max-width: 46rem;
+  }
+  .faq h3 {
+    margin: 0 0 var(--space-8);
+    font-size: var(--text-body);
+  }
+  .faq p {
+    margin: 0;
+    color: var(--ink-2);
+  }
+  .faq__more {
+    margin-top: var(--space-24);
   }
 </style>

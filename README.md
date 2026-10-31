@@ -14,6 +14,34 @@ non-goals.
 **Site:** [toonstrip.danielkimdev.com](https://toonstrip.danielkimdev.com) — intro,
 docs, playground, changelog. Source in `site/`.
 
+## Why not an image?
+
+| | Pre-rendered PNG | Exported SVG | toonstrip |
+|---|---|---|---|
+| Reflows to the container | No — one fixed layout | Scales, doesn't reflow | Column count follows width |
+| Sharp on any display | Only at export size | Yes | Yes — DPR-aware backing store |
+| Screen readers | One alt text, if you wrote it | Depends on the export | Every panel described from its own lines |
+| Change one line of dialogue | Re-render, re-upload | Re-export | Edit the JSON |
+| Page weight (3-panel strip) | One large image | Text-heavy vector | Only the sprites it references |
+
+## FAQ
+
+**Does toonstrip generate the comic for me?** No. It renders the document you
+give it — the dialogue, emotions, and direction are yours, your script's, or
+an LLM you call yourself.
+
+**Can I use it commercially?** Yes. The code is MIT, and the default pack's
+Comic Chat art is redistributed under MIT terms (see `NOTICE`).
+
+**How big is it?** About 36 KB gzipped for element + core + schema validator;
+sprite sheets load per character actually used.
+
+**Does it render on the server?** The Astro component emits an inert tag on
+the server and the browser draws. For static PNGs, the CLI runs the same
+renderer in Node: `npx -p @toonstrip/cli toonstrip render strip.json --out strip.png`.
+
+Full FAQ: [toonstrip.danielkimdev.com/docs/faq/](https://toonstrip.danielkimdev.com/docs/faq/).
+
 ## Packages
 
 | Package | What it is |

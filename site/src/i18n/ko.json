@@ -41,7 +41,8 @@
       "Authoring": "작성하기",
       "Integrate": "연동하기",
       "Reference": "레퍼런스"
-    }
+    },
+    "indexDescription": "toonstrip을 설치하고 Astro나 순수 HTML에 스트립을 넣고, 코믹 스트립 문서를 작성하고, 에셋 팩을 만드는 방법을 안내합니다."
   },
   "changelog": {
     "title": "변경 이력",

@@ -29,6 +29,9 @@ const editUrl = `https://github.com/dkdev24/toonstrip/edit/main/site/src/content
 ---
 
 <Base title={entry.data.title} description={entry.data.description} lang={lang} wide>
+  <Fragment slot="head">
+    <slot name="head" />
+  </Fragment>
   <div class="docs">
     <aside class="docs__sidebar" aria-label={t("docs.sidebarAria")}>
       <details class="docs__nav-disclosure" open>

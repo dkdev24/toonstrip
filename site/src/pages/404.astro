@@ -10,6 +10,9 @@ const t = useTranslations(lang);
 ---
 
 <Base title={t("notFound.title")} description={t("notFound.description")} lang={lang}>
+  <Fragment slot="head">
+    <meta name="robots" content="noindex" />
+  </Fragment>
   <div class="prose">
     <h1>{t("notFound.title")}</h1>
     <p class="lead">{t("notFound.body")}</p>

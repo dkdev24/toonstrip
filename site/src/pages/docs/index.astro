@@ -11,7 +11,7 @@ const t = useTranslations(lang);
 const { sections } = await docsNav(lang);
 ---
 
-<Base title={t("docs.indexTitle")} description="Install toonstrip, embed a strip in Astro or plain HTML, write a Comic Strip Document, and build asset packs." lang={lang}>
+<Base title={t("docs.indexTitle")} description={t("docs.indexDescription")} lang={lang}>
   <div class="prose">
     <p class="caption">{t("docs.indexCaption")}</p>
     <h1>{t("docs.indexTitle")}</h1>

@@ -2,6 +2,7 @@
 import { getCollection, render } from "astro:content";
 import Docs from "../../layouts/Docs.astro";
 import { docLang, docSlug } from "../../lib/docs-nav";
+import { faqJsonLd } from "../../lib/faq-schema";
 
 export async function getStaticPaths() {
   const entries = await getCollection("docs", (e) => docLang(e) === "en");
@@ -10,8 +11,16 @@ export async function getStaticPaths() {
 
 const { entry } = Astro.props;
 const { Content, headings } = await render(entry);
+const slug = docSlug(entry);
+// FAQPage JSON-LD, derived from the curated ## question format of faq.mdx
+const jsonLd = slug === "faq" ? faqJsonLd(entry.body) : null;
 ---
 
 <Docs entry={entry} headings={headings} lang="en">
+  {jsonLd && (
+    <Fragment slot="head">
+      <script type="application/ld+json" set:html={jsonLd} />
+    </Fragment>
+  )}
   <Content />
 </Docs>

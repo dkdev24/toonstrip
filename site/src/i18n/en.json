@@ -41,7 +41,8 @@
       "Authoring": "Authoring",
       "Integrate": "Integrate",
       "Reference": "Reference"
-    }
+    },
+    "indexDescription": "Install toonstrip, embed a strip in Astro or plain HTML, write a Comic Strip Document, and build asset packs."
   },
   "changelog": {
     "title": "Changelog",
