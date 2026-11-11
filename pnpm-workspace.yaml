@@ -9,3 +9,5 @@ overrides:
   # next@15.5.29 pins postcss 8.4.31 (vulnerable; see Dependabot alerts).
   # Force the patched 8.5.x line until next pins a newer postcss.
   postcss: ^8.5.32
+  glob: ^14.0.2
+  minimatch: ^11.0.1
