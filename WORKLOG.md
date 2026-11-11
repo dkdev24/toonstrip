@@ -2488,3 +2488,8 @@ Next Actions).
 - **Left open (2 alerts, not forced):** glob 13.0.7 (patch 14.0.2) + minimatch 10.2.6 (patch 11.0.1). Both need major bumps blocked by js-beautify@2.0.3's `glob: ^13` range (minimatch via glob 13 + editorconfig/get-tsconfig). Forcing majors underneath js-beautify was judged disproportionate; recorded in HANDOFF Open Issues.
 - **Verification:** `pnpm -r run test` green everywhere except 2 pre-existing asset-packager timeouts (sheet/anchor-guide image tests vs the 5000ms timeout on this slow VM — verified identical on the pristine tree via `git stash`, 3 failed there); `pnpm -r run build` green (incl. examples/next-app, site). Site test exit 0; @toonstrip/next 3/3.
 - **VM notes:** `pnpm` binary was missing — installed 11.1.1 globally (`npm install -g pnpm@11.1.1`; repo pins it via `packageManager`). Repo files were gid `nogroup`, which broke pnpm's atomic lockfile write (chown EPERM to gid 65534); `chgrp -R root` on the checkout fixed it. /tmp is a 512M tmpfs and filled up from pnpm's version-manager store (`/tmp/.pnpm-store`, ~490M) — cleared; use `TMPDIR=~/tmp` for heavy runs.
+
+## 2026-11-12 — Dependabot: glob and minimatch (no version bump, no publish)
+
+- Closes the 2 alerts left open on 2026-11-11. `pnpm-workspace.yaml` `overrides`: `glob: ^14.0.2`, `minimatch: ^11.0.1`; lockfile resolves glob 14.0.4, minimatch 11.0.5. Only consumer is the `js-beautify` dev chain under `@toonstrip/vue`. Commit `e9c1e74`.
+- Verified: install, build, lint, tests pass. `asset-packager` image/sheet tests time out under CPU load (5 s limit) with or without the change, pass 37/37 on an idle machine.

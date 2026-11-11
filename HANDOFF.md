@@ -19,7 +19,7 @@ stripped). M0–M15 done, 11 packages on npm, site live at
 
 ## Last Session
 
-2026-11-11 (Dependabot security bumps, **pushed**; no version bump, no publish): 104 open alerts → 2 left. undici 8.10.1→8.12.4, vite 8.2.2→8.3.7 + examples vite 5→6.4.6, vitest 2.1.9→4.1.12 (11 packages, `^4.1.11`), devalue→6.0.3, next→15.5.29, zod→4.6.7, astro→7.4.8, sharp→0.35.5, postcss→8.5.32 (override in `pnpm-workspace.yaml`: next pins 8.4.31), esbuild→0.25.12, brace-expansion→5.0.12, smol-toml→1.9.1, source-map-js→1.2.2; tinypool gone with vitest 4. Full `pnpm -r run test` green except 2 pre-existing asset-packager timeouts (slow VM; identical on pristine tree); `pnpm -r run build` green. Left open: glob 13.0.7 + minimatch 10.2.6 (major bumps blocked by js-beautify/glob ranges; not forced). VM notes: `pnpm` was missing (installed 11.1.1 globally); repo files were gid `nogroup`, which broke pnpm's atomic lockfile write (`chgrp -R root` fixed it); /tmp (512M tmpfs) filled by pnpm's version-manager store — cleared, use `TMPDIR=~/tmp` for heavy runs.
+2026-11-12 (Dependabot, last 2 alerts; no version bump, no publish): `pnpm-workspace.yaml` overrides `glob: ^14.0.2` and `minimatch: ^11.0.1` (only consumer: js-beautify chain under `@toonstrip/vue`); lockfile glob 14.0.4, minimatch 11.0.5 (`e9c1e74`). Install, build, lint, tests green (asset-packager tests time out when the machine is loaded, pass idle, same as before). The 2026-11-11 bump session (104 alerts → 2) is in WORKLOG.
 
 ## Next Actions
 
