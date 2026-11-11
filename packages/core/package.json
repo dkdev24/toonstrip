@@ -19,11 +19,11 @@
     "@toonstrip/schema": "workspace:*"
   },
   "devDependencies": {
-    "@napi-rs/canvas": "^0.1.65",
+    "@napi-rs/canvas": "^0.1.100",
     "@toonstrip/pack-comic-chat": "workspace:*",
     "@toonstrip/pack-example": "workspace:*",
-    "typescript": "^5.6.3",
-    "vitest": "^2.1.4"
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.12"
   },
   "publishConfig": {
     "access": "public"

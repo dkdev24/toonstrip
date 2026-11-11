@@ -19,9 +19,9 @@
   },
   "devDependencies": {
     "@toonstrip/pack-comic-chat": "workspace:*",
-    "@types/node": "^24",
-    "typescript": "^5.6.3",
-    "vitest": "^2.1.4"
+    "@types/node": "^24.19.2",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.12"
   },
   "publishConfig": {
     "access": "public"
